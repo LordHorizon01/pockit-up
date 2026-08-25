@@ -14,7 +14,10 @@
     "@cantoo/pdf-lib": "^2.9.1",
     "@pdf-lib/fontkit": "^1.1.1",
     "docx": "^9.7.1",
+    "docx-preview": "^0.4.0",
+    "html2canvas": "^1.4.1",
     "jszip": "^3.10.1",
+    "mammoth": "^1.12.1",
     "xlsx": "^0.18.5"
   }
 }
