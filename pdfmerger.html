@@ -264,8 +264,17 @@
        </div>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <!-- Tools will be added here -->
-       </div>
+       <!-- Standard Calculator -->
+       <button onclick="openTool('calculator')" class="group p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/70 shadow-sm hover:shadow-lg hover:border-amber-300 dark:hover:border-amber-700 transition-all text-left flex flex-col gap-3 hover:-translate-y-0.5">
+        <div class="w-11 h-11 bg-amber-50 dark:bg-amber-950/50 rounded-lg flex items-center justify-center group-hover:bg-amber-100 dark:group-hover:bg-amber-900/50 transition">
+         <i data-lucide="calculator" style="width:20px;height:20px" class="text-amber-600 dark:text-amber-400"></i>
+        </div>
+        <div>
+         <div class="font-semibold text-sm text-gray-800 dark:text-gray-200">Standard Calculator</div>
+         <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Fluent math calculator with memory, history &amp; converters</div>
+        </div>
+       </button>
+      </div>
      </section>
 
     <!-- PDF TOOLS SECTION -->
@@ -5638,7 +5647,388 @@
 
   </div>
 
-  <!-- LIGHTBOX MODAL (Global - used by Merger preview & Compressor preview) -->
+  <!-- STANDARD CALCULATOR STUDIO VIEW -->
+  <div id="calculator-view" class="hidden">
+   <header class="hero-header px-6 py-4 flex items-center gap-4">
+    <div class="flex items-center gap-3 flex-1 pl-12">
+     <button onclick="goHome()" class="flex items-center gap-1 hover:opacity-80 transition" title="Back to Home" style="background:none;border:none;padding:0;cursor:pointer;">
+      <img src="/assets/logo-light.png" alt="PockitUp" class="site-logo-sm logo-light" draggable="false" />
+      <img src="/assets/logo-dark.png" alt="PockitUp" class="site-logo-sm logo-dark" draggable="false" />
+     </button>
+     <span class="text-gray-400 dark:text-gray-600">/</span>
+     <span class="font-semibold text-gray-700 dark:text-gray-200 text-lg inline-flex items-center gap-1.5">
+      <i data-lucide="calculator" style="width:18px;height:18px" class="text-amber-500"></i>
+      Standard Calculator
+     </span>
+    </div>
+   </header>
+
+   <main class="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
+    <!-- PAGE TITLE -->
+    <div class="text-center mb-2">
+     <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/50 mb-3 text-amber-600 dark:text-amber-400 shadow-sm border border-amber-100 dark:border-amber-900/50">
+      <i data-lucide="calculator" style="width:28px;height:28px"></i>
+     </div>
+     <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-1.5">Standard Calculator</h1>
+     <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
+      Fast, accurate standard arithmetic with memory, calculation history, and live unit conversion.
+     </p>
+    </div>
+
+    <!-- CALCULATOR STUDIO CONTAINER -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+     <!-- MAIN CALCULATOR DEVICE (7 Cols on large screen) -->
+     <div class="lg:col-span-7 bg-white dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700/80 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4 font-sans select-none backdrop-blur-md">
+      
+      <!-- Top Bar: Title & Action Controls -->
+      <div class="flex items-center justify-between text-gray-700 dark:text-gray-200">
+       <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+         <i id="calc-header-icon" data-lucide="calculator" style="width:17px;height:17px"></i>
+        </div>
+        <span id="calc-current-mode-title" class="font-bold text-base tracking-tight text-gray-800 dark:text-gray-100">Standard</span>
+       </div>
+
+       <!-- Action Icons -->
+       <div class="flex items-center gap-1">
+        <!-- Sound Toggle Button -->
+        <button id="calc-sound-btn" onclick="calcToggleSound()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700/70 rounded-xl transition text-gray-600 dark:text-gray-300" title="Toggle audio click feedback">
+         <i id="calc-sound-icon" data-lucide="volume-2" style="width:16px;height:16px"></i>
+        </button>
+        <!-- History Drawer Button -->
+        <button id="calc-history-toggle-btn" onclick="calcToggleSideTab('history')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700/70 rounded-xl transition text-gray-600 dark:text-gray-300 relative" title="View calculation history">
+         <i data-lucide="history" style="width:16px;height:16px"></i>
+         <span id="calc-history-count-dot" class="hidden absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500"></span>
+        </button>
+        <!-- Settings Modal Button -->
+        <button onclick="calcOpenSettingsModal()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700/70 rounded-xl transition text-gray-600 dark:text-gray-300" title="Calculator settings">
+         <i data-lucide="settings" style="width:16px;height:16px"></i>
+        </button>
+       </div>
+      </div>
+
+      <!-- SCREEN 1: STANDARD CALCULATION DISPLAY (INSET SCREEN) -->
+      <div id="calc-standard-screen" class="space-y-3">
+       <div class="bg-gray-50/80 dark:bg-gray-900/90 border border-gray-200/80 dark:border-gray-700/70 rounded-2xl p-4 flex flex-col justify-between min-h-[105px] shadow-inner relative">
+        <!-- Top Display Line: Copy Button on Left, Calculation Operations on Right -->
+        <div class="flex items-center justify-between text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-mono tracking-wide h-5">
+         <button type="button" onclick="calcCopyResult(event)" class="p-1 hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-400 hover:text-amber-500 rounded-lg transition" title="Copy result to clipboard">
+          <i data-lucide="copy" style="width:13px;height:13px"></i>
+         </button>
+         <div id="calc-equation-display" class="truncate max-w-[85%] text-right font-mono"></div>
+        </div>
+        <!-- Main Large Digit Display -->
+        <div class="flex items-center justify-end overflow-hidden pt-1">
+         <span id="calc-main-display" class="text-4xl sm:text-5xl font-semibold text-gray-900 dark:text-white tracking-tight break-all font-mono">
+          0
+         </span>
+        </div>
+       </div>
+
+       <!-- MEMORY BAR (6 buttons) -->
+       <div class="grid grid-cols-6 gap-1 text-[11px] font-semibold text-center text-gray-700 dark:text-gray-300 py-0.5">
+        <button id="calc-mem-mc" onclick="calcMemoryClear()" class="py-1.5 rounded-xl opacity-40 cursor-default hover:bg-gray-100 dark:hover:bg-gray-700/60 transition">MC</button>
+        <button id="calc-mem-mr" onclick="calcMemoryRecall()" class="py-1.5 rounded-xl opacity-40 cursor-default hover:bg-gray-100 dark:hover:bg-gray-700/60 transition">MR</button>
+        <button onclick="calcMemoryAdd()" class="py-1.5 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-700 dark:text-amber-300 transition active:scale-95">M+</button>
+        <button onclick="calcMemorySubtract()" class="py-1.5 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-700 dark:text-amber-300 transition active:scale-95">M−</button>
+        <button onclick="calcMemoryStore()" class="py-1.5 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-700 dark:text-amber-300 transition active:scale-95">MS</button>
+        <button id="calc-mem-dropdown" onclick="calcToggleSideTab('memory')" class="py-1.5 rounded-xl opacity-40 cursor-default hover:bg-gray-100 dark:hover:bg-gray-700/60 transition flex items-center justify-center gap-0.5">
+         <span>M</span>
+         <i data-lucide="chevron-down" style="width:11px;height:11px"></i>
+        </button>
+       </div>
+      </div>
+
+      <!-- SCREEN 2: DUAL UNIT CONVERTER DISPLAY (Smartphone style inside calculator) -->
+      <div id="calc-converter-screen" class="hidden space-y-3">
+       <!-- Horizontal Category Chips (Matching Reference) -->
+       <div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs font-semibold">
+        <button onclick="calcSelectConvCat('length')" class="calc-cat-chip px-3 py-1.5 rounded-full bg-amber-500 text-white shadow-sm transition whitespace-nowrap" data-cat="length">Length</button>
+        <button onclick="calcSelectConvCat('weight')" class="calc-cat-chip px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap" data-cat="weight">Mass</button>
+        <button onclick="calcSelectConvCat('temperature')" class="calc-cat-chip px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap" data-cat="temperature">Temperature</button>
+        <button onclick="calcSelectConvCat('volume')" class="calc-cat-chip px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap" data-cat="volume">Volume</button>
+        <button onclick="calcSelectConvCat('area')" class="calc-cat-chip px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap" data-cat="area">Area</button>
+        <button onclick="calcSelectConvCat('data')" class="calc-cat-chip px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap" data-cat="data">Data</button>
+        <button onclick="calcSelectConvCat('speed')" class="calc-cat-chip px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap" data-cat="speed">Speed</button>
+        <button onclick="calcSelectConvCat('time')" class="calc-cat-chip px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap" data-cat="time">Time</button>
+       </div>
+
+       <!-- Dual Unit Inset Display (Exact 1:1 smartphone style from reference) -->
+       <div class="bg-gray-50/80 dark:bg-gray-900/90 border border-gray-200/80 dark:border-gray-700/70 rounded-2xl p-3.5 space-y-2.5 shadow-inner">
+        <!-- Top Field (Unit 1) -->
+        <div id="calc-conv-field-top" onclick="calcFocusConvField('top')" class="p-3 rounded-xl border-2 border-amber-500 bg-white dark:bg-gray-800 cursor-pointer transition shadow-sm">
+         <div class="flex items-center justify-between gap-2">
+          <select id="calc-conv-unit-top" onchange="calcOnUnitChange('top')" class="bg-transparent font-bold text-sm text-gray-800 dark:text-gray-100 outline-none cursor-pointer pr-1 truncate max-w-[140px]"></select>
+          <div class="flex items-baseline gap-1 text-right overflow-hidden">
+           <span id="calc-conv-val-top" class="text-2xl sm:text-3xl font-mono font-bold text-gray-900 dark:text-white tracking-tight">1</span>
+           <span id="calc-conv-sym-top" class="text-xs sm:text-sm font-semibold text-gray-400">in</span>
+          </div>
+         </div>
+        </div>
+
+        <!-- Divider with Swap Action -->
+        <div class="flex items-center justify-between px-2">
+         <div class="h-px bg-gray-200 dark:bg-gray-700 flex-1"></div>
+         <button onclick="calcSwapConvUnits()" class="mx-3 p-1.5 rounded-xl bg-gray-200/80 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-amber-500 hover:scale-110 transition shadow-sm" title="Swap Units">
+          <i data-lucide="arrow-up-down" style="width:14px;height:14px"></i>
+         </button>
+         <div class="h-px bg-gray-200 dark:bg-gray-700 flex-1"></div>
+        </div>
+
+        <!-- Bottom Field (Unit 2) -->
+        <div id="calc-conv-field-bottom" onclick="calcFocusConvField('bottom')" class="p-3 rounded-xl border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-700 bg-white/60 dark:bg-gray-800/60 cursor-pointer transition">
+         <div class="flex items-center justify-between gap-2">
+          <select id="calc-conv-unit-bottom" onchange="calcOnUnitChange('bottom')" class="bg-transparent font-bold text-sm text-gray-800 dark:text-gray-100 outline-none cursor-pointer pr-1 truncate max-w-[140px]"></select>
+          <div class="flex items-baseline gap-1 text-right overflow-hidden">
+           <span id="calc-conv-val-bottom" class="text-2xl sm:text-3xl font-mono font-bold text-emerald-600 dark:text-emerald-400 tracking-tight">2.54</span>
+           <span id="calc-conv-sym-bottom" class="text-xs sm:text-sm font-semibold text-gray-400">cm</span>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+
+      <!-- STANDARD 6x4 KEYPAD GRID (Operates both Standard math and Live Conversion) -->
+      <div id="calc-keypad-grid" class="grid grid-cols-4 gap-2 text-sm sm:text-base font-semibold">
+       
+       <!-- ROW 1: %, CE, C, Backspace -->
+       <button onclick="calcInputPercent()" class="calc-btn calc-btn-func" data-key="%">%</button>
+       <button onclick="calcClearEntry()" class="calc-btn calc-btn-func" data-key="Delete">CE</button>
+       <button onclick="calcClearAll()" class="calc-btn calc-btn-func" data-key="Escape">C</button>
+       <button onclick="calcBackspace()" class="calc-btn calc-btn-func flex items-center justify-center" data-key="Backspace">
+        <i data-lucide="delete" style="width:18px;height:18px"></i>
+       </button>
+
+       <!-- ROW 2: 1/x, x², √x, ÷ -->
+       <button onclick="calcReciprocal()" class="calc-btn calc-btn-math" data-key="r">¹/x</button>
+       <button onclick="calcSquare()" class="calc-btn calc-btn-math" data-key="s">x²</button>
+       <button onclick="calcSquareRoot()" class="calc-btn calc-btn-math" data-key="@">²√x</button>
+       <button onclick="calcOperator('÷')" class="calc-btn calc-btn-op" data-key="/">÷</button>
+
+       <!-- ROW 3: 7, 8, 9, × -->
+       <button onclick="calcDigit('7')" class="calc-btn calc-btn-num" data-key="7">7</button>
+       <button onclick="calcDigit('8')" class="calc-btn calc-btn-num" data-key="8">8</button>
+       <button onclick="calcDigit('9')" class="calc-btn calc-btn-num" data-key="9">9</button>
+       <button onclick="calcOperator('×')" class="calc-btn calc-btn-op" data-key="*">×</button>
+
+       <!-- ROW 4: 4, 5, 6, − -->
+       <button onclick="calcDigit('4')" class="calc-btn calc-btn-num" data-key="4">4</button>
+       <button onclick="calcDigit('5')" class="calc-btn calc-btn-num" data-key="5">5</button>
+       <button onclick="calcDigit('6')" class="calc-btn calc-btn-num" data-key="6">6</button>
+       <button onclick="calcOperator('−')" class="calc-btn calc-btn-op" data-key="-">−</button>
+
+       <!-- ROW 5: 1, 2, 3, + -->
+       <button onclick="calcDigit('1')" class="calc-btn calc-btn-num" data-key="1">1</button>
+       <button onclick="calcDigit('2')" class="calc-btn calc-btn-num" data-key="2">2</button>
+       <button onclick="calcDigit('3')" class="calc-btn calc-btn-num" data-key="3">3</button>
+       <button onclick="calcOperator('+')" class="calc-btn calc-btn-op" data-key="+">+</button>
+
+       <!-- ROW 6: +/−, 0, ., = (Accent Color) -->
+       <button onclick="calcToggleSign()" class="calc-btn calc-btn-num" data-key="F9">+/−</button>
+       <button onclick="calcDigit('0')" class="calc-btn calc-btn-num" data-key="0">0</button>
+       <button onclick="calcDecimal()" class="calc-btn calc-btn-num" data-key=".">.</button>
+       <button id="calc-equals-btn" onclick="calcEquals()" class="calc-btn font-bold text-white shadow-md active:scale-95 transition" data-key="Enter" style="background-color: #f59e0b; color: #ffffff;">
+        =
+       </button>
+      </div>
+
+     </div>
+
+     <!-- RIGHT SIDECAR: HISTORY, MEMORY & CONVERTER STUDIO (5 Cols) -->
+     <div class="lg:col-span-5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 shadow-sm space-y-4">
+      
+      <!-- Sidecar Tab Switcher -->
+      <div class="flex items-center gap-1.5 p-1 bg-gray-100 dark:bg-gray-900/80 rounded-2xl border border-gray-200 dark:border-gray-800 text-xs font-bold">
+       <button id="calc-sidetab-history-btn" onclick="calcSwitchSideTab('history')" class="flex-1 py-2 px-3 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm transition flex items-center justify-center gap-1.5">
+        <i data-lucide="history" style="width:13px;height:13px" class="text-amber-500"></i>
+        <span>History</span>
+       </button>
+       <button id="calc-sidetab-memory-btn" onclick="calcSwitchSideTab('memory')" class="flex-1 py-2 px-3 rounded-xl text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center justify-center gap-1.5">
+        <i data-lucide="database" style="width:13px;height:13px" class="text-blue-500"></i>
+        <span>Memory</span>
+       </button>
+       <button id="calc-sidetab-converter-btn" onclick="calcSwitchSideTab('converter')" class="flex-1 py-2 px-3 rounded-xl text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center justify-center gap-1.5">
+        <i data-lucide="repeat" style="width:13px;height:13px" class="text-emerald-500"></i>
+        <span>Convert</span>
+       </button>
+      </div>
+
+      <!-- PANEL 1: CALCULATION HISTORY -->
+      <div id="calc-panel-history" class="space-y-3">
+       <div class="flex items-center justify-between text-xs">
+        <span class="font-bold text-gray-700 dark:text-gray-300">Calculation Log</span>
+        <div class="flex items-center gap-2">
+         <button onclick="calcExportHistory()" class="text-gray-500 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition" title="Export as text">Export</button>
+         <span class="text-gray-300 dark:text-gray-600">•</span>
+         <button onclick="calcClearHistory()" class="text-red-500 hover:underline font-medium transition">Clear All</button>
+        </div>
+       </div>
+
+       <!-- History Items List -->
+       <div id="calc-history-list" class="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+        <!-- Empty State -->
+        <div class="text-center py-12 space-y-2 text-gray-400 dark:text-gray-500">
+         <i data-lucide="clock" style="width:28px;height:28px" class="mx-auto opacity-40"></i>
+         <p class="text-xs font-semibold">There's no history yet</p>
+         <p class="text-[11px] opacity-75">Your completed calculations will appear here</p>
+        </div>
+       </div>
+      </div>
+
+      <!-- PANEL 2: MEMORY STACK -->
+      <div id="calc-panel-memory" class="hidden space-y-3">
+       <div class="flex items-center justify-between text-xs">
+        <span class="font-bold text-gray-700 dark:text-gray-300">Memory Slots</span>
+        <button onclick="calcMemoryClear()" class="text-red-500 hover:underline font-medium transition">Clear Memory</button>
+       </div>
+
+       <!-- Memory Items List -->
+       <div id="calc-memory-list" class="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+        <!-- Empty State -->
+        <div class="text-center py-12 space-y-2 text-gray-400 dark:text-gray-500">
+         <i data-lucide="database" style="width:28px;height:28px" class="mx-auto opacity-40"></i>
+         <p class="text-xs font-semibold">There's nothing saved in memory</p>
+         <p class="text-[11px] opacity-75">Use MS to store values or M+/M− to accumulate</p>
+        </div>
+       </div>
+      </div>
+
+      <!-- PANEL 3: CONVERTER CATEGORIES & QUICK FORMULAS -->
+      <div id="calc-panel-converter" class="hidden space-y-4 text-xs">
+       <div class="space-y-2">
+        <span class="font-bold text-gray-700 dark:text-gray-300">Categories</span>
+        
+        <!-- Category Grid in Sidecar -->
+        <div class="grid grid-cols-2 gap-2">
+         <button onclick="calcSelectConvCat('length')" class="calc-side-cat-btn p-2.5 rounded-2xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-bold flex items-center gap-2 transition" data-cat="length">
+          <i data-lucide="ruler" style="width:16px;height:16px"></i>
+          <span>Length</span>
+         </button>
+         <button onclick="calcSelectConvCat('weight')" class="calc-side-cat-btn p-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold flex items-center gap-2 transition" data-cat="weight">
+          <i data-lucide="scale" style="width:16px;height:16px"></i>
+          <span>Mass</span>
+         </button>
+         <button onclick="calcSelectConvCat('temperature')" class="calc-side-cat-btn p-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold flex items-center gap-2 transition" data-cat="temperature">
+          <i data-lucide="thermometer" style="width:16px;height:16px"></i>
+          <span>Temperature</span>
+         </button>
+         <button onclick="calcSelectConvCat('volume')" class="calc-side-cat-btn p-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold flex items-center gap-2 transition" data-cat="volume">
+          <i data-lucide="beaker" style="width:16px;height:16px"></i>
+          <span>Volume</span>
+         </button>
+         <button onclick="calcSelectConvCat('area')" class="calc-side-cat-btn p-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold flex items-center gap-2 transition" data-cat="area">
+          <i data-lucide="grid" style="width:16px;height:16px"></i>
+          <span>Area</span>
+         </button>
+         <button onclick="calcSelectConvCat('data')" class="calc-side-cat-btn p-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold flex items-center gap-2 transition" data-cat="data">
+          <i data-lucide="hard-drive" style="width:16px;height:16px"></i>
+          <span>Data</span>
+         </button>
+         <button onclick="calcSelectConvCat('speed')" class="calc-side-cat-btn p-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold flex items-center gap-2 transition" data-cat="speed">
+          <i data-lucide="gauge" style="width:16px;height:16px"></i>
+          <span>Speed</span>
+         </button>
+         <button onclick="calcSelectConvCat('time')" class="calc-side-cat-btn p-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold flex items-center gap-2 transition" data-cat="time">
+          <i data-lucide="clock" style="width:16px;height:16px"></i>
+          <span>Time</span>
+         </button>
+        </div>
+       </div>
+
+       <!-- Formula / Quick Info Box -->
+       <div class="p-3.5 bg-gray-50 dark:bg-gray-900/60 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-2">
+        <div class="font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+         <i data-lucide="info" style="width:14px;height:14px" class="text-amber-500"></i>
+         <span>Live Conversion</span>
+        </div>
+        <p id="calc-conv-formula-text" class="text-gray-600 dark:text-gray-400 font-mono text-[11px] leading-relaxed">
+         1 Inch (in) = 2.54 Centimetres (cm)
+        </p>
+       </div>
+
+       <button onclick="calcSwitchSideTab('history')" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-bold transition shadow-sm flex items-center justify-center gap-1.5 active:scale-95">
+        <i data-lucide="calculator" style="width:14px;height:14px"></i>
+        <span>Return to Standard Math</span>
+       </button>
+      </div>
+
+     </div>
+
+    </div>
+   </main>
+
+   <!-- CALCULATOR SETTINGS MODAL -->
+   <div id="calc-settings-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0;">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-md p-6 space-y-5 border border-gray-200 dark:border-gray-700">
+     <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+       <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+        <i data-lucide="settings" style="width:18px;height:18px"></i>
+       </div>
+       <h4 class="font-bold text-base text-gray-800 dark:text-gray-100">Calculator Settings</h4>
+      </div>
+      <button onclick="calcCloseSettingsModal()" class="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition">
+       <i data-lucide="x" style="width:16px;height:16px" class="text-gray-500"></i>
+      </button>
+     </div>
+
+     <div class="space-y-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
+      
+      <!-- Decimal Precision -->
+      <div class="space-y-1.5">
+       <label class="block">Decimal Precision</label>
+       <select id="calc-setting-precision" class="w-full py-2.5 px-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 font-medium">
+        <option value="auto" selected>Auto (Dynamic up to 12 decimals)</option>
+        <option value="0">0 Decimals (Integers only)</option>
+        <option value="2">2 Decimals (Financial / Currency)</option>
+        <option value="4">4 Decimals (Precision)</option>
+        <option value="6">6 Decimals (High Precision)</option>
+       </select>
+      </div>
+
+      <!-- Digit Grouping (Commas) -->
+      <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/60 rounded-2xl border border-gray-200 dark:border-gray-700">
+       <div>
+        <div class="font-bold text-gray-800 dark:text-gray-200">Thousands Separator</div>
+        <div class="text-[11px] text-gray-500 font-normal">Format numbers like 1,234,567.89</div>
+       </div>
+       <input type="checkbox" id="calc-setting-grouping" checked class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 cursor-pointer">
+      </div>
+
+      <!-- Button Sound Effect -->
+      <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/60 rounded-2xl border border-gray-200 dark:border-gray-700">
+       <div>
+        <div class="font-bold text-gray-800 dark:text-gray-200">Keypad Audio Click</div>
+        <div class="text-[11px] text-gray-500 font-normal">Subtle acoustic mechanical tick on tap</div>
+       </div>
+       <input type="checkbox" id="calc-setting-sound" checked class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 cursor-pointer">
+      </div>
+
+      <!-- Accent Equals Color Theme -->
+      <div class="space-y-1.5">
+       <label class="block">Equals Key Accent Color</label>
+       <div class="flex items-center gap-3">
+        <button onclick="calcSetAccentTheme('#f59e0b', '#ffffff')" class="w-7 h-7 rounded-full border-2 border-white shadow-sm transition hover:scale-110" style="background-color: #f59e0b;" title="Amber Gold (Default)"></button>
+        <button onclick="calcSetAccentTheme('#3b82f6', '#ffffff')" class="w-7 h-7 rounded-full border-2 border-white shadow-sm transition hover:scale-110" style="background-color: #3b82f6;" title="Electric Blue"></button>
+        <button onclick="calcSetAccentTheme('#10b981', '#ffffff')" class="w-7 h-7 rounded-full border-2 border-white shadow-sm transition hover:scale-110" style="background-color: #10b981;" title="Emerald Green"></button>
+        <button onclick="calcSetAccentTheme('#c084fc', '#1e1e1e')" class="w-7 h-7 rounded-full border-2 border-white shadow-sm transition hover:scale-110" style="background-color: #c084fc;" title="Lavender Purple"></button>
+        <button onclick="calcSetAccentTheme('#ec4899', '#ffffff')" class="w-7 h-7 rounded-full border-2 border-white shadow-sm transition hover:scale-110" style="background-color: #ec4899;" title="Rose Pink"></button>
+        <button onclick="calcSetAccentTheme('#06b6d4', '#1e1e1e')" class="w-7 h-7 rounded-full border-2 border-white shadow-sm transition hover:scale-110" style="background-color: #06b6d4;" title="Cyan Glow"></button>
+       </div>
+      </div>
+
+     </div>
+
+     <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+      <button onclick="calcSaveSettings()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition shadow-sm active:scale-95">
+       Save &amp; Apply
+      </button>
+     </div>
+    </div>
+   </div>
+
+  </div>
   <div id="lightbox-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%;">
    <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full flex flex-col overflow-hidden" style="max-width: 90vw; max-height: 95vh;">
     <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">

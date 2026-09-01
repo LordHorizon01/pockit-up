@@ -12,6 +12,9 @@ function openTool(tool) {
   if (tool === 'colorpicker') {
     setTimeout(colorpickerDrawSpectrum, 30);
   }
+  if (tool === 'calculator') {
+    setupCalculator();
+  }
 }
 
 function goHome() {
@@ -36,6 +39,7 @@ function goHome() {
   document.getElementById('passwordgen-view')?.classList.add('hidden');
   document.getElementById('colorpicker-view')?.classList.add('hidden');
   document.getElementById('ziparchiver-view')?.classList.add('hidden');
+  document.getElementById('calculator-view')?.classList.add('hidden');
   document.getElementById('home-view').classList.remove('hidden');
   imgResetConverter();
   img2pdfReset();
@@ -57,6 +61,7 @@ function goHome() {
   passwordgenReset();
   colorpickerReset();
   ziparchiverReset();
+  calcReset();
   lucide.createIcons();
 }
 
@@ -10083,6 +10088,1279 @@ function ziparchiverReset() {
   ziparchiverClosePathModal();
   ziparchiverClosePasswordModal();
   ziparchiverSetTab('create');
+}
+
+
+// =========================================================================
+// ======================== STANDARD CALCULATOR STUDIO =====================
+// =========================================================================
+
+let calcCurrentInput = '0';
+let calcPreviousValue = null;
+let calcCurrentOperator = null;
+let calcWaitingForSecondOperand = false;
+let calcEquationTrail = '';
+let calcEquationTokens = []; // Array of tokens: ['112165', '+', '578435', '×', ...]
+let calcOperationCount = 0; // Tracks operations chained in current calculation (up to 100)
+let calcMemoryStack = []; // Array of saved numbers
+let calcHistoryLog = []; // Array of { id, equation, result, timestamp }
+let calcCurrentSideTab = 'history'; // 'history', 'memory', 'converter'
+let calcInConverterMode = false;
+let calcSettings = {
+  precision: 'auto',
+  grouping: true,
+  sound: true,
+  accentBg: '#f59e0b',
+  accentText: '#ffffff'
+};
+let calcAudioCtx = null;
+let calcKeyboardListenerAttached = false;
+
+// Smartphone Unit Converter State
+let calcConverterCategory = 'length';
+let calcConvActiveField = 'top'; // 'top' or 'bottom'
+let calcConvValTop = '1';
+let calcConvValBottom = '2.54';
+let calcConvUnitTop = 'in';
+let calcConvUnitBottom = 'cm';
+
+const CALC_UNITS_REGISTRY = {
+  length: {
+    name: 'Length',
+    units: {
+      in: { name: 'Inches', sym: 'in', factor: 0.0254 },
+      cm: { name: 'Centimetres', sym: 'cm', factor: 0.01 },
+      m: { name: 'Metres', sym: 'm', factor: 1 },
+      km: { name: 'Kilometres', sym: 'km', factor: 1000 },
+      mm: { name: 'Millimetres', sym: 'mm', factor: 0.001 },
+      ft: { name: 'Feet', sym: 'ft', factor: 0.3048 },
+      yd: { name: 'Yards', sym: 'yd', factor: 0.9144 },
+      mi: { name: 'Miles', sym: 'mi', factor: 1609.344 },
+      nm: { name: 'Nautical Miles', sym: 'NM', factor: 1852 }
+    }
+  },
+  weight: {
+    name: 'Mass',
+    units: {
+      kg: { name: 'Kilograms', sym: 'kg', factor: 1 },
+      g: { name: 'Grams', sym: 'g', factor: 0.001 },
+      mg: { name: 'Milligrams', sym: 'mg', factor: 0.000001 },
+      lb: { name: 'Pounds', sym: 'lb', factor: 0.45359237 },
+      oz: { name: 'Ounces', sym: 'oz', factor: 0.02834952 },
+      t: { name: 'Metric Tonnes', sym: 't', factor: 1000 },
+      st: { name: 'Stone', sym: 'st', factor: 6.35029 }
+    }
+  },
+  temperature: {
+    name: 'Temperature',
+    units: {
+      C: { name: 'Celsius', sym: '°C' },
+      F: { name: 'Fahrenheit', sym: '°F' },
+      K: { name: 'Kelvin', sym: 'K' }
+    }
+  },
+  volume: {
+    name: 'Volume',
+    units: {
+      L: { name: 'Litres', sym: 'L', factor: 1 },
+      mL: { name: 'Millilitres', sym: 'mL', factor: 0.001 },
+      m3: { name: 'Cubic Metres', sym: 'm³', factor: 1000 },
+      gal: { name: 'US Gallons', sym: 'gal', factor: 3.78541 },
+      qt: { name: 'US Quarts', sym: 'qt', factor: 0.946353 },
+      pt: { name: 'US Pints', sym: 'pt', factor: 0.473176 },
+      cup: { name: 'US Cups', sym: 'cup', factor: 0.236588 },
+      floz: { name: 'Fluid Ounces', sym: 'fl oz', factor: 0.0295735 }
+    }
+  },
+  area: {
+    name: 'Area',
+    units: {
+      sqm: { name: 'Square Metres', sym: 'm²', factor: 1 },
+      sqkm: { name: 'Square Kilometres', sym: 'km²', factor: 1000000 },
+      sqcm: { name: 'Square Centimetres', sym: 'cm²', factor: 0.0001 },
+      sqft: { name: 'Square Feet', sym: 'ft²', factor: 0.092903 },
+      sqin: { name: 'Square Inches', sym: 'in²', factor: 0.00064516 },
+      sqyd: { name: 'Square Yards', sym: 'yd²', factor: 0.836127 },
+      acre: { name: 'Acres', sym: 'ac', factor: 4046.86 },
+      ha: { name: 'Hectares', sym: 'ha', factor: 10000 }
+    }
+  },
+  data: {
+    name: 'Data',
+    units: {
+      B: { name: 'Bytes', sym: 'B', factor: 1 },
+      KB: { name: 'Kilobytes', sym: 'KB', factor: 1024 },
+      MB: { name: 'Megabytes', sym: 'MB', factor: 1048576 },
+      GB: { name: 'Gigabytes', sym: 'GB', factor: 1073741824 },
+      TB: { name: 'Terabytes', sym: 'TB', factor: 1099511627776 },
+      PB: { name: 'Petabytes', sym: 'PB', factor: 1125899906842624 }
+    }
+  },
+  speed: {
+    name: 'Speed',
+    units: {
+      kmh: { name: 'Kilometres / hr', sym: 'km/h', factor: 0.277778 },
+      mph: { name: 'Miles / hr', sym: 'mph', factor: 0.44704 },
+      ms: { name: 'Metres / sec', sym: 'm/s', factor: 1 },
+      kn: { name: 'Knots', sym: 'kn', factor: 0.514444 },
+      fts: { name: 'Feet / sec', sym: 'ft/s', factor: 0.3048 }
+    }
+  },
+  time: {
+    name: 'Time',
+    units: {
+      s: { name: 'Seconds', sym: 's', factor: 1 },
+      min: { name: 'Minutes', sym: 'min', factor: 60 },
+      h: { name: 'Hours', sym: 'h', factor: 3600 },
+      d: { name: 'Days', sym: 'd', factor: 86400 },
+      wk: { name: 'Weeks', sym: 'wk', factor: 604800 },
+      mo: { name: 'Months (30d)', sym: 'mo', factor: 2592000 },
+      yr: { name: 'Years (365d)', sym: 'yr', factor: 31536000 }
+    }
+  }
+};
+
+// Initialize Calculator
+function setupCalculator() {
+  calcUpdateDisplay();
+  calcRenderHistoryList();
+  calcRenderMemoryList();
+  calcInitDualConverter();
+  calcApplyAccentColor();
+
+  if (!calcKeyboardListenerAttached) {
+    window.addEventListener('keydown', calcHandleGlobalKeyboard);
+    calcKeyboardListenerAttached = true;
+  }
+}
+
+// Show Toast Message
+function calcShowToast(msg) {
+  const toast = document.getElementById('coming-toast');
+  const text = document.getElementById('coming-toast-text');
+  if (toast && text) {
+    text.textContent = msg;
+    toast.classList.remove('hidden');
+    toast.style.opacity = '1';
+    if (window._calcToastTimer) clearTimeout(window._calcToastTimer);
+    window._calcToastTimer = setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.classList.add('hidden'), 300);
+    }, 2000);
+  }
+}
+
+// Play synthesized acoustic mechanical tick
+function calcPlayAudioTick() {
+  if (!calcSettings.sound) return;
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    if (!calcAudioCtx) calcAudioCtx = new AudioCtx();
+    if (calcAudioCtx.state === 'suspended') calcAudioCtx.resume();
+
+    const osc = calcAudioCtx.createOscillator();
+    const gain = calcAudioCtx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(550, calcAudioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(140, calcAudioCtx.currentTime + 0.022);
+
+    gain.gain.setValueAtTime(0.06, calcAudioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, calcAudioCtx.currentTime + 0.022);
+
+    osc.connect(gain);
+    gain.connect(calcAudioCtx.destination);
+
+    osc.start();
+    osc.stop(calcAudioCtx.currentTime + 0.022);
+  } catch (e) {
+    // Fallback ignored safely
+  }
+}
+
+// Clean and format floating point math & scientific exponential notation
+function calcCleanFloat(num) {
+  if (isNaN(num) || !isFinite(num)) return num;
+
+  // For very large numbers (>= 1e16) or very small decimals (< 1e-6), use scientific exponential notation
+  if (Math.abs(num) >= 1e16 || (Math.abs(num) < 1e-6 && num !== 0)) {
+    return parseFloat(num.toPrecision(12)).toString();
+  }
+
+  if (calcSettings.precision !== 'auto') {
+    const dec = parseInt(calcSettings.precision, 10);
+    return parseFloat(num.toFixed(dec));
+  }
+  // Remove floating point IEEE artifacts
+  return parseFloat(parseFloat(num.toPrecision(14)).toString());
+}
+
+// Format numbers with thousands separators, exponential notation, and dynamic font scaling
+function calcFormatDisplay(valueStr) {
+  if (valueStr === undefined || valueStr === null || valueStr === '') return '0';
+  const str = valueStr.toString();
+  if (['Error', 'Cannot divide by zero', 'Invalid Input'].includes(str)) {
+    return str;
+  }
+
+  // Handle scientific exponential notation e.g. 1.53515e+10 or 2.5e-8
+  if (str.toLowerCase().includes('e')) {
+    const parts = str.toLowerCase().split('e');
+    const mantissa = parts[0];
+    const exp = parseInt(parts[1], 10);
+    return `${mantissa}e${exp >= 0 ? '+' : ''}${exp}`;
+  }
+
+  if (!calcSettings.grouping) return str;
+
+  const parts = str.split('.');
+  let integerPart = parts[0];
+  const decimalPart = parts.length > 1 ? '.' + parts[1] : '';
+
+  // Add thousand commas to integer part
+  const isNegative = integerPart.startsWith('-');
+  if (isNegative) integerPart = integerPart.substring(1);
+
+  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return (isNegative ? '-' : '') + integerPart + decimalPart;
+}
+
+// Format multi-step chained tokens into a readable equation trail
+function calcFormatTokensTrail(tokens) {
+  return tokens.map(t => {
+    if (['+', '−', '×', '÷', '='].includes(t)) return t;
+    if (t.startsWith('sqr(') || t.startsWith('√(') || t.startsWith('1/(')) return t;
+    return calcFormatDisplay(t);
+  }).join(' ');
+}
+
+function calcUpdateDisplay() {
+  const mainEl = document.getElementById('calc-main-display');
+  const eqEl = document.getElementById('calc-equation-display');
+
+  if (mainEl) {
+    const formatted = calcFormatDisplay(calcCurrentInput);
+    mainEl.textContent = formatted;
+
+    // Dynamic responsive font scaling for very large numbers & exponents
+    const len = formatted.length;
+    if (len <= 10) {
+      mainEl.className = 'text-4xl sm:text-5xl font-semibold text-gray-900 dark:text-white tracking-tight break-all font-mono transition-all';
+    } else if (len <= 15) {
+      mainEl.className = 'text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-white tracking-tight break-all font-mono transition-all';
+    } else if (len <= 20) {
+      mainEl.className = 'text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white tracking-tight break-all font-mono transition-all';
+    } else if (len <= 26) {
+      mainEl.className = 'text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white tracking-tight break-all font-mono transition-all';
+    } else {
+      mainEl.className = 'text-lg sm:text-xl font-semibold text-gray-900 dark:text-white tracking-tight break-all font-mono transition-all';
+    }
+  }
+
+  if (eqEl) {
+    eqEl.textContent = calcEquationTrail;
+    // Auto-scroll trail to show latest operations
+    eqEl.scrollLeft = eqEl.scrollWidth;
+  }
+
+  calcUpdateMemoryKeyStates();
+}
+
+// Digits & Numbers (Extended large input capacity up to 48 digits)
+function calcDigit(digit) {
+  calcPlayAudioTick();
+
+  // If in Converter mode, type directly into the active dual converter field
+  if (calcInConverterMode) {
+    let currentVal = calcConvActiveField === 'top' ? calcConvValTop : calcConvValBottom;
+    if (currentVal === '0' || currentVal === 'Error') {
+      currentVal = digit;
+    } else {
+      if (currentVal.replace(/[^0-9]/g, '').length < 32) {
+        currentVal += digit;
+      }
+    }
+
+    if (calcConvActiveField === 'top') {
+      calcConvValTop = currentVal;
+    } else {
+      calcConvValBottom = currentVal;
+    }
+
+    calcPerformDualConversion();
+    return;
+  }
+
+  if (calcWaitingForSecondOperand) {
+    calcCurrentInput = digit;
+    calcWaitingForSecondOperand = false;
+  } else {
+    if (calcCurrentInput === '0' || calcCurrentInput === 'Error' || calcCurrentInput === 'Cannot divide by zero' || calcCurrentInput === 'Invalid Input') {
+      calcCurrentInput = digit;
+    } else {
+      if (calcCurrentInput.replace(/[^0-9]/g, '').length < 48) {
+        calcCurrentInput += digit;
+      }
+    }
+  }
+
+  calcUpdateDisplay();
+}
+
+function calcDecimal() {
+  calcPlayAudioTick();
+
+  // If in Converter mode, add decimal to the active dual converter field
+  if (calcInConverterMode) {
+    let currentVal = calcConvActiveField === 'top' ? calcConvValTop : calcConvValBottom;
+    if (!currentVal.includes('.')) {
+      if (currentVal === 'Error') currentVal = '0.';
+      else currentVal += '.';
+    }
+    if (calcConvActiveField === 'top') calcConvValTop = currentVal;
+    else calcConvValBottom = currentVal;
+    calcPerformDualConversion();
+    return;
+  }
+
+  if (calcWaitingForSecondOperand) {
+    calcCurrentInput = '0.';
+    calcWaitingForSecondOperand = false;
+  } else if (!calcCurrentInput.includes('.')) {
+    if (calcCurrentInput === 'Error' || calcCurrentInput === 'Cannot divide by zero' || calcCurrentInput === 'Invalid Input') {
+      calcCurrentInput = '0.';
+    } else {
+      calcCurrentInput += '.';
+    }
+  }
+
+  calcUpdateDisplay();
+}
+
+function calcToggleSign() {
+  calcPlayAudioTick();
+
+  if (calcInConverterMode) {
+    let currentVal = calcConvActiveField === 'top' ? calcConvValTop : calcConvValBottom;
+    if (currentVal !== '0' && !isNaN(Number(currentVal))) {
+      currentVal = currentVal.startsWith('-') ? currentVal.substring(1) : '-' + currentVal;
+      if (calcConvActiveField === 'top') calcConvValTop = currentVal;
+      else calcConvValBottom = currentVal;
+      calcPerformDualConversion();
+    }
+    return;
+  }
+
+  if (calcCurrentInput === '0' || isNaN(Number(calcCurrentInput))) return;
+
+  if (calcCurrentInput.startsWith('-')) {
+    calcCurrentInput = calcCurrentInput.substring(1);
+  } else {
+    calcCurrentInput = '-' + calcCurrentInput;
+  }
+
+  calcUpdateDisplay();
+}
+
+function calcBackspace() {
+  calcPlayAudioTick();
+
+  if (calcInConverterMode) {
+    let currentVal = calcConvActiveField === 'top' ? calcConvValTop : calcConvValBottom;
+    if (currentVal.length > 1 && currentVal !== 'Error') {
+      currentVal = currentVal.slice(0, -1);
+      if (currentVal === '-' || currentVal === '') currentVal = '0';
+    } else {
+      currentVal = '0';
+    }
+    if (calcConvActiveField === 'top') calcConvValTop = currentVal;
+    else calcConvValBottom = currentVal;
+    calcPerformDualConversion();
+    return;
+  }
+
+  if (calcWaitingForSecondOperand) return;
+
+  if (calcCurrentInput.length > 1 && !['Error', 'Cannot divide by zero', 'Invalid Input'].includes(calcCurrentInput)) {
+    calcCurrentInput = calcCurrentInput.slice(0, -1);
+    if (calcCurrentInput === '-' || calcCurrentInput === '') calcCurrentInput = '0';
+  } else {
+    calcCurrentInput = '0';
+  }
+
+  calcUpdateDisplay();
+}
+
+function calcClearEntry() {
+  calcPlayAudioTick();
+
+  if (calcInConverterMode) {
+    if (calcConvActiveField === 'top') calcConvValTop = '0';
+    else calcConvValBottom = '0';
+    calcPerformDualConversion();
+    return;
+  }
+
+  calcCurrentInput = '0';
+  calcUpdateDisplay();
+}
+
+function calcClearAll() {
+  calcPlayAudioTick();
+
+  if (calcInConverterMode) {
+    calcConvValTop = '0';
+    calcConvValBottom = '0';
+    calcPerformDualConversion();
+    return;
+  }
+
+  calcCurrentInput = '0';
+  calcPreviousValue = null;
+  calcCurrentOperator = null;
+  calcWaitingForSecondOperand = false;
+  calcEquationTrail = '';
+  calcEquationTokens = [];
+  calcOperationCount = 0;
+  calcUpdateDisplay();
+}
+
+// Operators & Computation with continuous chaining (up to 100 operations in one go)
+function calcOperator(op) {
+  calcPlayAudioTick();
+
+  if (calcInConverterMode) {
+    calcSwapConvUnits();
+    return;
+  }
+
+  // Enforce 100 operations limit in one continuous calculation
+  if (calcOperationCount >= 100 && !calcWaitingForSecondOperand) {
+    calcShowToast('Maximum 100 chained operations reached for this calculation. Press = to view result.');
+    return;
+  }
+
+  const inputValue = parseFloat(calcCurrentInput);
+
+  if (calcPreviousValue === null) {
+    calcPreviousValue = inputValue;
+    calcOperationCount = 1;
+    calcEquationTokens = [calcCurrentInput, op];
+  } else if (calcWaitingForSecondOperand) {
+    // Replace the last operator if user presses a different operator before entering a number
+    calcCurrentOperator = op;
+    if (calcEquationTokens.length > 0) {
+      calcEquationTokens[calcEquationTokens.length - 1] = op;
+    }
+    calcEquationTrail = calcFormatTokensTrail(calcEquationTokens);
+    calcUpdateDisplay();
+    return;
+  } else if (calcCurrentOperator) {
+    const result = calcCompute(calcPreviousValue, inputValue, calcCurrentOperator);
+    if (typeof result === 'string') {
+      calcCurrentInput = result;
+      calcPreviousValue = null;
+      calcCurrentOperator = null;
+      calcEquationTrail = '';
+      calcEquationTokens = [];
+      calcOperationCount = 0;
+      calcUpdateDisplay();
+      return;
+    }
+    calcOperationCount++;
+    calcPreviousValue = result;
+    calcCurrentInput = calcCleanFloat(result).toString();
+    calcEquationTokens.push(inputValue.toString(), op);
+  }
+
+  calcWaitingForSecondOperand = true;
+  calcCurrentOperator = op;
+  calcEquationTrail = calcFormatTokensTrail(calcEquationTokens);
+  calcUpdateDisplay();
+}
+
+function calcCompute(first, second, op) {
+  let res;
+  switch (op) {
+    case '+':
+      res = first + second;
+      break;
+    case '−':
+    case '-':
+      res = first - second;
+      break;
+    case '×':
+    case '*':
+      res = first * second;
+      break;
+    case '÷':
+    case '/':
+      if (second === 0) return 'Cannot divide by zero';
+      res = first / second;
+      break;
+    default:
+      return second;
+  }
+  return calcCleanFloat(res);
+}
+
+function calcEquals() {
+  calcPlayAudioTick();
+
+  if (calcInConverterMode) {
+    calcFocusConvField(calcConvActiveField === 'top' ? 'bottom' : 'top');
+    return;
+  }
+
+  if (calcCurrentOperator === null || calcPreviousValue === null) {
+    return;
+  }
+
+  const inputValue = parseFloat(calcCurrentInput);
+  const result = calcCompute(calcPreviousValue, inputValue, calcCurrentOperator);
+
+  calcEquationTokens.push(inputValue.toString(), '=');
+  const equationStr = calcFormatTokensTrail(calcEquationTokens);
+
+  if (typeof result === 'string') {
+    calcCurrentInput = result;
+    calcEquationTrail = equationStr;
+    calcPreviousValue = null;
+    calcCurrentOperator = null;
+    calcWaitingForSecondOperand = true;
+    calcEquationTokens = [];
+    calcOperationCount = 0;
+    calcUpdateDisplay();
+    return;
+  }
+
+  const finalResultStr = calcCleanFloat(result).toString();
+  calcEquationTrail = equationStr;
+  calcCurrentInput = finalResultStr;
+
+  // Add to Calculation History
+  calcAddHistory(equationStr, calcFormatDisplay(finalResultStr), result);
+
+  calcPreviousValue = null;
+  calcCurrentOperator = null;
+  calcWaitingForSecondOperand = true;
+  calcEquationTokens = [];
+  calcOperationCount = 0;
+  calcUpdateDisplay();
+}
+
+// Standard Functions (%, 1/x, x², √x)
+function calcInputPercent() {
+  calcPlayAudioTick();
+  if (calcInConverterMode) return;
+
+  const current = parseFloat(calcCurrentInput);
+  if (isNaN(current)) return;
+
+  if (calcPreviousValue !== null && (calcCurrentOperator === '+' || calcCurrentOperator === '−')) {
+    const percentVal = calcCleanFloat((calcPreviousValue * current) / 100);
+    calcCurrentInput = percentVal.toString();
+  } else {
+    const percentVal = calcCleanFloat(current / 100);
+    calcCurrentInput = percentVal.toString();
+  }
+
+  calcUpdateDisplay();
+}
+
+function calcSquare() {
+  calcPlayAudioTick();
+  if (calcInConverterMode) return;
+
+  const current = parseFloat(calcCurrentInput);
+  if (isNaN(current)) return;
+
+  const res = calcCleanFloat(current * current);
+  const eq = `sqr(${calcFormatDisplay(current.toString())})`;
+  calcEquationTrail = eq;
+  calcCurrentInput = res.toString();
+  calcWaitingForSecondOperand = true;
+
+  calcAddHistory(`${eq} =`, calcFormatDisplay(res.toString()), res);
+  calcUpdateDisplay();
+}
+
+function calcSquareRoot() {
+  calcPlayAudioTick();
+  if (calcInConverterMode) return;
+
+  const current = parseFloat(calcCurrentInput);
+  if (isNaN(current)) return;
+  if (current < 0) {
+    calcCurrentInput = 'Invalid Input';
+    calcUpdateDisplay();
+    return;
+  }
+
+  const res = calcCleanFloat(Math.sqrt(current));
+  const eq = `√(${calcFormatDisplay(current.toString())})`;
+  calcEquationTrail = eq;
+  calcCurrentInput = res.toString();
+  calcWaitingForSecondOperand = true;
+
+  calcAddHistory(`${eq} =`, calcFormatDisplay(res.toString()), res);
+  calcUpdateDisplay();
+}
+
+function calcReciprocal() {
+  calcPlayAudioTick();
+  if (calcInConverterMode) return;
+
+  const current = parseFloat(calcCurrentInput);
+  if (isNaN(current)) return;
+  if (current === 0) {
+    calcCurrentInput = 'Cannot divide by zero';
+    calcUpdateDisplay();
+    return;
+  }
+
+  const res = calcCleanFloat(1 / current);
+  const eq = `1/(${calcFormatDisplay(current.toString())})`;
+  calcEquationTrail = eq;
+  calcCurrentInput = res.toString();
+  calcWaitingForSecondOperand = true;
+
+  calcAddHistory(`${eq} =`, calcFormatDisplay(res.toString()), res);
+  calcUpdateDisplay();
+}
+
+// Memory Operations
+function calcMemoryStore() {
+  calcPlayAudioTick();
+  const val = parseFloat(calcInConverterMode ? (calcConvActiveField === 'top' ? calcConvValTop : calcConvValBottom) : calcCurrentInput);
+  if (isNaN(val)) return;
+
+  calcMemoryStack.unshift(val);
+  calcWaitingForSecondOperand = true;
+  calcRenderMemoryList();
+  calcUpdateMemoryKeyStates();
+  calcShowToast('Stored ' + calcFormatDisplay(val.toString()) + ' in memory');
+}
+
+function calcMemoryRecall() {
+  calcPlayAudioTick();
+  if (calcMemoryStack.length === 0) return;
+  const recalled = calcCleanFloat(calcMemoryStack[0]).toString();
+
+  if (calcInConverterMode) {
+    if (calcConvActiveField === 'top') calcConvValTop = recalled;
+    else calcConvValBottom = recalled;
+    calcPerformDualConversion();
+    return;
+  }
+
+  calcCurrentInput = recalled;
+  calcWaitingForSecondOperand = true;
+  calcUpdateDisplay();
+}
+
+function calcMemoryClear() {
+  calcPlayAudioTick();
+  calcMemoryStack = [];
+  calcRenderMemoryList();
+  calcUpdateMemoryKeyStates();
+  calcShowToast('Memory cleared');
+}
+
+function calcMemoryAdd() {
+  calcPlayAudioTick();
+  const val = parseFloat(calcInConverterMode ? (calcConvActiveField === 'top' ? calcConvValTop : calcConvValBottom) : calcCurrentInput);
+  if (isNaN(val)) return;
+
+  if (calcMemoryStack.length === 0) {
+    calcMemoryStack.push(val);
+  } else {
+    calcMemoryStack[0] = calcCleanFloat(calcMemoryStack[0] + val);
+  }
+
+  calcWaitingForSecondOperand = true;
+  calcRenderMemoryList();
+  calcUpdateMemoryKeyStates();
+}
+
+function calcMemorySubtract() {
+  calcPlayAudioTick();
+  const val = parseFloat(calcInConverterMode ? (calcConvActiveField === 'top' ? calcConvValTop : calcConvValBottom) : calcCurrentInput);
+  if (isNaN(val)) return;
+
+  if (calcMemoryStack.length === 0) {
+    calcMemoryStack.push(-val);
+  } else {
+    calcMemoryStack[0] = calcCleanFloat(calcMemoryStack[0] - val);
+  }
+
+  calcWaitingForSecondOperand = true;
+  calcRenderMemoryList();
+  calcUpdateMemoryKeyStates();
+}
+
+function calcUpdateMemoryKeyStates() {
+  const hasMem = calcMemoryStack.length > 0;
+  const mc = document.getElementById('calc-mem-mc');
+  const mr = document.getElementById('calc-mem-mr');
+  const mDrop = document.getElementById('calc-mem-dropdown');
+
+  [mc, mr, mDrop].forEach(el => {
+    if (el) {
+      if (hasMem) {
+        el.classList.remove('opacity-40', 'cursor-default');
+        el.classList.add('opacity-100', 'cursor-pointer', 'text-amber-600', 'dark:text-amber-400');
+      } else {
+        el.classList.add('opacity-40', 'cursor-default');
+        el.classList.remove('opacity-100', 'cursor-pointer', 'text-amber-600', 'dark:text-amber-400');
+      }
+    }
+  });
+}
+
+function calcRenderMemoryList() {
+  const listEl = document.getElementById('calc-memory-list');
+  if (!listEl) return;
+
+  if (calcMemoryStack.length === 0) {
+    listEl.innerHTML = `
+      <div class="text-center py-12 space-y-2 text-gray-400 dark:text-gray-500">
+        <i data-lucide="database" style="width:28px;height:28px" class="mx-auto opacity-40"></i>
+        <p class="text-xs font-semibold">There's nothing saved in memory</p>
+        <p class="text-[11px] opacity-75">Use MS to store values or M+/M− to accumulate</p>
+      </div>
+    `;
+    lucide.createIcons();
+    return;
+  }
+
+  let html = '';
+  calcMemoryStack.forEach((val, idx) => {
+    html += `
+      <div class="p-3 bg-gray-50 dark:bg-gray-900/60 rounded-2xl border border-gray-200 dark:border-gray-700/80 flex items-center justify-between gap-2 group hover:border-amber-400 transition">
+        <div class="cursor-pointer flex-1" onclick="calcLoadMemoryItem(${val})">
+          <div class="text-[10px] text-gray-400 font-semibold">Slot #${idx + 1}</div>
+          <div class="font-mono text-sm font-bold text-gray-800 dark:text-gray-100">${calcFormatDisplay(val.toString())}</div>
+        </div>
+        <div class="flex items-center gap-1">
+          <button onclick="calcMemoryItemAdd(${idx})" class="px-2.5 py-1.5 bg-white dark:bg-gray-800 hover:bg-amber-50 text-gray-700 dark:text-gray-200 text-xs font-bold rounded-lg transition" title="Add to this slot">M+</button>
+          <button onclick="calcMemoryItemSub(${idx})" class="px-2.5 py-1.5 bg-white dark:bg-gray-800 hover:bg-amber-50 text-gray-700 dark:text-gray-200 text-xs font-bold rounded-lg transition" title="Subtract from this slot">M−</button>
+          <button onclick="calcMemoryItemClear(${idx})" class="p-1.5 hover:bg-red-100 dark:hover:bg-red-950/60 text-red-500 rounded-lg transition active:scale-95" title="Clear slot"><i data-lucide="trash-2" style="width:16px;height:16px"></i></button>
+        </div>
+      </div>
+    `;
+  });
+
+  listEl.innerHTML = html;
+  lucide.createIcons();
+}
+
+function calcLoadMemoryItem(val) {
+  calcPlayAudioTick();
+  if (calcInConverterMode) {
+    const s = calcCleanFloat(val).toString();
+    if (calcConvActiveField === 'top') calcConvValTop = s;
+    else calcConvValBottom = s;
+    calcPerformDualConversion();
+    return;
+  }
+
+  calcCurrentInput = calcCleanFloat(val).toString();
+  calcWaitingForSecondOperand = true;
+  calcUpdateDisplay();
+}
+
+function calcMemoryItemAdd(idx) {
+  const current = parseFloat(calcInConverterMode ? (calcConvActiveField === 'top' ? calcConvValTop : calcConvValBottom) : calcCurrentInput);
+  if (isNaN(current)) return;
+  calcMemoryStack[idx] = calcCleanFloat(calcMemoryStack[idx] + current);
+  calcRenderMemoryList();
+}
+
+function calcMemoryItemSub(idx) {
+  const current = parseFloat(calcInConverterMode ? (calcConvActiveField === 'top' ? calcConvValTop : calcConvValBottom) : calcCurrentInput);
+  if (isNaN(current)) return;
+  calcMemoryStack[idx] = calcCleanFloat(calcMemoryStack[idx] - current);
+  calcRenderMemoryList();
+}
+
+function calcMemoryItemClear(idx) {
+  calcMemoryStack.splice(idx, 1);
+  calcRenderMemoryList();
+  calcUpdateMemoryKeyStates();
+}
+
+// History Operations
+function calcAddHistory(equation, formattedResult, rawResult) {
+  const item = {
+    id: Date.now(),
+    equation: equation,
+    result: formattedResult,
+    rawResult: rawResult,
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  };
+
+  calcHistoryLog.unshift(item);
+  calcRenderHistoryList();
+
+  const dot = document.getElementById('calc-history-count-dot');
+  if (dot) dot.classList.remove('hidden');
+}
+
+function calcRenderHistoryList() {
+  const listEl = document.getElementById('calc-history-list');
+  if (!listEl) return;
+
+  if (calcHistoryLog.length === 0) {
+    listEl.innerHTML = `
+      <div class="text-center py-12 space-y-2 text-gray-400 dark:text-gray-500">
+        <i data-lucide="clock" style="width:28px;height:28px" class="mx-auto opacity-40"></i>
+        <p class="text-xs font-semibold">There's no history yet</p>
+        <p class="text-[11px] opacity-75">Your completed calculations will appear here</p>
+      </div>
+    `;
+    lucide.createIcons();
+    return;
+  }
+
+  let html = '';
+  calcHistoryLog.forEach(item => {
+    html += `
+      <div class="p-3.5 bg-gray-50 dark:bg-gray-900/60 rounded-2xl border border-gray-200 dark:border-gray-700/80 hover:border-amber-400 cursor-pointer transition text-right group relative" onclick="calcLoadHistoryItem(${item.rawResult})">
+        <div class="flex items-center justify-between text-xs text-gray-400 mb-1.5">
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="calcDeleteHistoryItem(${item.id}, event)" class="p-1.5 hover:bg-red-100 dark:hover:bg-red-950/60 text-gray-400 hover:text-red-500 rounded-xl transition active:scale-90" title="Delete calculation">
+              <i data-lucide="trash-2" style="width:16px;height:16px"></i>
+            </button>
+            <span class="text-[11px] font-medium">${item.timestamp}</span>
+          </div>
+          <span class="opacity-0 group-hover:opacity-100 text-amber-600 dark:text-amber-400 font-semibold text-[11px] transition">Click to load</span>
+        </div>
+        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 font-mono truncate pr-1">${item.equation}</div>
+        <div class="text-base font-bold text-gray-800 dark:text-gray-100 font-mono mt-0.5 pr-1">${item.result}</div>
+      </div>
+    `;
+  });
+
+  listEl.innerHTML = html;
+  lucide.createIcons();
+}
+
+function calcLoadHistoryItem(rawResult) {
+  calcPlayAudioTick();
+  if (calcInConverterMode) {
+    const s = calcCleanFloat(rawResult).toString();
+    if (calcConvActiveField === 'top') calcConvValTop = s;
+    else calcConvValBottom = s;
+    calcPerformDualConversion();
+    return;
+  }
+
+  calcCurrentInput = calcCleanFloat(rawResult).toString();
+  calcWaitingForSecondOperand = true;
+  calcUpdateDisplay();
+}
+
+function calcDeleteHistoryItem(id, event) {
+  if (event) event.stopPropagation();
+  calcPlayAudioTick();
+  calcHistoryLog = calcHistoryLog.filter(item => item.id !== id);
+  calcRenderHistoryList();
+  if (calcHistoryLog.length === 0) {
+    const dot = document.getElementById('calc-history-count-dot');
+    if (dot) dot.classList.add('hidden');
+  }
+  calcShowToast('Calculation deleted from history');
+}
+
+function calcClearHistory() {
+  calcHistoryLog = [];
+  calcRenderHistoryList();
+  const dot = document.getElementById('calc-history-count-dot');
+  if (dot) dot.classList.add('hidden');
+  calcShowToast('History cleared');
+}
+
+function calcExportHistory() {
+  if (calcHistoryLog.length === 0) {
+    alert('No calculation history to export.');
+    return;
+  }
+
+  let text = `PockitUp Standard Calculator - History Log (${new Date().toLocaleDateString()})\n\n`;
+  calcHistoryLog.forEach((item, idx) => {
+    text += `[${item.timestamp}] ${item.equation} ${item.result}\n`;
+  });
+
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `calculator_history_${Date.now()}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// Sidecar Tabs Switcher
+function calcSwitchSideTab(tab) {
+  calcCurrentSideTab = tab;
+  ['history', 'memory', 'converter'].forEach(t => {
+    const btn = document.getElementById(`calc-sidetab-${t}-btn`);
+    const panel = document.getElementById(`calc-panel-${t}`);
+
+    if (t === tab) {
+      if (btn) btn.className = 'flex-1 py-2 px-3 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm transition flex items-center justify-center gap-1.5 font-bold';
+      if (panel) panel.classList.remove('hidden');
+    } else {
+      if (btn) btn.className = 'flex-1 py-2 px-3 rounded-xl text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center justify-center gap-1.5 font-semibold';
+      if (panel) panel.classList.add('hidden');
+    }
+  });
+
+  const stdScreen = document.getElementById('calc-standard-screen');
+  const convScreen = document.getElementById('calc-converter-screen');
+  const modeTitle = document.getElementById('calc-current-mode-title');
+  const headerIcon = document.getElementById('calc-header-icon');
+
+  if (tab === 'converter') {
+    calcInConverterMode = true;
+    if (stdScreen) stdScreen.classList.add('hidden');
+    if (convScreen) convScreen.classList.remove('hidden');
+    if (modeTitle) modeTitle.textContent = 'Unit Converter';
+    if (headerIcon) {
+      headerIcon.setAttribute('data-lucide', 'repeat');
+      lucide.createIcons();
+    }
+    calcInitDualConverter();
+  } else {
+    calcInConverterMode = false;
+    if (convScreen) convScreen.classList.add('hidden');
+    if (stdScreen) stdScreen.classList.remove('hidden');
+    if (modeTitle) modeTitle.textContent = 'Standard';
+    if (headerIcon) {
+      headerIcon.setAttribute('data-lucide', 'calculator');
+      lucide.createIcons();
+    }
+  }
+}
+
+function calcToggleSideTab(tab) {
+  calcSwitchSideTab(tab);
+}
+
+// =========================================================================
+// =============== SMARTPHONE DUAL UNIT CONVERTER SYSTEM ===================
+// =========================================================================
+
+function calcInitDualConverter() {
+  calcSelectConvCat(calcConverterCategory || 'length');
+}
+
+function calcSelectConvCat(cat) {
+  calcConverterCategory = cat;
+  const reg = CALC_UNITS_REGISTRY[cat];
+  if (!reg) return;
+
+  // 1. Update horizontal category chips inside calculator
+  document.querySelectorAll('.calc-cat-chip').forEach(btn => {
+    const bCat = btn.getAttribute('data-cat');
+    if (bCat === cat) {
+      btn.className = 'calc-cat-chip px-3 py-1.5 rounded-full bg-amber-500 text-white shadow-sm transition whitespace-nowrap font-bold';
+    } else {
+      btn.className = 'calc-cat-chip px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap font-semibold';
+    }
+  });
+
+  // 2. Update sidecar category buttons
+  document.querySelectorAll('.calc-side-cat-btn').forEach(btn => {
+    const bCat = btn.getAttribute('data-cat');
+    if (bCat === cat) {
+      btn.className = 'calc-side-cat-btn p-2.5 rounded-2xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-bold flex items-center gap-2 transition';
+    } else {
+      btn.className = 'calc-side-cat-btn p-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold flex items-center gap-2 transition';
+    }
+  });
+
+  // 3. Populate unit dropdowns
+  const topSel = document.getElementById('calc-conv-unit-top');
+  const bottomSel = document.getElementById('calc-conv-unit-bottom');
+
+  if (topSel && bottomSel) {
+    const keys = Object.keys(reg.units);
+    const optionsHtml = keys.map(k => `<option value="${k}">${reg.units[k].name}</option>`).join('');
+
+    topSel.innerHTML = optionsHtml;
+    bottomSel.innerHTML = optionsHtml;
+
+    // Set default selections
+    topSel.value = keys[0];
+    bottomSel.value = keys.length > 1 ? keys[1] : keys[0];
+
+    calcConvUnitTop = topSel.value;
+    calcConvUnitBottom = bottomSel.value;
+  }
+
+  // 4. Default input
+  calcConvActiveField = 'top';
+  calcConvValTop = '1';
+  calcFocusConvField('top');
+  calcPerformDualConversion();
+}
+
+function calcFocusConvField(field) {
+  calcConvActiveField = field;
+  const topBox = document.getElementById('calc-conv-field-top');
+  const botBox = document.getElementById('calc-conv-field-bottom');
+
+  if (field === 'top') {
+    if (topBox) topBox.className = 'p-3 rounded-xl border-2 border-amber-500 bg-white dark:bg-gray-800 cursor-pointer transition shadow-sm';
+    if (botBox) botBox.className = 'p-3 rounded-xl border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-700 bg-white/60 dark:bg-gray-800/60 cursor-pointer transition';
+  } else {
+    if (topBox) topBox.className = 'p-3 rounded-xl border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-700 bg-white/60 dark:bg-gray-800/60 cursor-pointer transition';
+    if (botBox) botBox.className = 'p-3 rounded-xl border-2 border-amber-500 bg-white dark:bg-gray-800 cursor-pointer transition shadow-sm';
+  }
+}
+
+function calcOnUnitChange(field) {
+  const topSel = document.getElementById('calc-conv-unit-top');
+  const bottomSel = document.getElementById('calc-conv-unit-bottom');
+
+  if (topSel) calcConvUnitTop = topSel.value;
+  if (bottomSel) calcConvUnitBottom = bottomSel.value;
+
+  calcPerformDualConversion();
+}
+
+function calcSwapConvUnits() {
+  const topSel = document.getElementById('calc-conv-unit-top');
+  const bottomSel = document.getElementById('calc-conv-unit-bottom');
+
+  if (topSel && bottomSel) {
+    const temp = topSel.value;
+    topSel.value = bottomSel.value;
+    bottomSel.value = temp;
+
+    calcConvUnitTop = topSel.value;
+    calcConvUnitBottom = bottomSel.value;
+
+    calcPerformDualConversion();
+  }
+}
+
+function calcPerformDualConversion() {
+  const cat = calcConverterCategory;
+  const reg = CALC_UNITS_REGISTRY[cat];
+  if (!reg) return;
+
+  const topSel = document.getElementById('calc-conv-unit-top');
+  const bottomSel = document.getElementById('calc-conv-unit-bottom');
+  if (topSel) calcConvUnitTop = topSel.value;
+  if (bottomSel) calcConvUnitBottom = bottomSel.value;
+
+  const uTop = reg.units[calcConvUnitTop];
+  const uBottom = reg.units[calcConvUnitBottom];
+
+  const symTopEl = document.getElementById('calc-conv-sym-top');
+  const symBotEl = document.getElementById('calc-conv-sym-bottom');
+  if (symTopEl && uTop) symTopEl.textContent = uTop.sym;
+  if (symBotEl && uBottom) symBotEl.textContent = uBottom.sym;
+
+  if (calcConvActiveField === 'top') {
+    const raw = calcConvValTop.replace(/,/g, '');
+    const num = parseFloat(raw);
+    const converted = isNaN(num) ? 0 : calcComputeUnitConvert(num, calcConvUnitTop, calcConvUnitBottom, cat);
+    calcConvValBottom = calcCleanFloat(converted).toString();
+  } else {
+    const raw = calcConvValBottom.replace(/,/g, '');
+    const num = parseFloat(raw);
+    const converted = isNaN(num) ? 0 : calcComputeUnitConvert(num, calcConvUnitBottom, calcConvUnitTop, cat);
+    calcConvValTop = calcCleanFloat(converted).toString();
+  }
+
+  // Render numbers
+  const valTopEl = document.getElementById('calc-conv-val-top');
+  const valBotEl = document.getElementById('calc-conv-val-bottom');
+  if (valTopEl) valTopEl.textContent = calcFormatDisplay(calcConvValTop);
+  if (valBotEl) valBotEl.textContent = calcFormatDisplay(calcConvValBottom);
+
+  // Update formula in sidecar
+  const formulaText = document.getElementById('calc-conv-formula-text');
+  if (formulaText && uTop && uBottom) {
+    const oneConv = calcCleanFloat(calcComputeUnitConvert(1, calcConvUnitTop, calcConvUnitBottom, cat));
+    formulaText.textContent = `1 ${uTop.name} (${uTop.sym}) = ${calcFormatDisplay(oneConv.toString())} ${uBottom.name} (${uBottom.sym})`;
+  }
+}
+
+function calcComputeUnitConvert(val, fromKey, toKey, cat) {
+  if (fromKey === toKey) return val;
+
+  if (cat === 'temperature') {
+    if (fromKey === 'C' && toKey === 'F') return (val * 9 / 5) + 32;
+    if (fromKey === 'C' && toKey === 'K') return val + 273.15;
+    if (fromKey === 'F' && toKey === 'C') return (val - 32) * 5 / 9;
+    if (fromKey === 'F' && toKey === 'K') return (val - 32) * 5 / 9 + 273.15;
+    if (fromKey === 'K' && toKey === 'C') return val - 273.15;
+    if (fromKey === 'K' && toKey === 'F') return (val - 273.15) * 9 / 5 + 32;
+    return val;
+  }
+
+  const reg = CALC_UNITS_REGISTRY[cat];
+  if (!reg) return val;
+  const uFrom = reg.units[fromKey];
+  const uTo = reg.units[toKey];
+
+  if (!uFrom || !uTo) return val;
+
+  const inBase = val * uFrom.factor;
+  return inBase / uTo.factor;
+}
+
+// Copy Result with toast feedback
+function calcCopyResult(event) {
+  if (event) event.stopPropagation();
+  const val = calcInConverterMode ? (calcConvActiveField === 'top' ? calcConvValTop : calcConvValBottom) : calcCurrentInput;
+  if (!val || val === 'Error' || val === 'Cannot divide by zero' || val === 'Invalid Input') return;
+
+  navigator.clipboard.writeText(val).then(() => {
+    calcShowToast('Copied ' + val + ' to clipboard!');
+  }).catch(() => {
+    calcShowToast('Copied to clipboard!');
+  });
+}
+
+// Sound Settings
+function calcToggleSound() {
+  calcSettings.sound = !calcSettings.sound;
+  const icon = document.getElementById('calc-sound-icon');
+  if (icon) {
+    icon.setAttribute('data-lucide', calcSettings.sound ? 'volume-2' : 'volume-x');
+    lucide.createIcons();
+  }
+  calcShowToast(calcSettings.sound ? 'Audio clicks enabled' : 'Audio clicks muted');
+}
+
+// Settings Modal
+function calcOpenSettingsModal() {
+  const modal = document.getElementById('calc-settings-modal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function calcCloseSettingsModal() {
+  const modal = document.getElementById('calc-settings-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function calcSetAccentTheme(bg, text) {
+  calcSettings.accentBg = bg;
+  calcSettings.accentText = text;
+  calcApplyAccentColor();
+}
+
+function calcApplyAccentColor() {
+  const eqBtn = document.getElementById('calc-equals-btn');
+  if (eqBtn) {
+    eqBtn.style.backgroundColor = calcSettings.accentBg;
+    eqBtn.style.color = calcSettings.accentText;
+  }
+}
+
+function calcSaveSettings() {
+  const precisionSel = document.getElementById('calc-setting-precision');
+  const groupingChk = document.getElementById('calc-setting-grouping');
+  const soundChk = document.getElementById('calc-setting-sound');
+
+  if (precisionSel) calcSettings.precision = precisionSel.value;
+  if (groupingChk) calcSettings.grouping = groupingChk.checked;
+  if (soundChk) calcSettings.sound = soundChk.checked;
+
+  const soundIcon = document.getElementById('calc-sound-icon');
+  if (soundIcon) {
+    soundIcon.setAttribute('data-lucide', calcSettings.sound ? 'volume-2' : 'volume-x');
+    lucide.createIcons();
+  }
+
+  calcCloseSettingsModal();
+  calcUpdateDisplay();
+  if (calcInConverterMode) calcPerformDualConversion();
+  calcShowToast('Calculator settings saved');
+}
+
+// Keyboard Support
+function calcHandleGlobalKeyboard(e) {
+  const view = document.getElementById('calculator-view');
+  if (!view || view.classList.contains('hidden')) return;
+
+  // Prevent handling if typing in an input
+  if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
+
+  const key = e.key;
+
+  if (key >= '0' && key <= '9') {
+    calcTriggerVisualKey(key);
+    calcDigit(key);
+  } else if (key === '.') {
+    calcTriggerVisualKey('.');
+    calcDecimal();
+  } else if (key === '+' || key === '-') {
+    calcTriggerVisualKey(key === '-' ? '-' : '+');
+    calcOperator(key === '-' ? '−' : '+');
+  } else if (key === '*') {
+    calcTriggerVisualKey('*');
+    calcOperator('×');
+  } else if (key === '/') {
+    e.preventDefault();
+    calcTriggerVisualKey('/');
+    calcOperator('÷');
+  } else if (key === 'Enter' || key === '=') {
+    e.preventDefault();
+    calcTriggerVisualKey('Enter');
+    calcEquals();
+  } else if (key === 'Backspace') {
+    calcTriggerVisualKey('Backspace');
+    calcBackspace();
+  } else if (key === 'Escape') {
+    calcTriggerVisualKey('Escape');
+    calcClearAll();
+  } else if (key === 'Delete') {
+    calcTriggerVisualKey('Delete');
+    calcClearEntry();
+  } else if (key === '%') {
+    calcTriggerVisualKey('%');
+    calcInputPercent();
+  } else if (key.toLowerCase() === 'r') {
+    calcTriggerVisualKey('r');
+    calcReciprocal();
+  } else if (key === '@') {
+    calcTriggerVisualKey('@');
+    calcSquareRoot();
+  } else if (key === 'ArrowUp') {
+    if (calcInConverterMode) {
+      e.preventDefault();
+      calcFocusConvField('top');
+    }
+  } else if (key === 'ArrowDown') {
+    if (calcInConverterMode) {
+      e.preventDefault();
+      calcFocusConvField('bottom');
+    }
+  }
+}
+
+function calcTriggerVisualKey(dataKey) {
+  const btn = document.querySelector(`.calc-btn[data-key="${dataKey}"]`);
+  if (btn) {
+    btn.classList.add('calc-btn-active');
+    setTimeout(() => btn.classList.remove('calc-btn-active'), 120);
+  }
+}
+
+function calcReset() {
+  calcClearAll();
+  calcCloseSettingsModal();
+  calcSwitchSideTab('history');
 }
 
 
