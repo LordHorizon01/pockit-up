@@ -4,7 +4,7 @@
   <script src="/_sdk/telemetry_sdk.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PockitUp - PDF Merger & Tools</title>
+  <title>PockitUp - Your Daily Use Tools</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script>
     tailwind.config = {
@@ -16,7 +16,11 @@
   <script src="https://unpkg.com/@pdf-lib/fontkit/dist/fontkit.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@zip.js/zip.js@2.7.53/dist/zip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.3/dist/docx-preview.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Dancing+Script:wght@400;700&family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400;700&family=Lora:ital,wght@0,400;0,700;1,400;1,700&family=Merriweather:ital,wght@0,400;0,700;1,400;1,700&family=Montserrat:ital,wght@0,400;0,700;1,400;1,700&family=Open+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Poppins:ital,wght@0,400;0,700;1,400;1,700&family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
@@ -260,8 +264,17 @@
        </div>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <!-- Tools will be added here -->
-       </div>
+       <!-- Standard Calculator -->
+       <button onclick="openTool('calculator')" class="group p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/70 shadow-sm hover:shadow-lg hover:border-amber-300 dark:hover:border-amber-700 transition-all text-left flex flex-col gap-3 hover:-translate-y-0.5">
+        <div class="w-11 h-11 bg-amber-50 dark:bg-amber-950/50 rounded-lg flex items-center justify-center group-hover:bg-amber-100 dark:group-hover:bg-amber-900/50 transition">
+         <i data-lucide="calculator" style="width:20px;height:20px" class="text-amber-600 dark:text-amber-400"></i>
+        </div>
+        <div>
+         <div class="font-semibold text-sm text-gray-800 dark:text-gray-200">Standard Calculator</div>
+         <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Fluent math calculator with memory, history &amp; converters</div>
+        </div>
+       </button>
+      </div>
      </section>
 
     <!-- PDF TOOLS SECTION -->
@@ -387,9 +400,9 @@
        </button>
 
        <!-- Word to PDF -->
-       <button onclick="showComingSoon(this, 'Word to PDF')" class="group p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/70 shadow-sm hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-700 transition-all text-left flex flex-col gap-3 hover:-translate-y-0.5">
-        <div class="w-11 h-11 bg-indigo-50 dark:bg-indigo-950/50 rounded-lg flex items-center justify-center group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition">
-         <i data-lucide="file-text" style="width:20px;height:20px" class="text-indigo-600 dark:text-indigo-400"></i>
+       <button onclick="openTool('wordtopdf')" class="group p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/70 shadow-sm hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-700 transition-all text-left flex flex-col gap-3 hover:-translate-y-0.5">
+        <div class="w-11 h-11 bg-blue-50 dark:bg-blue-950/50 rounded-lg flex items-center justify-center group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition">
+         <i data-lucide="file-text" style="width:20px;height:20px" class="text-blue-600 dark:text-blue-400"></i>
         </div>
         <div>
          <div class="font-semibold text-sm text-gray-800 dark:text-gray-200">Word to PDF</div>
@@ -818,13 +831,14 @@
       </div>
      </div>
      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <button class="group p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/70 shadow-sm hover:shadow-lg transition text-left flex flex-col gap-3">
-       <div class="w-11 h-11 bg-red-50 dark:bg-red-950/50 rounded-lg flex items-center justify-center">
+      <!-- Password Generator -->
+      <button onclick="openTool('passwordgen')" class="group p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/70 shadow-sm hover:shadow-lg hover:border-red-300 dark:hover:border-red-700 transition-all text-left flex flex-col gap-3 hover:-translate-y-0.5">
+       <div class="w-11 h-11 bg-red-50 dark:bg-red-950/50 rounded-lg flex items-center justify-center group-hover:bg-red-100 dark:group-hover:bg-red-900/50 transition">
         <i data-lucide="shield" style="width:20px;height:20px" class="text-red-600 dark:text-red-400"></i>
        </div>
        <div>
         <div class="font-semibold text-sm text-gray-800 dark:text-gray-200">Password Generator</div>
-        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Generate strong secure passwords</div>
+        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Generate strong, customizable &amp; secure passwords</div>
        </div>
       </button>
      </div>
@@ -842,13 +856,14 @@
       </div>
      </div>
      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <button class="group p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/70 shadow-sm hover:shadow-lg transition text-left flex flex-col gap-3">
-       <div class="w-11 h-11 bg-yellow-50 dark:bg-yellow-950/50 rounded-lg flex items-center justify-center">
+      <!-- Color Picker & Palette Studio -->
+      <button onclick="openTool('colorpicker')" class="group p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/70 shadow-sm hover:shadow-lg hover:border-yellow-300 dark:hover:border-yellow-700 transition-all text-left flex flex-col gap-3 hover:-translate-y-0.5">
+       <div class="w-11 h-11 bg-yellow-50 dark:bg-yellow-950/50 rounded-lg flex items-center justify-center group-hover:bg-yellow-100 dark:group-hover:bg-yellow-900/50 transition">
         <i data-lucide="palette" style="width:20px;height:20px" class="text-yellow-600 dark:text-yellow-400"></i>
        </div>
        <div>
-        <div class="font-semibold text-sm text-gray-800 dark:text-gray-200">Color Picker</div>
-        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Select and convert hex, rgb and hsl colors</div>
+        <div class="font-semibold text-sm text-gray-800 dark:text-gray-200">Color Picker &amp; Palettes</div>
+        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Pick colors, convert formats, gradients &amp; UI palettes</div>
        </div>
       </button>
      </div>
@@ -866,7 +881,7 @@
       </div>
      </div>
      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <button class="group p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/70 shadow-sm hover:shadow-lg transition text-left flex flex-col gap-3">
+      <button onclick="openTool('ziparchiver')" class="group p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/70 shadow-sm hover:shadow-lg transition text-left flex flex-col gap-3">
        <div class="w-11 h-11 bg-blue-50 dark:bg-blue-950/50 rounded-lg flex items-center justify-center">
         <i data-lucide="database" style="width:20px;height:20px" class="text-blue-600 dark:text-blue-400"></i>
        </div>
@@ -3923,7 +3938,2097 @@
    </div>
   </div>
 
-  <!-- LIGHTBOX MODAL (Global - used by Merger preview & Compressor preview) -->
+  <!-- WORD TO PDF VIEW -->
+  <div id="wordtopdf-view" class="hidden">
+   <header class="hero-header px-6 py-4 flex items-center gap-4">
+    <div class="flex items-center gap-3 flex-1 pl-12">
+     <button onclick="goHome()" class="flex items-center gap-1 hover:opacity-80 transition" title="Back to Home" style="background:none;border:none;padding:0;cursor:pointer;">
+      <img src="/assets/logo-light.png" alt="PockitUp" class="site-logo-sm logo-light" draggable="false" />
+      <img src="/assets/logo-dark.png" alt="PockitUp" class="site-logo-sm logo-dark" draggable="false" />
+     </button>
+     <span class="text-gray-400 dark:text-gray-600">/</span>
+     <span class="font-semibold text-gray-700 dark:text-gray-200 text-lg inline-flex items-center gap-1.5">
+      <i data-lucide="file-text" style="width:18px;height:18px" class="text-blue-600 dark:text-blue-400"></i>
+      Word to PDF
+     </span>
+    </div>
+   </header>
+
+   <main class="max-w-6xl mx-auto p-6 space-y-6">
+    <!-- PAGE TITLE -->
+    <div class="text-center mb-2">
+     <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/50 mb-4">
+      <i data-lucide="file-text" style="width:32px;height:32px" class="text-blue-600 dark:text-blue-400"></i>
+     </div>
+     <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Word to PDF Converter</h1>
+     <p class="text-sm text-gray-500 dark:text-gray-400 max-w-lg mx-auto leading-relaxed">
+      Convert Microsoft Word documents (.docx, .doc) into high-resolution, print-ready PDF files with exact formatting, tables, images, and customizable layout settings.
+     </p>
+    </div>
+
+    <!-- DROP ZONE -->
+    <div id="wordtopdf-drop-zone" class="border-2 border-dashed border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800/40 rounded-2xl p-10 text-center transition-colors cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 shadow-sm">
+     <div class="w-16 h-16 bg-blue-50 dark:bg-blue-950/60 rounded-2xl flex items-center justify-center mx-auto mb-4">
+      <i data-lucide="file-text" class="text-blue-600 dark:text-blue-400" style="width:32px;height:32px"></i>
+     </div>
+     <p class="font-semibold text-base text-gray-700 dark:text-gray-200">Drag &amp; drop your Word document here</p>
+     <p class="text-xs text-gray-400 mt-1">Supports Microsoft Word DOCX and DOC files up to 200 MB</p>
+     <p class="text-xs text-gray-400 mt-1">or</p>
+     <label class="inline-block mt-3 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl cursor-pointer transition font-medium text-sm shadow-sm">
+      Browse Word Document
+      <input type="file" accept=".docx,.doc,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword" class="hidden" id="wordtopdf-file-input">
+     </label>
+    </div>
+
+    <!-- WORKSPACE SECTION -->
+    <div id="wordtopdf-workspace-section" class="hidden space-y-6">
+     <!-- Top file info header -->
+     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+      <div class="flex items-center gap-3.5 min-w-0">
+       <div class="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="file-text" style="width:22px;height:22px" class="text-blue-600 dark:text-blue-400"></i>
+       </div>
+       <div class="min-w-0">
+        <div id="wordtopdf-file-name" class="font-bold text-sm sm:text-base text-gray-800 dark:text-gray-100 truncate max-w-md">document.docx</div>
+        <div id="wordtopdf-file-meta" class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Word Document • 1.4 MB</div>
+       </div>
+      </div>
+      <div class="flex items-center gap-2.5 self-end sm:self-center">
+       <button onclick="wordtopdfResetFile()" class="text-xs px-3.5 py-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 bg-gray-100 dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition font-medium flex items-center gap-1.5">
+        <i data-lucide="refresh-cw" style="width:14px;height:14px"></i> Change Document
+       </button>
+      </div>
+     </div>
+
+     <!-- Two Column Grid: Controls on Left, Document Preview on Right -->
+     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- LEFT SETTINGS (5 Cols) -->
+      <div class="lg:col-span-5 space-y-5">
+       
+       <!-- Page Sizing & Orientation Card -->
+       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm space-y-4">
+        <div class="flex items-center gap-2 border-b border-gray-100 dark:border-gray-700 pb-3">
+         <i data-lucide="file-stack" style="width:16px;height:16px" class="text-blue-600 dark:text-blue-400"></i>
+         <h3 class="font-bold text-sm text-gray-800 dark:text-gray-100">Page Setup &amp; Sizing</h3>
+        </div>
+
+        <div class="space-y-3.5">
+         <div>
+          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Target Page Size</label>
+          <select id="wordtopdf-pagesize" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-800 dark:text-gray-200 outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+           <option value="a4" selected>A4 (210 × 297 mm) — Standard International</option>
+           <option value="letter">Letter (8.5 × 11 in) — Standard US</option>
+           <option value="legal">Legal (8.5 × 14 in)</option>
+           <option value="a3">A3 (297 × 420 mm) — Large Poster</option>
+           <option value="a5">A5 (148 × 210 mm) — Booklet</option>
+           <option value="auto">Auto (Preserve Word Page Ratio)</option>
+          </select>
+         </div>
+
+         <div>
+          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Orientation</label>
+          <div class="grid grid-cols-3 gap-2">
+           <label class="flex items-center justify-center gap-1.5 p-2.5 rounded-xl border border-blue-500 bg-blue-50/50 dark:bg-blue-950/40 cursor-pointer text-xs font-semibold text-blue-700 dark:text-blue-300 wordtopdf-orient-btn" onclick="wordtopdfSelectOrient('auto', this)">
+            <input type="radio" name="wordtopdf-orient" value="auto" checked class="hidden">
+            <span>Auto</span>
+           </label>
+           <label class="flex items-center justify-center gap-1.5 p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 cursor-pointer text-xs font-medium text-gray-700 dark:text-gray-300 hover:border-gray-300 wordtopdf-orient-btn" onclick="wordtopdfSelectOrient('portrait', this)">
+            <input type="radio" name="wordtopdf-orient" value="portrait" class="hidden">
+            <span>Portrait</span>
+           </label>
+           <label class="flex items-center justify-center gap-1.5 p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 cursor-pointer text-xs font-medium text-gray-700 dark:text-gray-300 hover:border-gray-300 wordtopdf-orient-btn" onclick="wordtopdfSelectOrient('landscape', this)">
+            <input type="radio" name="wordtopdf-orient" value="landscape" class="hidden">
+            <span>Landscape</span>
+           </label>
+          </div>
+         </div>
+        </div>
+       </div>
+
+       <!-- Quality & Printing Options Card -->
+       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm space-y-4">
+        <div class="flex items-center gap-2 border-b border-gray-100 dark:border-gray-700 pb-3">
+         <i data-lucide="sliders" style="width:16px;height:16px" class="text-blue-600 dark:text-blue-400"></i>
+         <h3 class="font-bold text-sm text-gray-800 dark:text-gray-100">Quality &amp; Output Settings</h3>
+        </div>
+
+        <div class="space-y-3">
+         <div>
+          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Rendering Resolution</label>
+          <div class="grid grid-cols-2 gap-2">
+           <label class="flex items-center gap-2 p-2.5 rounded-xl border border-blue-500 bg-blue-50/40 dark:bg-blue-950/30 cursor-pointer wordtopdf-dpi-card" onclick="wordtopdfSelectDpi(2, this)">
+            <input type="radio" name="wordtopdf-dpi" value="2" checked class="text-blue-600">
+            <div>
+             <div class="text-xs font-bold text-gray-800 dark:text-gray-200">High Quality</div>
+             <div class="text-[10px] text-gray-400">2x / 150 DPI (Fast)</div>
+            </div>
+           </label>
+           <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 cursor-pointer hover:border-gray-300 wordtopdf-dpi-card" onclick="wordtopdfSelectDpi(3, this)">
+            <input type="radio" name="wordtopdf-dpi" value="3" class="text-blue-600">
+            <div>
+             <div class="text-xs font-bold text-gray-800 dark:text-gray-200">Ultra Sharp</div>
+             <div class="text-[10px] text-gray-400">3x / 300 DPI (Print)</div>
+            </div>
+           </label>
+          </div>
+         </div>
+
+         <!-- Color Mode -->
+         <div>
+          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Color Appearance</label>
+          <div class="flex items-center gap-4 text-xs">
+           <label class="flex items-center gap-1.5 cursor-pointer text-gray-700 dark:text-gray-300 font-medium">
+            <input type="radio" name="wordtopdf-color" value="color" checked class="text-blue-600"> Full Color (Original)
+           </label>
+           <label class="flex items-center gap-1.5 cursor-pointer text-gray-700 dark:text-gray-300 font-medium">
+            <input type="radio" name="wordtopdf-color" value="grayscale" class="text-blue-600"> Grayscale (B&amp;W)
+           </label>
+          </div>
+         </div>
+
+         <!-- Page Range Filter -->
+         <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
+          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Page Range</label>
+          <div class="flex items-center gap-4 text-xs">
+           <label class="flex items-center gap-1.5 cursor-pointer text-gray-700 dark:text-gray-300">
+            <input type="radio" name="wordtopdf-range-mode" value="all" checked onchange="wordtopdfToggleRangeInput(false)" class="text-blue-600"> All Pages
+           </label>
+           <label class="flex items-center gap-1.5 cursor-pointer text-gray-700 dark:text-gray-300">
+            <input type="radio" name="wordtopdf-range-mode" value="custom" onchange="wordtopdfToggleRangeInput(true)" class="text-blue-600"> Custom Range
+           </label>
+          </div>
+          <div id="wordtopdf-custom-range-box" class="hidden mt-2">
+           <input type="text" id="wordtopdf-custom-range-val" placeholder="e.g. 1-3, 5" class="w-full px-3 py-2 text-xs rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+         </div>
+
+        </div>
+       </div>
+
+       <!-- Action Buttons -->
+       <div class="space-y-2.5">
+        <button id="wordtopdf-convert-btn" onclick="wordtopdfProcess()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm text-white shadow-lg transition flex items-center justify-center gap-2 hover:opacity-95 hover:scale-[1.01] active:scale-[0.99]" style="background: linear-gradient(135deg, #2563eb, #1d4ed8);">
+         <i data-lucide="download" style="width:18px;height:18px"></i>
+         <span>Convert &amp; Download PDF</span>
+        </button>
+        <p class="text-[11px] text-gray-400 dark:text-gray-500 text-center flex items-center justify-center gap-1">
+         <i data-lucide="shield-check" style="width:12px;height:12px" class="text-emerald-500"></i> 100% Free &amp; Private • Converted locally in your browser
+        </p>
+       </div>
+
+      </div>
+
+      <!-- RIGHT DOCUMENT PREVIEW (7 Cols) -->
+      <div class="lg:col-span-7 space-y-4">
+       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm space-y-4">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-gray-700 pb-3">
+         <div class="flex items-center gap-2">
+          <i data-lucide="eye" style="width:16px;height:16px" class="text-blue-600 dark:text-blue-400"></i>
+          <h3 class="font-bold text-sm text-gray-800 dark:text-gray-100">Live Document Preview</h3>
+         </div>
+         <!-- Stats Badges -->
+         <div class="flex items-center gap-1.5 flex-wrap text-[11px] text-gray-500 dark:text-gray-400">
+          <span id="wordtopdf-stat-pages" class="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 rounded-md font-semibold">0 Pages</span>
+          <span id="wordtopdf-stat-words" class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-md font-semibold">0 Words</span>
+          <span id="wordtopdf-stat-chars" class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-md font-semibold">0 Chars</span>
+         </div>
+        </div>
+
+        <!-- Rendered Word Container -->
+        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-900/70 p-4 min-h-[420px] max-h-[580px] overflow-y-auto flex flex-col items-center">
+         <div id="wordtopdf-rendered-container" class="w-full flex flex-col items-center gap-6 select-text">
+          <!-- Rendered DOCX pages or semantic HTML injected here -->
+          <div class="text-center py-20 text-gray-400 text-xs">
+           <i data-lucide="file-text" style="width:36px;height:36px" class="mx-auto mb-2 opacity-50"></i>
+           Loading document preview...
+          </div>
+         </div>
+        </div>
+
+        <div class="flex items-center justify-between text-[11px] text-gray-400 dark:text-gray-500 pt-1">
+         <span class="flex items-center gap-1">
+          <i data-lucide="check" style="width:12px;height:12px" class="text-blue-500"></i>
+          Exact page margins &amp; typography preserved
+         </span>
+         <span>High-Resolution Vector Output</span>
+        </div>
+
+       </div>
+      </div>
+
+     </div>
+    </div>
+   </main>
+  </div>
+
+  <!-- WORD TO PDF PROGRESS MODAL -->
+  <div id="wordtopdf-progress-modal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%;">
+   <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-sm text-center">
+    <div class="mb-4">
+     <div class="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/60 mx-auto flex items-center justify-center">
+      <i data-lucide="file-text" style="width:28px;height:28px" class="text-blue-600 dark:text-blue-400 animate-pulse"></i>
+     </div>
+    </div>
+    <h3 id="wordtopdf-modal-title" class="text-gray-800 dark:text-gray-100 font-bold text-lg mb-1">Converting Word to PDF...</h3>
+    <p id="wordtopdf-modal-sub" class="text-xs text-gray-500 dark:text-gray-400 mb-5">Formatting typography, tables and compiling PDF pages</p>
+    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden mb-2">
+     <div id="wordtopdf-progress-bar" class="bg-blue-600 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+    </div>
+    <p id="wordtopdf-progress-text" class="text-xs font-semibold text-gray-600 dark:text-gray-400">0%</p>
+   </div>
+  </div>
+
+  <!-- PASSWORD GENERATOR VIEW -->
+  <div id="passwordgen-view" class="hidden">
+   <header class="hero-header px-6 py-4 flex items-center gap-4">
+    <div class="flex items-center gap-3 flex-1 pl-12">
+     <button onclick="goHome()" class="flex items-center gap-1 hover:opacity-80 transition" title="Back to Home" style="background:none;border:none;padding:0;cursor:pointer;">
+      <img src="/assets/logo-light.png" alt="PockitUp" class="site-logo-sm logo-light" draggable="false" />
+      <img src="/assets/logo-dark.png" alt="PockitUp" class="site-logo-sm logo-dark" draggable="false" />
+     </button>
+     <span class="text-gray-400 dark:text-gray-600">/</span>
+     <span class="font-semibold text-gray-700 dark:text-gray-200 text-lg inline-flex items-center gap-1.5">
+      <i data-lucide="shield" style="width:18px;height:18px" class="text-red-600 dark:text-red-400"></i>
+      Password Generator
+     </span>
+    </div>
+   </header>
+
+   <main class="max-w-4xl mx-auto p-6 space-y-6">
+    <!-- PAGE TITLE -->
+    <div class="text-center mb-2">
+     <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-red-50 dark:bg-red-950/50 mb-4">
+      <i data-lucide="shield" style="width:32px;height:32px" class="text-red-600 dark:text-red-400"></i>
+     </div>
+     <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Secure Password Generator</h1>
+     <p class="text-sm text-gray-500 dark:text-gray-400 max-w-lg mx-auto leading-relaxed">
+      Generate strong, cryptographically secure passwords, memorable Diceware passphrases, and numeric PINs with real-time security entropy and brute-force crack time analysis.
+     </p>
+    </div>
+
+    <!-- MAIN PASSWORD SHOWCASE CARD -->
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+     
+     <!-- Password Display Box -->
+     <div class="relative bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div class="flex-1 min-w-0 overflow-x-auto py-1">
+       <div id="passwordgen-display" class="font-mono text-lg sm:text-2xl font-bold tracking-wider break-all select-all text-gray-800 dark:text-gray-100 min-h-[36px] flex items-center">
+        <!-- Colored characters rendered here -->
+       </div>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
+       <button id="passwordgen-toggle-mask" onclick="passwordgenToggleMask()" class="p-2.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:shadow transition" title="Show / Hide Password">
+        <i id="passwordgen-mask-icon" data-lucide="eye" style="width:18px;height:18px"></i>
+       </button>
+       <button onclick="passwordgenGenerate()" class="p-2.5 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:shadow transition active:rotate-180" title="Regenerate Password (Spacebar)">
+        <i data-lucide="refresh-cw" style="width:18px;height:18px"></i>
+       </button>
+       <button id="passwordgen-copy-btn" onclick="passwordgenCopy()" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5 active:scale-95">
+        <i id="passwordgen-copy-icon" data-lucide="copy" style="width:16px;height:16px"></i>
+        <span id="passwordgen-copy-text">Copy</span>
+       </button>
+      </div>
+     </div>
+
+     <!-- STRENGTH & ENTROPY BAR -->
+     <div class="space-y-2.5">
+      <div class="flex items-center justify-between text-xs">
+       <div class="flex items-center gap-2">
+        <span class="text-gray-500 dark:text-gray-400">Strength:</span>
+        <span id="passwordgen-strength-label" class="font-bold text-emerald-600 dark:text-emerald-400">Strong</span>
+       </div>
+       <div class="flex items-center gap-3 text-gray-400 dark:text-gray-500 font-medium text-[11px]">
+        <span id="passwordgen-entropy-label">85.4 bits entropy</span>
+        <span>•</span>
+        <span id="passwordgen-crack-time">Crack Time: ~3.2 Billion Years</span>
+       </div>
+      </div>
+      
+      <!-- 5-segment strength meter -->
+      <div class="grid grid-cols-5 gap-1.5 h-2 w-full">
+       <div id="passwordgen-seg-1" class="h-full rounded-full bg-emerald-500 transition-colors duration-300"></div>
+       <div id="passwordgen-seg-2" class="h-full rounded-full bg-emerald-500 transition-colors duration-300"></div>
+       <div id="passwordgen-seg-3" class="h-full rounded-full bg-emerald-500 transition-colors duration-300"></div>
+       <div id="passwordgen-seg-4" class="h-full rounded-full bg-emerald-500 transition-colors duration-300"></div>
+       <div id="passwordgen-seg-5" class="h-full rounded-full bg-gray-200 dark:bg-gray-700 transition-colors duration-300"></div>
+      </div>
+
+      <!-- Security Checklist Badges -->
+      <div class="flex items-center gap-2 flex-wrap pt-1 text-[11px]">
+       <span id="passwordgen-chk-len" class="px-2 py-0.5 rounded-md font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+        <i data-lucide="check" style="width:12px;height:12px"></i> 16+ Chars
+       </span>
+       <span id="passwordgen-chk-upper" class="px-2 py-0.5 rounded-md font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+        <i data-lucide="check" style="width:12px;height:12px"></i> Uppercase
+       </span>
+       <span id="passwordgen-chk-lower" class="px-2 py-0.5 rounded-md font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+        <i data-lucide="check" style="width:12px;height:12px"></i> Lowercase
+       </span>
+       <span id="passwordgen-chk-num" class="px-2 py-0.5 rounded-md font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+        <i data-lucide="check" style="width:12px;height:12px"></i> Numbers
+       </span>
+       <span id="passwordgen-chk-sym" class="px-2 py-0.5 rounded-md font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+        <i data-lucide="check" style="width:12px;height:12px"></i> Symbols
+       </span>
+      </div>
+     </div>
+
+     <!-- MODE TABS -->
+     <div class="border-t border-gray-100 dark:border-gray-700 pt-5">
+      <div class="flex items-center gap-2 p-1 bg-gray-100 dark:bg-gray-900 rounded-xl overflow-x-auto">
+       <button id="passwordgen-tab-char" onclick="passwordgenSetMode('char')" class="flex-1 py-2.5 px-4 rounded-lg text-xs font-bold transition whitespace-nowrap bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 shadow-sm">
+        Random Password
+       </button>
+       <button id="passwordgen-tab-phrase" onclick="passwordgenSetMode('phrase')" class="flex-1 py-2.5 px-4 rounded-lg text-xs font-semibold transition whitespace-nowrap text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+        Memorable Passphrase
+       </button>
+       <button id="passwordgen-tab-pin" onclick="passwordgenSetMode('pin')" class="flex-1 py-2.5 px-4 rounded-lg text-xs font-semibold transition whitespace-nowrap text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+        Numeric PIN
+       </button>
+       <button id="passwordgen-tab-bulk" onclick="passwordgenSetMode('bulk')" class="flex-1 py-2.5 px-4 rounded-lg text-xs font-semibold transition whitespace-nowrap text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+        Bulk Generator
+       </button>
+      </div>
+     </div>
+
+     <!-- MODE 1: RANDOM CHARACTER SETTINGS -->
+     <div id="passwordgen-panel-char" class="space-y-5">
+      
+      <!-- Length Slider -->
+      <div class="space-y-2">
+       <div class="flex items-center justify-between text-xs font-bold text-gray-700 dark:text-gray-300">
+        <label>Password Length: <span id="passwordgen-char-len-val" class="text-red-600 dark:text-red-400 font-mono text-sm">16</span></label>
+        <div class="flex items-center gap-1">
+         <button onclick="passwordgenSetLength(8)" class="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-[10px] font-semibold">8</button>
+         <button onclick="passwordgenSetLength(12)" class="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-[10px] font-semibold">12</button>
+         <button onclick="passwordgenSetLength(16)" class="px-2 py-0.5 rounded bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 text-[10px] font-semibold">16</button>
+         <button onclick="passwordgenSetLength(24)" class="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-[10px] font-semibold">24</button>
+         <button onclick="passwordgenSetLength(32)" class="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-[10px] font-semibold">32</button>
+         <button onclick="passwordgenSetLength(64)" class="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-[10px] font-semibold">64</button>
+        </div>
+       </div>
+       <input type="range" id="passwordgen-char-len-slider" min="4" max="128" value="16" oninput="passwordgenOnLengthInput(this.value)" class="w-full accent-red-600 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg cursor-pointer">
+      </div>
+
+      <!-- Character Type Checkboxes -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+       <label class="flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/60 transition">
+        <div class="flex items-center gap-2.5">
+         <span class="w-6 h-6 rounded-md bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 text-xs font-bold flex items-center justify-center font-mono">ABC</span>
+         <div>
+          <div class="text-xs font-bold text-gray-800 dark:text-gray-200">Uppercase Letters</div>
+          <div class="text-[10px] text-gray-400">A, B, C...</div>
+         </div>
+        </div>
+        <input type="checkbox" id="passwordgen-opt-upper" checked onchange="passwordgenGenerate()" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+       </label>
+
+       <label class="flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/60 transition">
+        <div class="flex items-center gap-2.5">
+         <span class="w-6 h-6 rounded-md bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold flex items-center justify-center font-mono">abc</span>
+         <div>
+          <div class="text-xs font-bold text-gray-800 dark:text-gray-200">Lowercase Letters</div>
+          <div class="text-[10px] text-gray-400">a, b, c...</div>
+         </div>
+        </div>
+        <input type="checkbox" id="passwordgen-opt-lower" checked onchange="passwordgenGenerate()" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+       </label>
+
+       <label class="flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/60 transition">
+        <div class="flex items-center gap-2.5">
+         <span class="w-6 h-6 rounded-md bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-xs font-bold flex items-center justify-center font-mono">123</span>
+         <div>
+          <div class="text-xs font-bold text-gray-800 dark:text-gray-200">Numbers &amp; Digits</div>
+          <div class="text-[10px] text-gray-400">0, 1, 2, 3...</div>
+         </div>
+        </div>
+        <input type="checkbox" id="passwordgen-opt-num" checked onchange="passwordgenGenerate()" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+       </label>
+
+       <label class="flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/60 transition">
+        <div class="flex items-center gap-2.5">
+         <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center justify-center font-mono">#$&amp;</span>
+         <div>
+          <div class="text-xs font-bold text-gray-800 dark:text-gray-200">Symbols &amp; Special</div>
+          <div class="text-[10px] text-gray-400">!@#$%^&amp;*()_+-=[]...</div>
+         </div>
+        </div>
+        <input type="checkbox" id="passwordgen-opt-sym" checked onchange="passwordgenGenerate()" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+       </label>
+      </div>
+
+      <!-- Advanced Exclusion Filters -->
+      <div class="p-4 rounded-2xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/20 space-y-2.5">
+       <div class="text-xs font-bold text-gray-700 dark:text-gray-300">Smart Ambiguity Filters</div>
+       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+        <label class="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300">
+         <input type="checkbox" id="passwordgen-opt-exclude-ambiguous" onchange="passwordgenGenerate()" class="w-4 h-4 text-red-600 rounded">
+         <span>Exclude Ambiguous Chars (<code class="text-red-500">0, O, o, 1, l, I, |</code>)</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300">
+         <input type="checkbox" id="passwordgen-opt-exclude-similar-sym" onchange="passwordgenGenerate()" class="w-4 h-4 text-red-600 rounded">
+         <span>Exclude Confusing Brackets (<code class="text-red-500">{}[]()/\'&quot;~,;:</code>)</span>
+        </label>
+       </div>
+      </div>
+
+     </div>
+
+     <!-- MODE 2: MEMORABLE PASSPHRASE SETTINGS -->
+     <div id="passwordgen-panel-phrase" class="hidden space-y-5">
+      <!-- Word Count Slider -->
+      <div class="space-y-2">
+       <div class="flex items-center justify-between text-xs font-bold text-gray-700 dark:text-gray-300">
+        <label>Number of Words: <span id="passwordgen-phrase-count-val" class="text-red-600 dark:text-red-400 font-mono text-sm">4</span></label>
+        <div class="flex items-center gap-1">
+         <button onclick="passwordgenSetWordCount(3)" class="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-[10px] font-semibold">3</button>
+         <button onclick="passwordgenSetWordCount(4)" class="px-2 py-0.5 rounded bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 text-[10px] font-semibold">4</button>
+         <button onclick="passwordgenSetWordCount(5)" class="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-[10px] font-semibold">5</button>
+         <button onclick="passwordgenSetWordCount(6)" class="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-[10px] font-semibold">6</button>
+         <button onclick="passwordgenSetWordCount(8)" class="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-[10px] font-semibold">8</button>
+        </div>
+       </div>
+       <input type="range" id="passwordgen-phrase-slider" min="3" max="10" value="4" oninput="passwordgenOnWordCountInput(this.value)" class="w-full accent-red-600 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg cursor-pointer">
+      </div>
+
+      <!-- Separator & Word Casing -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+       <div>
+        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Word Separator</label>
+        <select id="passwordgen-phrase-sep" onchange="passwordgenGenerate()" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-800 dark:text-gray-200 outline-none focus:ring-2 focus:ring-red-500 font-medium">
+         <option value="-" selected>Hyphen ( - ) e.g. correct-horse</option>
+         <option value="_">Underscore ( _ ) e.g. correct_horse</option>
+         <option value=".">Period / Dot ( . ) e.g. correct.horse</option>
+         <option value=" ">Space ( ) e.g. correct horse</option>
+         <option value="/">Slash ( / ) e.g. correct/horse</option>
+         <option value="#">Hash ( # ) e.g. correct#horse</option>
+         <option value="">None (Concatenated) e.g. correcthorse</option>
+        </select>
+       </div>
+
+       <div>
+        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Word Casing</label>
+        <select id="passwordgen-phrase-case" onchange="passwordgenGenerate()" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-800 dark:text-gray-200 outline-none focus:ring-2 focus:ring-red-500 font-medium">
+         <option value="title" selected>Title Case (Correct-Horse-Battery)</option>
+         <option value="lower">lowercase (correct-horse-battery)</option>
+         <option value="upper">UPPERCASE (CORRECT-HORSE-BATTERY)</option>
+         <option value="camel">camelCase (correctHorseBattery)</option>
+        </select>
+       </div>
+      </div>
+
+      <!-- Extra Passphrase Security Toggles -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
+       <label class="flex items-center gap-2 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 cursor-pointer">
+        <input type="checkbox" id="passwordgen-phrase-add-num" checked onchange="passwordgenGenerate()" class="w-4 h-4 text-red-600 rounded">
+        <span>Include Random Number (e.g. <code class="text-red-500 font-mono">42</code>)</span>
+       </label>
+       <label class="flex items-center gap-2 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 cursor-pointer">
+        <input type="checkbox" id="passwordgen-phrase-add-sym" checked onchange="passwordgenGenerate()" class="w-4 h-4 text-red-600 rounded">
+        <span>Include Random Symbol (e.g. <code class="text-red-500 font-mono">!</code>)</span>
+       </label>
+      </div>
+     </div>
+
+     <!-- MODE 3: NUMERIC PIN SETTINGS -->
+     <div id="passwordgen-panel-pin" class="hidden space-y-5">
+      <div class="space-y-2">
+       <div class="flex items-center justify-between text-xs font-bold text-gray-700 dark:text-gray-300">
+        <label>PIN Digits: <span id="passwordgen-pin-len-val" class="text-red-600 dark:text-red-400 font-mono text-sm">6</span></label>
+        <div class="flex items-center gap-1">
+         <button onclick="passwordgenSetPinLength(4)" class="px-2.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-[10px] font-semibold">4 Digits (ATM)</button>
+         <button onclick="passwordgenSetPinLength(6)" class="px-2.5 py-0.5 rounded bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 text-[10px] font-semibold">6 Digits (OTP)</button>
+         <button onclick="passwordgenSetPinLength(8)" class="px-2.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-[10px] font-semibold">8 Digits</button>
+         <button onclick="passwordgenSetPinLength(10)" class="px-2.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-[10px] font-semibold">10 Digits</button>
+        </div>
+       </div>
+       <input type="range" id="passwordgen-pin-slider" min="4" max="32" value="6" oninput="passwordgenOnPinLengthInput(this.value)" class="w-full accent-red-600 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg cursor-pointer">
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+       <label class="flex items-center gap-2 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 cursor-pointer">
+        <input type="checkbox" id="passwordgen-pin-no-seq" checked onchange="passwordgenGenerate()" class="w-4 h-4 text-red-600 rounded">
+        <span>Disallow Simple Sequences (<code class="text-red-500">1234, 4321</code>)</span>
+       </label>
+       <label class="flex items-center gap-2 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 cursor-pointer">
+        <input type="checkbox" id="passwordgen-pin-no-rep" checked onchange="passwordgenGenerate()" class="w-4 h-4 text-red-600 rounded">
+        <span>Disallow Repeated Digits (<code class="text-red-500">1111, 0000</code>)</span>
+       </label>
+      </div>
+     </div>
+
+     <!-- MODE 4: BULK GENERATOR SETTINGS -->
+     <div id="passwordgen-panel-bulk" class="hidden space-y-4">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+       <div class="flex items-center gap-3">
+        <label class="text-xs font-semibold text-gray-700 dark:text-gray-300">Quantity:</label>
+        <select id="passwordgen-bulk-count" class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs font-bold">
+         <option value="5">5 Passwords</option>
+         <option value="10" selected>10 Passwords</option>
+         <option value="25">25 Passwords</option>
+         <option value="50">50 Passwords</option>
+         <option value="100">100 Passwords</option>
+        </select>
+       </div>
+       <div class="flex items-center gap-2">
+        <button onclick="passwordgenRunBulk()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+         <i data-lucide="refresh-cw" style="width:14px;height:14px"></i> Generate Bulk
+        </button>
+        <button onclick="passwordgenCopyBulk()" class="px-3.5 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+         <i data-lucide="copy" style="width:14px;height:14px"></i> Copy All
+        </button>
+        <button onclick="passwordgenDownloadBulk('txt')" class="px-3.5 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+         <i data-lucide="download" style="width:14px;height:14px"></i> .TXT
+        </button>
+        <button onclick="passwordgenDownloadBulk('csv')" class="px-3.5 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+         <i data-lucide="file-spreadsheet" style="width:14px;height:14px"></i> .CSV
+        </button>
+       </div>
+      </div>
+
+      <textarea id="passwordgen-bulk-output" readonly rows="6" placeholder="Click 'Generate Bulk' to create a batch of passwords..." class="w-full p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 font-mono text-xs text-gray-800 dark:text-gray-200 outline-none focus:ring-2 focus:ring-red-500 resize-y"></textarea>
+     </div>
+
+    </div>
+
+    <!-- SESSION HISTORY DRAWER / PANEL -->
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm space-y-4">
+     <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3">
+      <div class="flex items-center gap-2">
+       <i data-lucide="history" style="width:16px;height:16px" class="text-red-600 dark:text-red-400"></i>
+       <h3 class="font-bold text-sm text-gray-800 dark:text-gray-100">Session Password History</h3>
+       <span id="passwordgen-history-badge" class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-md text-[10px] font-semibold text-gray-500 dark:text-gray-400">0</span>
+      </div>
+      <button onclick="passwordgenClearHistory()" class="text-xs text-gray-400 hover:text-red-500 transition font-medium flex items-center gap-1">
+       <i data-lucide="trash-2" style="width:12px;height:12px"></i> Clear
+      </button>
+     </div>
+
+     <div id="passwordgen-history-list" class="space-y-2 max-h-56 overflow-y-auto">
+      <div class="text-center py-6 text-xs text-gray-400">
+       Generated passwords in this session will appear here for quick recall.
+      </div>
+     </div>
+
+     <div class="flex items-center justify-between text-[11px] text-gray-400 dark:text-gray-500 pt-1">
+      <span class="flex items-center gap-1">
+       <i data-lucide="lock" style="width:12px;height:12px" class="text-emerald-500"></i>
+       Stored only in active memory • Never logged or sent to any server
+      </span>
+      <span>Web Crypto API (CSPRNG)</span>
+     </div>
+    </div>
+
+   </main>
+  </div>
+
+  <!-- COLOR PICKER & PALETTE STUDIO VIEW -->
+  <div id="colorpicker-view" class="hidden">
+   <header class="hero-header px-6 py-4 flex items-center gap-4">
+    <div class="flex items-center gap-3 flex-1 pl-12">
+     <button onclick="goHome()" class="flex items-center gap-1 hover:opacity-80 transition" title="Back to Home" style="background:none;border:none;padding:0;cursor:pointer;">
+      <img src="/assets/logo-light.png" alt="PockitUp" class="site-logo-sm logo-light" draggable="false" />
+      <img src="/assets/logo-dark.png" alt="PockitUp" class="site-logo-sm logo-dark" draggable="false" />
+     </button>
+     <span class="text-gray-400 dark:text-gray-600">/</span>
+     <span class="font-semibold text-gray-700 dark:text-gray-200 text-lg inline-flex items-center gap-1.5">
+      <i data-lucide="palette" style="width:18px;height:18px" class="text-yellow-600 dark:text-yellow-400"></i>
+      Color Picker &amp; Palettes
+     </span>
+    </div>
+   </header>
+
+   <main class="max-w-5xl mx-auto p-6 space-y-6">
+    <!-- PAGE TITLE -->
+    <div class="text-center mb-2">
+     <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-yellow-50 dark:bg-yellow-950/50 mb-4">
+      <i data-lucide="palette" style="width:32px;height:32px" class="text-yellow-600 dark:text-yellow-400"></i>
+     </div>
+     <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Color Picker &amp; Palette Studio</h1>
+     <p class="text-sm text-gray-500 dark:text-gray-400 max-w-lg mx-auto leading-relaxed">
+      Interactive color picker, multi-format conversions (HEX, RGB, HSL, CMYK), color harmonies, UI palettes for Web, Android &amp; iOS, and CSS gradient studio.
+     </p>
+    </div>
+
+    <!-- 4 STUDIO MODE TABS -->
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-1.5 shadow-sm">
+     <div class="flex items-center gap-1 overflow-x-auto">
+      <button id="colorpicker-tab-picker" onclick="colorpickerSetTab('picker')" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition whitespace-nowrap bg-yellow-500 text-white shadow-sm flex items-center justify-center gap-1.5">
+       <i data-lucide="pipette" style="width:14px;height:14px"></i>
+       <span>Color Picker &amp; Converter</span>
+      </button>
+      <button id="colorpicker-tab-palettes" onclick="colorpickerSetTab('palettes')" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold transition whitespace-nowrap text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center justify-center gap-1.5">
+       <i data-lucide="layout-grid" style="width:14px;height:14px"></i>
+       <span>UI Palettes (Web / App)</span>
+      </button>
+      <button id="colorpicker-tab-gradients" onclick="colorpickerSetTab('gradients')" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold transition whitespace-nowrap text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center justify-center gap-1.5">
+       <i data-lucide="sparkles" style="width:14px;height:14px"></i>
+       <span>Gradient Studio</span>
+      </button>
+      <button id="colorpicker-tab-extractor" onclick="colorpickerSetTab('extractor')" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold transition whitespace-nowrap text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center justify-center gap-1.5">
+       <i data-lucide="image" style="width:14px;height:14px"></i>
+       <span>Image Color Extractor</span>
+      </button>
+     </div>
+    </div>
+
+    <!-- ================= TAB 1: COLOR PICKER & CONVERTER ================= -->
+    <div id="colorpicker-panel-picker" class="space-y-6">
+     
+     <!-- Top Picker Grid -->
+     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Left: Visual Canvas & Sliders (6 Cols) -->
+      <div class="lg:col-span-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm space-y-5">
+       <div class="flex items-center justify-between">
+        <h3 class="font-bold text-sm text-gray-800 dark:text-gray-100 flex items-center gap-2">
+         <i data-lucide="sliders" style="width:16px;height:16px" class="text-yellow-600 dark:text-yellow-400"></i>
+         Color Spectrum
+        </h3>
+        <button id="colorpicker-eyedropper-btn" onclick="colorpickerUseEyeDropper()" class="px-3 py-1.5 bg-yellow-50 dark:bg-yellow-950/50 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-yellow-200 dark:border-yellow-800">
+         <i data-lucide="pipette" style="width:13px;height:13px"></i> Eyedropper
+        </button>
+       </div>
+
+       <!-- Spectrum Box -->
+       <div class="relative w-full h-52 rounded-2xl overflow-hidden cursor-crosshair border border-gray-200 dark:border-gray-700" id="colorpicker-spectrum-box">
+        <canvas id="colorpicker-spectrum-canvas" class="w-full h-full block"></canvas>
+        <div id="colorpicker-spectrum-handle" class="absolute w-4 h-4 rounded-full border-2 border-white shadow-md pointer-events-none -translate-x-1/2 -translate-y-1/2" style="left: 50%; top: 50%; background: #3b82f6;"></div>
+       </div>
+
+       <!-- Hue Slider -->
+       <div class="space-y-1.5">
+        <div class="flex justify-between text-[11px] font-semibold text-gray-500">
+         <span>Hue</span>
+         <span id="colorpicker-hue-val">217°</span>
+        </div>
+        <input type="range" id="colorpicker-hue-slider" min="0" max="360" value="217" oninput="colorpickerOnHueInput(this.value)" class="w-full h-3 rounded-lg appearance-none cursor-pointer" style="background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);">
+       </div>
+
+       <!-- Alpha Slider -->
+       <div class="space-y-1.5">
+        <div class="flex justify-between text-[11px] font-semibold text-gray-500">
+         <span>Opacity / Alpha</span>
+         <span id="colorpicker-alpha-val">100%</span>
+        </div>
+        <input type="range" id="colorpicker-alpha-slider" min="0" max="100" value="100" oninput="colorpickerOnAlphaInput(this.value)" class="w-full h-3 rounded-lg appearance-none cursor-pointer" style="background: linear-gradient(to right, rgba(59,130,246,0), rgba(59,130,246,1));">
+       </div>
+
+       <!-- Native Color Input Shortcut -->
+       <div class="flex items-center gap-3 pt-2">
+        <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">Quick Palette Color:</label>
+        <input type="color" id="colorpicker-native-input" value="#3b82f6" onchange="colorpickerOnNativeChange(this.value)" class="w-8 h-8 rounded-lg cursor-pointer border-0 p-0 bg-transparent">
+        <span class="text-xs font-mono font-bold text-gray-700 dark:text-gray-300" id="colorpicker-native-hex">#3B82F6</span>
+       </div>
+      </div>
+
+      <!-- Right: Color Swatch & All Formats (6 Cols) -->
+      <div class="lg:col-span-6 space-y-5">
+       
+       <!-- Swatch Showcase Card -->
+       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+         <h3 class="font-bold text-sm text-gray-800 dark:text-gray-100 flex items-center gap-2">
+          <i data-lucide="eye" style="width:16px;height:16px" class="text-yellow-600 dark:text-yellow-400"></i>
+          Live Swatch &amp; Contrast
+         </h3>
+         <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-400">Preview:</span>
+          <button onclick="colorpickerToggleSwatchMode('light')" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-gray-100 dark:bg-gray-700 hover:bg-gray-200">Light</button>
+          <button onclick="colorpickerToggleSwatchMode('dark')" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-gray-900 text-white hover:bg-black">Dark</button>
+         </div>
+        </div>
+
+        <!-- Color Swatch Box -->
+        <div id="colorpicker-swatch-box" class="h-28 rounded-2xl shadow-inner flex items-center justify-center p-4 transition-all duration-200" style="background-color: #3b82f6;">
+         <div class="text-center font-bold text-lg sm:text-xl font-mono tracking-wider drop-shadow" id="colorpicker-swatch-text" style="color: #ffffff;">
+          #3B82F6
+         </div>
+        </div>
+
+        <!-- WCAG Contrast Matrix -->
+        <div class="grid grid-cols-2 gap-3 pt-1">
+         <div class="p-3 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 flex items-center justify-between">
+          <div>
+           <div class="text-[10px] text-gray-400 font-semibold">Contrast vs White (#FFF)</div>
+           <div class="text-sm font-bold text-gray-800 dark:text-gray-200" id="colorpicker-contrast-white-score">3.68:1</div>
+          </div>
+          <span id="colorpicker-contrast-white-badge" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">AA Large</span>
+         </div>
+
+         <div class="p-3 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 flex items-center justify-between">
+          <div>
+           <div class="text-[10px] text-gray-400 font-semibold">Contrast vs Black (#000)</div>
+           <div class="text-sm font-bold text-gray-800 dark:text-gray-200" id="colorpicker-contrast-black-score">5.71:1</div>
+          </div>
+          <span id="colorpicker-contrast-black-badge" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">AAA Pass</span>
+         </div>
+        </div>
+       </div>
+
+       <!-- Formats Conversion Grid -->
+       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm space-y-3">
+        <h3 class="font-bold text-sm text-gray-800 dark:text-gray-100 flex items-center gap-2 mb-2">
+         <i data-lucide="code" style="width:16px;height:16px" class="text-yellow-600 dark:text-yellow-400"></i>
+         Export Formats (Click to Copy)
+        </h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs font-mono">
+         <!-- HEX -->
+         <div class="flex items-center justify-between p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40">
+          <div class="min-w-0 flex-1 mr-2">
+           <span class="text-[10px] text-gray-400 font-sans block font-semibold">HEX</span>
+           <span id="colorpicker-val-hex" class="text-gray-800 dark:text-gray-100 truncate block">#3B82F6</span>
+          </div>
+          <button onclick="colorpickerCopyText('colorpicker-val-hex', this)" class="p-1.5 text-gray-400 hover:text-yellow-600 rounded-lg transition" title="Copy HEX">
+           <i data-lucide="copy" style="width:14px;height:14px"></i>
+          </button>
+         </div>
+
+         <!-- RGB -->
+         <div class="flex items-center justify-between p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40">
+          <div class="min-w-0 flex-1 mr-2">
+           <span class="text-[10px] text-gray-400 font-sans block font-semibold">RGB</span>
+           <span id="colorpicker-val-rgb" class="text-gray-800 dark:text-gray-100 truncate block">rgb(59, 130, 246)</span>
+          </div>
+          <button onclick="colorpickerCopyText('colorpicker-val-rgb', this)" class="p-1.5 text-gray-400 hover:text-yellow-600 rounded-lg transition" title="Copy RGB">
+           <i data-lucide="copy" style="width:14px;height:14px"></i>
+          </button>
+         </div>
+
+         <!-- RGBA -->
+         <div class="flex items-center justify-between p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40">
+          <div class="min-w-0 flex-1 mr-2">
+           <span class="text-[10px] text-gray-400 font-sans block font-semibold">RGBA</span>
+           <span id="colorpicker-val-rgba" class="text-gray-800 dark:text-gray-100 truncate block">rgba(59, 130, 246, 1)</span>
+          </div>
+          <button onclick="colorpickerCopyText('colorpicker-val-rgba', this)" class="p-1.5 text-gray-400 hover:text-yellow-600 rounded-lg transition" title="Copy RGBA">
+           <i data-lucide="copy" style="width:14px;height:14px"></i>
+          </button>
+         </div>
+
+         <!-- HSL -->
+         <div class="flex items-center justify-between p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40">
+          <div class="min-w-0 flex-1 mr-2">
+           <span class="text-[10px] text-gray-400 font-sans block font-semibold">HSL</span>
+           <span id="colorpicker-val-hsl" class="text-gray-800 dark:text-gray-100 truncate block">hsl(217, 91%, 60%)</span>
+          </div>
+          <button onclick="colorpickerCopyText('colorpicker-val-hsl', this)" class="p-1.5 text-gray-400 hover:text-yellow-600 rounded-lg transition" title="Copy HSL">
+           <i data-lucide="copy" style="width:14px;height:14px"></i>
+          </button>
+         </div>
+
+         <!-- HSV -->
+         <div class="flex items-center justify-between p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40">
+          <div class="min-w-0 flex-1 mr-2">
+           <span class="text-[10px] text-gray-400 font-sans block font-semibold">HSV</span>
+           <span id="colorpicker-val-hsv" class="text-gray-800 dark:text-gray-100 truncate block">hsv(217, 76%, 96%)</span>
+          </div>
+          <button onclick="colorpickerCopyText('colorpicker-val-hsv', this)" class="p-1.5 text-gray-400 hover:text-yellow-600 rounded-lg transition" title="Copy HSV">
+           <i data-lucide="copy" style="width:14px;height:14px"></i>
+          </button>
+         </div>
+
+         <!-- CMYK -->
+         <div class="flex items-center justify-between p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40">
+          <div class="min-w-0 flex-1 mr-2">
+           <span class="text-[10px] text-gray-400 font-sans block font-semibold">CMYK (Print)</span>
+           <span id="colorpicker-val-cmyk" class="text-gray-800 dark:text-gray-100 truncate block">cmyk(76%, 47%, 0%, 4%)</span>
+          </div>
+          <button onclick="colorpickerCopyText('colorpicker-val-cmyk', this)" class="p-1.5 text-gray-400 hover:text-yellow-600 rounded-lg transition" title="Copy CMYK">
+           <i data-lucide="copy" style="width:14px;height:14px"></i>
+          </button>
+         </div>
+
+         <!-- CSS Variable -->
+         <div class="flex items-center justify-between p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 sm:col-span-2">
+          <div class="min-w-0 flex-1 mr-2">
+           <span class="text-[10px] text-gray-400 font-sans block font-semibold">CSS Variable</span>
+           <span id="colorpicker-val-css" class="text-gray-800 dark:text-gray-100 truncate block">--color-primary: #3b82f6;</span>
+          </div>
+          <button onclick="colorpickerCopyText('colorpicker-val-css', this)" class="p-1.5 text-gray-400 hover:text-yellow-600 rounded-lg transition" title="Copy CSS Variable">
+           <i data-lucide="copy" style="width:14px;height:14px"></i>
+          </button>
+         </div>
+        </div>
+       </div>
+
+      </div>
+     </div>
+
+     <!-- Harmonies & Tints/Shades Card -->
+     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm space-y-6">
+      
+      <!-- Harmonies -->
+      <div class="space-y-3">
+       <div class="flex items-center justify-between">
+        <h3 class="font-bold text-sm text-gray-800 dark:text-gray-100 flex items-center gap-2">
+         <i data-lucide="sparkles" style="width:16px;height:16px" class="text-yellow-600 dark:text-yellow-400"></i>
+         Color Harmonies &amp; Combinations (Click swatch to select)
+        </h3>
+       </div>
+
+       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="colorpicker-harmonies-container">
+        <!-- Injected via JavaScript -->
+       </div>
+      </div>
+
+      <!-- Tints & Shades -->
+      <div class="space-y-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+       <h3 class="font-bold text-sm text-gray-800 dark:text-gray-100">Tints &amp; Shades Scale</h3>
+       <div class="flex rounded-xl overflow-hidden h-12 shadow-sm border border-gray-200 dark:border-gray-700" id="colorpicker-tints-shades-container">
+        <!-- 10 swatches injected via JavaScript -->
+       </div>
+      </div>
+
+     </div>
+
+    </div>
+
+    <!-- ================= TAB 2: UI PALETTES (WEB / ANDROID / IOS) ================= -->
+    <div id="colorpicker-panel-palettes" class="hidden space-y-6">
+     
+     <!-- Category Subtabs -->
+     <div class="flex items-center gap-2 overflow-x-auto pb-1">
+      <button id="colorpicker-cat-web" onclick="colorpickerSetPaletteCategory('web')" class="py-2 px-4 rounded-xl text-xs font-bold bg-yellow-500 text-white shadow-sm transition whitespace-nowrap">
+       🌐 Websites &amp; SaaS (Tailwind UI)
+      </button>
+      <button id="colorpicker-cat-android" onclick="colorpickerSetPaletteCategory('android')" class="py-2 px-4 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-gray-800 transition whitespace-nowrap">
+       🤖 Android Apps (Material 3)
+      </button>
+      <button id="colorpicker-cat-ios" onclick="colorpickerSetPaletteCategory('ios')" class="py-2 px-4 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-gray-800 transition whitespace-nowrap">
+       🍎 iOS Apps (Cupertino / HIG)
+      </button>
+      <button id="colorpicker-cat-aesthetic" onclick="colorpickerSetPaletteCategory('aesthetic')" class="py-2 px-4 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-gray-800 transition whitespace-nowrap">
+       🎨 Aesthetic &amp; Themes
+      </button>
+     </div>
+
+     <!-- Interactive Live Mockup Preview Box -->
+     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm space-y-4">
+      <div class="flex items-center justify-between">
+       <h3 class="font-bold text-sm text-gray-800 dark:text-gray-100 flex items-center gap-2">
+        <i data-lucide="smartphone" style="width:16px;height:16px" class="text-yellow-600 dark:text-yellow-400"></i>
+        Live UI Component Mockup (Previewing Active Palette)
+       </h3>
+       <span id="colorpicker-mockup-palette-name" class="text-xs font-bold text-yellow-600 dark:text-yellow-400">Modern SaaS Indigo</span>
+      </div>
+
+      <!-- Live Mockup Board -->
+      <div id="colorpicker-mockup-board" class="p-6 rounded-2xl border transition-all duration-300 space-y-4" style="background-color: #f8fafc; border-color: #e2e8f0;">
+       <div class="flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+         <div id="colorpicker-mockup-avatar" class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs text-white" style="background-color: #4f46e5;">JS</div>
+         <div>
+          <div id="colorpicker-mockup-title" class="text-sm font-bold" style="color: #0f172a;">Application Dashboard</div>
+          <div class="text-[11px] text-gray-400">Previewing live color harmony</div>
+         </div>
+        </div>
+        <span id="colorpicker-mockup-badge" class="px-2.5 py-1 rounded-full text-xs font-bold" style="background-color: #e0e7ff; color: #4338ca;">Active Plan</span>
+       </div>
+
+       <div class="p-4 rounded-xl shadow-sm border space-y-3" id="colorpicker-mockup-card" style="background-color: #ffffff; border-color: #e2e8f0;">
+        <p id="colorpicker-mockup-body" class="text-xs leading-relaxed" style="color: #334155;">
+         Explore how buttons, cards, tags, and surface backgrounds dynamically interact with your chosen palette.
+        </p>
+        <div class="flex items-center gap-2.5 flex-wrap">
+         <button id="colorpicker-mockup-btn-pri" class="px-4 py-2 rounded-xl text-xs font-bold text-white shadow-sm transition active:scale-95" style="background-color: #4f46e5;">
+          Primary Button
+         </button>
+         <button id="colorpicker-mockup-btn-sec" class="px-4 py-2 rounded-xl text-xs font-bold border transition active:scale-95" style="background-color: #f1f5f9; color: #475569; border-color: #cbd5e1;">
+          Secondary Action
+         </button>
+         <span id="colorpicker-mockup-accent" class="text-xs font-bold flex items-center gap-1" style="color: #f59e0b;">
+          ★ 4.9 Rating Accent
+         </span>
+        </div>
+       </div>
+      </div>
+     </div>
+
+     <!-- Palettes Grid Header & Toolbar -->
+     <div class="flex items-center justify-between flex-wrap gap-3 pt-2">
+      <div class="flex items-center gap-2">
+       <span class="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+        <i data-lucide="layers" style="width:15px;height:15px" class="text-yellow-600 dark:text-yellow-400"></i>
+        Available Palettes
+       </span>
+       <span id="colorpicker-palettes-count-badge" class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-yellow-100 dark:bg-yellow-950/60 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800">
+        Showing 14 Palettes
+       </span>
+      </div>
+
+      <div class="flex items-center gap-2">
+       <button onclick="colorpickerGenerateCustomPalette()" class="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 active:scale-95">
+        <i data-lucide="sparkles" style="width:13px;height:13px"></i>
+        <span>Generate New Palette</span>
+       </button>
+      </div>
+     </div>
+
+     <!-- Palettes List Container -->
+     <div id="colorpicker-palettes-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <!-- Palettes injected via JavaScript -->
+     </div>
+
+     <!-- Explore More Palettes Action Bar -->
+     <div class="bg-gradient-to-b from-gray-50/50 to-gray-100/60 dark:from-gray-900/30 dark:to-gray-900/60 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 text-center space-y-3">
+      <div>
+       <h4 class="font-bold text-sm text-gray-800 dark:text-gray-200">Want to discover more color combinations?</h4>
+       <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Explore additional professionally harmonized palettes optimized for this platform.</p>
+      </div>
+      <div class="flex items-center justify-center gap-3 flex-wrap pt-1">
+       <button id="colorpicker-explore-more-btn" onclick="colorpickerExploreMorePalettes()" class="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md transition flex items-center gap-2 active:scale-95">
+        <i data-lucide="sparkles" style="width:16px;height:16px"></i>
+        <span>Explore More Palettes (+6)</span>
+       </button>
+       <button onclick="colorpickerGenerateCustomPalette()" class="px-5 py-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 active:scale-95">
+        <i data-lucide="shuffle" style="width:16px;height:16px"></i>
+        <span>Generate Custom</span>
+       </button>
+      </div>
+     </div>
+    </div>
+
+    <!-- ================= TAB 3: GRADIENT STUDIO ================= -->
+    <div id="colorpicker-panel-gradients" class="hidden space-y-6">
+     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Gradient Controls (5 Cols) -->
+      <div class="lg:col-span-5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm space-y-5">
+       <h3 class="font-bold text-sm text-gray-800 dark:text-gray-100 flex items-center gap-2">
+        <i data-lucide="sliders" style="width:16px;height:16px" class="text-yellow-600 dark:text-yellow-400"></i>
+        Gradient Controls
+       </h3>
+
+       <!-- Type Switcher -->
+       <div class="space-y-1.5">
+        <label class="text-xs font-semibold text-gray-700 dark:text-gray-300">Gradient Type</label>
+        <div class="grid grid-cols-2 gap-2">
+         <button id="colorpicker-grad-type-linear" onclick="colorpickerSetGradientType('linear')" class="py-2 px-3 rounded-xl border border-yellow-500 bg-yellow-50 dark:bg-yellow-950/40 text-yellow-700 dark:text-yellow-300 text-xs font-bold">
+          Linear Gradient
+         </button>
+         <button id="colorpicker-grad-type-radial" onclick="colorpickerSetGradientType('radial')" class="py-2 px-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300 text-xs font-semibold">
+          Radial Gradient
+         </button>
+        </div>
+       </div>
+
+       <!-- Angle (Linear only) -->
+       <div id="colorpicker-grad-angle-box" class="space-y-2">
+        <div class="flex items-center justify-between text-xs font-bold text-gray-700 dark:text-gray-300">
+         <label>Angle: <span id="colorpicker-grad-angle-val" class="text-yellow-600 font-mono">135°</span></label>
+         <div class="flex items-center gap-1">
+          <button onclick="colorpickerSetGradAngle(0)" class="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-[10px] font-semibold">0°</button>
+          <button onclick="colorpickerSetGradAngle(90)" class="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-[10px] font-semibold">90°</button>
+          <button onclick="colorpickerSetGradAngle(135)" class="px-2 py-0.5 rounded bg-yellow-100 dark:bg-yellow-950/60 text-yellow-700 dark:text-yellow-300 text-[10px] font-semibold">135°</button>
+          <button onclick="colorpickerSetGradAngle(180)" class="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-[10px] font-semibold">180°</button>
+         </div>
+        </div>
+        <input type="range" id="colorpicker-grad-angle-slider" min="0" max="360" value="135" oninput="colorpickerOnGradAngleInput(this.value)" class="w-full accent-yellow-500 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg cursor-pointer">
+       </div>
+
+       <!-- Color Stops Editor -->
+       <div class="space-y-3 pt-2">
+        <div class="flex items-center justify-between">
+         <label class="text-xs font-bold text-gray-700 dark:text-gray-300">Color Stops</label>
+         <button onclick="colorpickerAddGradientStop()" class="text-xs text-yellow-600 dark:text-yellow-400 hover:underline font-bold flex items-center gap-1">
+          <i data-lucide="plus" style="width:12px;height:12px"></i> Add Stop
+         </button>
+        </div>
+
+        <div id="colorpicker-grad-stops-list" class="space-y-2 max-h-48 overflow-y-auto">
+         <!-- Stops injected via JavaScript -->
+        </div>
+       </div>
+
+      </div>
+
+      <!-- Gradient Preview & Code (7 Cols) -->
+      <div class="lg:col-span-7 space-y-5">
+       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+         <h3 class="font-bold text-sm text-gray-800 dark:text-gray-100">Live Gradient Preview</h3>
+         <button onclick="colorpickerDownloadGradientPng()" class="px-3.5 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+          <i data-lucide="download" style="width:13px;height:13px"></i> Download PNG
+         </button>
+        </div>
+
+        <!-- Live Gradient Showcase -->
+        <div id="colorpicker-grad-preview" class="h-60 rounded-2xl shadow-inner flex flex-col items-center justify-center p-6 transition-all duration-200 relative overflow-hidden" style="background: linear-gradient(135deg, #3b82f6 0%, #ec4899 100%);">
+         <div class="bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl p-4 text-white text-center shadow-lg max-w-xs">
+          <div class="font-extrabold text-base tracking-wide">PockitUp Gradient</div>
+          <div class="text-[11px] opacity-90 mt-1">High-definition CSS visual render</div>
+         </div>
+        </div>
+
+        <!-- Generated CSS Code Box -->
+        <div class="space-y-1.5">
+         <div class="flex items-center justify-between text-xs text-gray-500 font-semibold">
+          <span>CSS Output</span>
+          <button onclick="colorpickerCopyText('colorpicker-grad-css-code', this)" class="text-yellow-600 hover:underline font-bold flex items-center gap-1">
+           <i data-lucide="copy" style="width:12px;height:12px"></i> Copy CSS
+          </button>
+         </div>
+         <pre id="colorpicker-grad-css-code" class="p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 font-mono text-xs text-gray-800 dark:text-gray-200 overflow-x-auto whitespace-pre-wrap select-all">background: linear-gradient(135deg, #3b82f6 0%, #ec4899 100%);</pre>
+        </div>
+       </div>
+      </div>
+
+     </div>
+
+     <!-- Trending Gradient Presets Library -->
+     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm space-y-4">
+      <h3 class="font-bold text-sm text-gray-800 dark:text-gray-100 flex items-center gap-2">
+       <i data-lucide="sparkles" style="width:16px;height:16px" class="text-yellow-600 dark:text-yellow-400"></i>
+       Curated Gradient Presets (Click to Apply)
+      </h3>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3" id="colorpicker-gradient-presets-grid">
+       <!-- Presets injected via JavaScript -->
+      </div>
+     </div>
+
+    </div>
+
+    <!-- ================= TAB 4: IMAGE COLOR EXTRACTOR ================= -->
+    <div id="colorpicker-panel-extractor" class="hidden space-y-6">
+     
+     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+      <!-- Drop Zone -->
+      <div id="colorpicker-img-drop-zone" class="border-2 border-dashed border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 rounded-2xl p-8 text-center cursor-pointer hover:border-yellow-400 dark:hover:border-yellow-500 transition shadow-sm">
+       <div class="w-14 h-14 bg-yellow-50 dark:bg-yellow-950/60 rounded-2xl flex items-center justify-center mx-auto mb-3">
+        <i data-lucide="image" class="text-yellow-600 dark:text-yellow-400" style="width:28px;height:28px"></i>
+       </div>
+       <p class="font-semibold text-sm text-gray-800 dark:text-gray-200">Drag &amp; drop any image to extract its color palette</p>
+       <p class="text-xs text-gray-400 mt-1">Supports PNG, JPG, WEBP, GIF</p>
+       <label class="inline-block mt-3 px-5 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl cursor-pointer transition font-bold text-xs shadow-sm">
+        Browse Image
+        <input type="file" accept="image/*" class="hidden" id="colorpicker-img-file-input" onchange="colorpickerHandleImageUpload(event)">
+       </label>
+      </div>
+
+      <!-- Extracted Results Area -->
+      <div id="colorpicker-img-results" class="hidden space-y-6">
+       <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+        
+        <!-- Image Preview (5 Cols) -->
+        <div class="md:col-span-5 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 max-h-72 flex items-center justify-center">
+         <img id="colorpicker-extracted-img-preview" class="max-h-72 w-full object-contain" alt="Uploaded Preview">
+        </div>
+
+        <!-- Extracted Swatches (7 Cols) -->
+        <div class="md:col-span-7 space-y-4">
+         <div class="flex items-center justify-between">
+          <h4 class="font-bold text-sm text-gray-800 dark:text-gray-100">Extracted Dominant Palette</h4>
+          <button onclick="colorpickerExportExtractedPalette()" class="px-3 py-1.5 bg-yellow-50 dark:bg-yellow-950/50 text-yellow-700 dark:text-yellow-300 rounded-xl text-xs font-bold border border-yellow-200 dark:border-yellow-800 transition">
+           Copy All HEX
+          </button>
+         </div>
+
+         <div id="colorpicker-extracted-swatches-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 font-mono text-xs">
+          <!-- Swatches injected via JavaScript -->
+         </div>
+        </div>
+
+       </div>
+      </div>
+     </div>
+    </div>
+   </main>
+  </div>
+
+  <!-- ZIP ARCHIVER & EXTRACTOR STUDIO VIEW -->
+  <div id="ziparchiver-view" class="hidden">
+   <header class="hero-header px-6 py-4 flex items-center gap-4">
+    <div class="flex items-center gap-3 flex-1 pl-12">
+     <button onclick="goHome()" class="flex items-center gap-1 hover:opacity-80 transition" title="Back to Home" style="background:none;border:none;padding:0;cursor:pointer;">
+      <img src="/assets/logo-light.png" alt="PockitUp" class="site-logo-sm logo-light" draggable="false" />
+      <img src="/assets/logo-dark.png" alt="PockitUp" class="site-logo-sm logo-dark" draggable="false" />
+     </button>
+     <span class="text-gray-400 dark:text-gray-600">/</span>
+     <span class="font-semibold text-gray-700 dark:text-gray-200 text-lg inline-flex items-center gap-1.5">
+      <i data-lucide="archive" style="width:18px;height:18px" class="text-blue-600 dark:text-blue-400"></i>
+      ZIP Archiver &amp; Extractor Studio
+     </span>
+    </div>
+   </header>
+
+   <main class="max-w-5xl mx-auto p-6 space-y-6">
+    <!-- PAGE TITLE -->
+    <div class="text-center mb-2">
+     <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/50 mb-4 text-blue-600 dark:text-blue-400 shadow-sm border border-blue-100 dark:border-blue-900/50">
+      <i data-lucide="archive" style="width:28px;height:28px"></i>
+     </div>
+     <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">ZIP Archiver &amp; Extractor Studio</h1>
+     <p class="text-sm text-gray-500 dark:text-gray-400 max-w-lg mx-auto leading-relaxed">
+      High-performance client-side ZIP compression, inspection, and extraction. Preserve folder hierarchies, preview archived files, and customize compression levels.
+     </p>
+    </div>
+
+    <!-- MAIN STUDIO CARD -->
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm space-y-6">
+
+     <!-- STUDIO MODE NAVIGATION TABS -->
+     <div class="flex items-center justify-center gap-2 p-1.5 bg-gray-100 dark:bg-gray-900/80 rounded-2xl border border-gray-200 dark:border-gray-800 max-w-md mx-auto">
+      <button id="ziparchiver-tab-create" onclick="ziparchiverSetTab('create')" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition whitespace-nowrap bg-blue-600 text-white shadow-sm flex items-center justify-center gap-1.5">
+       <i data-lucide="package-plus" style="width:15px;height:15px"></i>
+       <span>Create Archive</span>
+      </button>
+      <button id="ziparchiver-tab-extract" onclick="ziparchiverSetTab('extract')" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold transition whitespace-nowrap text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center justify-center gap-1.5">
+       <i data-lucide="folder-search" style="width:15px;height:15px"></i>
+       <span>Inspect &amp; Extract</span>
+      </button>
+     </div>
+
+     <!-- ===================== PANEL 1: CREATE ZIP ARCHIVE ===================== -->
+     <div id="ziparchiver-panel-create" class="space-y-6">
+
+      <!-- Multi-File & Folder Dropzone -->
+      <div id="ziparchiver-dropzone" ondragover="ziparchiverOnDragOver(event)" ondragleave="ziparchiverOnDragLeave(event)" ondrop="ziparchiverOnDrop(event)" class="border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 rounded-3xl p-8 text-center transition cursor-pointer bg-gray-50/50 dark:bg-gray-900/40">
+       <div class="flex flex-col items-center justify-center gap-3">
+        <div class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-inner">
+         <i data-lucide="upload-cloud" style="width:32px;height:32px"></i>
+        </div>
+        <div>
+         <h3 class="text-base font-bold text-gray-800 dark:text-gray-100">Drag &amp; Drop Files or Entire Folders</h3>
+         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-sm mx-auto">
+          Add any file types: documents, photos, audio, video, code, or whole directory trees.
+         </p>
+        </div>
+
+        <div class="flex items-center gap-3 flex-wrap justify-center mt-2">
+         <!-- Add Files Button -->
+         <label class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95">
+          <i data-lucide="file-plus" style="width:14px;height:14px"></i>
+          <span>Add Files</span>
+          <input type="file" multiple class="hidden" id="ziparchiver-files-input" onchange="ziparchiverHandleFilesSelect(event)">
+         </label>
+
+         <!-- Add Folder Button -->
+         <label class="px-4 py-2 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95">
+          <i data-lucide="folder-plus" style="width:14px;height:14px" class="text-blue-500"></i>
+          <span>Add Folder</span>
+          <input type="file" webkitdirectory directory multiple class="hidden" id="ziparchiver-folder-input" onchange="ziparchiverHandleFolderSelect(event)">
+         </label>
+        </div>
+       </div>
+      </div>
+
+      <!-- File Queue Section -->
+      <div id="ziparchiver-queue-section" class="hidden space-y-4">
+       <!-- Queue Header & Stats -->
+       <div class="flex items-center justify-between flex-wrap gap-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center gap-2 flex-wrap">
+         <span class="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+          <i data-lucide="layers" style="width:15px;height:15px" class="text-blue-500"></i>
+          Files in Queue
+         </span>
+         <span id="ziparchiver-queue-count-badge" class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+          0 Files
+         </span>
+         <span id="ziparchiver-queue-size-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+          0 KB
+         </span>
+         <span id="ziparchiver-queue-folders-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hidden">
+          0 Folders
+         </span>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap text-xs">
+         <!-- Sort Dropdown -->
+         <select id="ziparchiver-sort-select" onchange="ziparchiverSortQueue(this.value)" class="py-1.5 px-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl font-semibold text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="default">Default Order</option>
+          <option value="name-asc">Name (A-Z)</option>
+          <option value="name-desc">Name (Z-A)</option>
+          <option value="size-desc">Size (Largest First)</option>
+          <option value="size-asc">Size (Smallest First)</option>
+          <option value="type">File Type</option>
+         </select>
+
+         <!-- Clear All Button -->
+         <button onclick="ziparchiverClearQueue()" class="px-3 py-1.5 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl font-bold transition flex items-center gap-1">
+          <i data-lucide="trash-2" style="width:13px;height:13px"></i>
+          <span>Clear All</span>
+         </button>
+        </div>
+       </div>
+
+       <!-- Queue Files List Container -->
+       <div id="ziparchiver-file-list" class="space-y-2 max-h-80 overflow-y-auto pr-1">
+        <!-- Injected via JavaScript -->
+       </div>
+      </div>
+
+      <!-- Archive Settings & Options Panel -->
+      <div class="bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 space-y-5">
+       <div class="flex items-center gap-2 text-sm font-bold text-gray-800 dark:text-gray-100">
+        <i data-lucide="sliders" style="width:16px;height:16px" class="text-blue-500"></i>
+        <span>Archive Settings &amp; Compression</span>
+       </div>
+
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Output Name & Token Helper -->
+        <div class="space-y-2">
+         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
+          Archive Filename
+         </label>
+         <div class="flex items-center gap-2">
+          <div class="relative flex-1">
+           <input type="text" id="ziparchiver-out-filename" value="archive" class="w-full py-2.5 pl-3.5 pr-14 text-xs font-medium rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="archive">
+           <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 font-mono">.zip</span>
+          </div>
+         </div>
+         <!-- Token Chips -->
+         <div class="flex items-center gap-1.5 flex-wrap pt-1 text-[10px]">
+          <span class="text-gray-500">Quick Tokens:</span>
+          <button onclick="ziparchiverAppendToken('date')" class="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg text-gray-700 dark:text-gray-300 transition">+ Date</button>
+          <button onclick="ziparchiverAppendToken('time')" class="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg text-gray-700 dark:text-gray-300 transition">+ Time</button>
+          <button onclick="ziparchiverAppendToken('backup')" class="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg text-gray-700 dark:text-gray-300 transition">+ Backup</button>
+         </div>
+        </div>
+
+        <!-- Compression Level -->
+        <div class="space-y-2">
+         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
+          Compression Level
+         </label>
+         <select id="ziparchiver-compression-level" class="w-full py-2.5 px-3 text-xs font-semibold rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <option value="6" selected>Standard (Level 6) — Optimal balance (Recommended)</option>
+          <option value="9">Ultra Maximum (Level 9) — Max space savings</option>
+          <option value="1">Fast (Level 1) — Quick packing</option>
+          <option value="0">Store (Level 0) — No compression, instant speed</option>
+         </select>
+         <p class="text-[11px] text-gray-500 dark:text-gray-400">
+          Standard uses DEFLATE algorithm. Level 0 is best for already compressed files (JPEG, MP4).
+         </p>
+        </div>
+
+        <!-- Directory Structure Mode -->
+        <div class="space-y-2">
+         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
+          Folder Hierarchy
+         </label>
+         <select id="ziparchiver-folder-mode" class="w-full py-2.5 px-3 text-xs font-semibold rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <option value="preserve" selected>Preserve Folder Structure</option>
+          <option value="flatten">Flatten All Files into Root</option>
+         </select>
+        </div>
+
+        <!-- Archive Comment -->
+        <div class="space-y-2">
+         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
+          Archive Comment / Description (Optional)
+         </label>
+         <input type="text" id="ziparchiver-comment" class="w-full py-2.5 px-3 text-xs font-medium rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="e.g., Created with PockitUp ZIP Studio">
+        </div>
+
+        <!-- Password Protection & Encryption (Optional) -->
+        <div class="md:col-span-2 p-4 rounded-2xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 space-y-3">
+         <div class="flex items-center justify-between flex-wrap gap-2">
+          <label class="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+           <i data-lucide="lock" style="width:14px;height:14px" class="text-blue-600 dark:text-blue-400"></i>
+           <span>Password Protection &amp; Encryption (Optional)</span>
+          </label>
+          <span class="text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-100/80 dark:bg-blue-900/60 px-2 py-0.5 rounded-full">
+           AES-256 / ZipCrypto
+          </span>
+         </div>
+
+         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="space-y-1">
+           <div class="relative">
+            <input type="password" id="ziparchiver-create-password" oninput="ziparchiverCheckPasswordStrength(this.value)" class="w-full py-2.5 pl-3 pr-10 text-xs font-medium rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Leave blank for unencrypted ZIP">
+            <button type="button" onclick="ziparchiverToggleCreatePasswordVisibility()" class="p-1.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition" title="Toggle password visibility">
+             <i id="ziparchiver-create-pwd-icon" data-lucide="eye" style="width:14px;height:14px"></i>
+            </button>
+           </div>
+           <!-- Password Strength Bar -->
+           <div id="ziparchiver-pwd-strength-container" class="hidden space-y-1 pt-1">
+            <div class="flex items-center justify-between text-[10px]">
+             <span class="text-gray-500">Strength:</span>
+             <span id="ziparchiver-pwd-strength-text" class="font-bold text-gray-700 dark:text-gray-300">Weak</span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden">
+             <div id="ziparchiver-pwd-strength-bar" class="h-1.5 rounded-full transition-all duration-200" style="width: 25%; background-color: #ef4444;"></div>
+            </div>
+           </div>
+          </div>
+
+          <div>
+           <select id="ziparchiver-encryption-algo" class="w-full py-2.5 px-3 text-xs font-semibold rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <option value="aes256" selected>AES-256 Encryption (Recommended &amp; Secure)</option>
+            <option value="zipcrypto">Standard ZipCrypto (Legacy 7-Zip/WinZip Compatible)</option>
+           </select>
+           <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
+            If set, extractors will be prompted for this exact password to decrypt files.
+           </p>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+
+      <!-- Action Button & Compression Progress -->
+      <div class="space-y-4">
+       <button id="ziparchiver-create-btn" onclick="ziparchiverCreateZip()" class="w-full py-4 rounded-2xl font-bold text-sm text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed">
+        <i data-lucide="archive" style="width:18px;height:18px"></i>
+        <span>Create &amp; Compress ZIP Archive</span>
+       </button>
+
+       <!-- Packing Progress Bar -->
+       <div id="ziparchiver-create-progress-container" class="hidden space-y-2 p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50">
+        <div class="flex items-center justify-between text-xs font-semibold">
+         <span id="ziparchiver-create-status-text" class="text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
+          <i data-lucide="loader-2" style="width:14px;height:14px" class="animate-spin"></i>
+          Compressing files...
+         </span>
+         <span id="ziparchiver-create-percent-text" class="font-mono text-blue-700 dark:text-blue-300 font-bold">0%</span>
+        </div>
+        <div class="w-full bg-blue-200 dark:bg-blue-900/60 rounded-full h-2.5 overflow-hidden">
+         <div id="ziparchiver-create-progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-150" style="width: 0%"></div>
+        </div>
+       </div>
+      </div>
+
+      <!-- Completion Result Card -->
+      <div id="ziparchiver-create-result" class="hidden bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200 dark:border-green-800/80 rounded-3xl p-6 space-y-5">
+       <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-green-500 text-white flex items-center justify-center shadow">
+         <i data-lucide="check-circle-2" style="width:22px;height:22px"></i>
+        </div>
+        <div>
+         <h4 class="font-bold text-base text-gray-800 dark:text-gray-100">ZIP Archive Created Successfully!</h4>
+         <p id="ziparchiver-result-subtext" class="text-xs text-gray-600 dark:text-gray-300 mt-0.5">Ready for instant download</p>
+        </div>
+       </div>
+
+       <!-- Stats Grid -->
+       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-white/80 dark:bg-gray-800/80 p-3.5 rounded-2xl border border-green-100 dark:border-green-900/40 text-center">
+         <div class="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Total Files</div>
+         <div id="ziparchiver-result-files-count" class="text-base font-extrabold text-gray-800 dark:text-gray-100 mt-0.5">0</div>
+        </div>
+        <div class="bg-white/80 dark:bg-gray-800/80 p-3.5 rounded-2xl border border-green-100 dark:border-green-900/40 text-center">
+         <div class="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Original Size</div>
+         <div id="ziparchiver-result-orig-size" class="text-base font-extrabold text-gray-800 dark:text-gray-100 mt-0.5">0 KB</div>
+        </div>
+        <div class="bg-white/80 dark:bg-gray-800/80 p-3.5 rounded-2xl border border-green-100 dark:border-green-900/40 text-center">
+         <div class="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Compressed ZIP</div>
+         <div id="ziparchiver-result-zip-size" class="text-base font-extrabold text-green-600 dark:text-green-400 mt-0.5">0 KB</div>
+        </div>
+        <div class="bg-white/80 dark:bg-gray-800/80 p-3.5 rounded-2xl border border-green-100 dark:border-green-900/40 text-center">
+         <div class="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Space Saved</div>
+         <div id="ziparchiver-result-savings" class="text-base font-extrabold text-blue-600 dark:text-blue-400 mt-0.5">0%</div>
+        </div>
+       </div>
+
+       <!-- Action Buttons -->
+       <div class="flex items-center gap-3 flex-wrap pt-1">
+        <button id="ziparchiver-download-btn" onclick="ziparchiverDownloadCreatedZip()" class="flex-1 py-3 px-5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center gap-2 active:scale-95">
+         <i data-lucide="download" style="width:16px;height:16px"></i>
+         <span id="ziparchiver-download-btn-text">Download ZIP Archive</span>
+        </button>
+        <button onclick="ziparchiverInspectCreatedZip()" class="py-3 px-4 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+         <i data-lucide="eye" style="width:15px;height:15px"></i>
+         <span>Inspect in Extractor</span>
+        </button>
+        <button onclick="ziparchiverResetCreate()" class="py-3 px-4 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-xl text-xs font-bold transition">
+         <span>New Archive</span>
+        </button>
+       </div>
+      </div>
+
+     </div>
+
+
+     <!-- ===================== PANEL 2: INSPECT & EXTRACT ZIP ===================== -->
+     <div id="ziparchiver-panel-extract" class="hidden space-y-6">
+
+      <!-- ZIP File Dropzone -->
+      <div id="ziparchiver-extract-dropzone" ondragover="ziparchiverOnExtractDragOver(event)" ondragleave="ziparchiverOnExtractDragLeave(event)" ondrop="ziparchiverOnExtractDrop(event)" class="border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 rounded-3xl p-8 text-center transition cursor-pointer bg-gray-50/50 dark:bg-gray-900/40">
+       <div class="flex flex-col items-center justify-center gap-3">
+        <div class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-inner">
+         <i data-lucide="file-archive" style="width:32px;height:32px"></i>
+        </div>
+        <div>
+         <h3 class="text-base font-bold text-gray-800 dark:text-gray-100">Upload or Drag a ZIP Archive</h3>
+         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-sm mx-auto">
+          Inspect directory hierarchy, read file sizes &amp; compression stats, preview files in-browser, and extract all or selected items.
+         </p>
+        </div>
+
+        <label class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 mt-2">
+         <i data-lucide="folder-search" style="width:15px;height:15px"></i>
+         <span>Select ZIP File</span>
+         <input type="file" accept=".zip,application/zip,application/x-zip-compressed" class="hidden" id="ziparchiver-extract-input" onchange="ziparchiverHandleZipUpload(event)">
+        </label>
+       </div>
+      </div>
+
+      <!-- Loading / Parsing Indicator -->
+      <div id="ziparchiver-extract-loading" class="hidden text-center py-8 space-y-3">
+       <i data-lucide="loader-2" style="width:32px;height:32px" class="animate-spin text-blue-600 dark:text-blue-400 mx-auto"></i>
+       <p class="text-xs font-bold text-gray-700 dark:text-gray-300">Reading and unpacking ZIP metadata...</p>
+      </div>
+
+      <!-- Extraction & Inspection Dashboard -->
+      <div id="ziparchiver-extract-dashboard" class="hidden space-y-6">
+
+       <!-- Archive Summary Header Cards -->
+       <div class="bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 space-y-4">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+         <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-300 flex items-center justify-center">
+           <i data-lucide="archive" style="width:18px;height:18px"></i>
+          </div>
+          <div>
+           <h4 id="ziparchiver-inspect-filename" class="font-bold text-sm text-gray-800 dark:text-gray-100">archive.zip</h4>
+           <p id="ziparchiver-inspect-filesize" class="text-xs text-gray-500 dark:text-gray-400">0 KB</p>
+          </div>
+         </div>
+
+         <div id="ziparchiver-inspect-comment-container" class="hidden px-3 py-1 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 rounded-xl text-xs border border-amber-200 dark:border-amber-800/60 flex items-center gap-1 max-w-xs truncate" title="ZIP Comment">
+          <i data-lucide="info" style="width:12px;height:12px"></i>
+          <span id="ziparchiver-inspect-comment" class="truncate font-medium">Comment</span>
+         </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+         <div class="bg-white dark:bg-gray-800 p-3 rounded-2xl border border-gray-200 dark:border-gray-700">
+          <div class="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Total Files</div>
+          <div id="ziparchiver-inspect-files-count" class="text-sm font-extrabold text-gray-800 dark:text-gray-100 mt-0.5">0</div>
+         </div>
+         <div class="bg-white dark:bg-gray-800 p-3 rounded-2xl border border-gray-200 dark:border-gray-700">
+          <div class="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Total Folders</div>
+          <div id="ziparchiver-inspect-folders-count" class="text-sm font-extrabold text-gray-800 dark:text-gray-100 mt-0.5">0</div>
+         </div>
+         <div class="bg-white dark:bg-gray-800 p-3 rounded-2xl border border-gray-200 dark:border-gray-700">
+          <div class="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Uncompressed Size</div>
+          <div id="ziparchiver-inspect-uncompressed-size" class="text-sm font-extrabold text-gray-800 dark:text-gray-100 mt-0.5">0 KB</div>
+         </div>
+         <div class="bg-white dark:bg-gray-800 p-3 rounded-2xl border border-gray-200 dark:border-gray-700">
+          <div class="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Compression Ratio</div>
+          <div id="ziparchiver-inspect-compression-ratio" class="text-sm font-extrabold text-green-600 dark:text-green-400 mt-0.5">0%</div>
+         </div>
+        </div>
+
+        <!-- Password Decryption Bar (Shown dynamically or used for locked archives) -->
+        <div id="ziparchiver-decrypt-bar" class="hidden p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 flex items-center justify-between flex-wrap gap-3">
+         <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-300 flex items-center justify-center flex-shrink-0">
+           <i id="ziparchiver-decrypt-status-icon" data-lucide="lock" style="width:16px;height:16px"></i>
+          </div>
+          <div>
+           <div id="ziparchiver-decrypt-title" class="font-bold text-xs text-amber-800 dark:text-amber-200">
+            Encrypted Archive Detected
+           </div>
+           <div id="ziparchiver-decrypt-subtext" class="text-[11px] text-amber-600 dark:text-amber-400">
+            Files in this ZIP are password protected. Enter password to unlock.
+           </div>
+          </div>
+         </div>
+
+         <div class="flex items-center gap-2 flex-1 max-w-sm justify-end">
+          <div class="relative flex-1">
+           <input type="password" id="ziparchiver-extract-password" class="w-full py-1.5 pl-3 pr-8 text-xs font-medium rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-amber-500 focus:outline-none" placeholder="Enter archive password">
+           <button type="button" onclick="ziparchiverToggleExtractPasswordVisibility()" class="p-1 absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition" title="Toggle visibility">
+            <i id="ziparchiver-extract-pwd-icon" data-lucide="eye" style="width:12px;height:12px"></i>
+           </button>
+          </div>
+          <button onclick="ziparchiverApplyPassword()" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs transition shadow-sm whitespace-nowrap active:scale-95">
+           Unlock
+          </button>
+         </div>
+        </div>
+
+       </div>
+
+       <!-- Search & Category Filters Toolbar -->
+       <div class="flex items-center justify-between flex-wrap gap-3">
+        <!-- Search Input -->
+        <div class="relative flex-1 min-w-[200px]">
+         <i data-lucide="search" style="width:14px;height:14px" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+         <input type="text" id="ziparchiver-search-input" oninput="ziparchiverFilterTable()" placeholder="Search files in archive..." class="w-full py-2 pl-9 pr-4 text-xs font-medium rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="flex items-center gap-1.5 flex-wrap text-xs">
+         <button id="ziparchiver-filter-all" onclick="ziparchiverSetFilter('all')" class="px-3 py-1.5 rounded-xl font-bold bg-blue-600 text-white shadow-sm transition">All</button>
+         <button id="ziparchiver-filter-docs" onclick="ziparchiverSetFilter('docs')" class="px-3 py-1.5 rounded-xl font-semibold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition">Docs</button>
+         <button id="ziparchiver-filter-images" onclick="ziparchiverSetFilter('images')" class="px-3 py-1.5 rounded-xl font-semibold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition">Images</button>
+         <button id="ziparchiver-filter-code" onclick="ziparchiverSetFilter('code')" class="px-3 py-1.5 rounded-xl font-semibold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition">Code</button>
+         <button id="ziparchiver-filter-media" onclick="ziparchiverSetFilter('media')" class="px-3 py-1.5 rounded-xl font-semibold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition">Media</button>
+        </div>
+       </div>
+
+       <!-- Extraction Actions Toolbar -->
+       <div class="flex items-center justify-between flex-wrap gap-3 pt-1">
+        <div class="flex items-center gap-2 text-xs font-semibold">
+         <button onclick="ziparchiverSelectAll(true)" class="text-blue-600 dark:text-blue-400 hover:underline">Select All</button>
+         <span class="text-gray-300 dark:text-gray-600">|</span>
+         <button onclick="ziparchiverSelectAll(false)" class="text-gray-500 hover:underline">Deselect All</button>
+         <span id="ziparchiver-selected-count" class="text-gray-400 ml-1">(0 selected)</span>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+         <button onclick="ziparchiverDownloadSelected()" id="ziparchiver-download-selected-btn" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 active:scale-95 disabled:opacity-40" disabled>
+          <i data-lucide="download" style="width:13px;height:13px"></i>
+          <span>Download Selected</span>
+         </button>
+         <button onclick="ziparchiverExtractAllFiles()" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 active:scale-95">
+          <i data-lucide="folder-output" style="width:14px;height:14px"></i>
+          <span>Extract All Files</span>
+         </button>
+        </div>
+       </div>
+
+       <!-- Interactive File Explorer Table -->
+       <div class="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto max-h-96">
+         <table class="w-full text-left text-xs">
+          <thead class="bg-gray-50 dark:bg-gray-900/80 text-gray-600 dark:text-gray-300 font-bold border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+           <tr>
+            <th class="p-3 w-10 text-center">
+             <input type="checkbox" id="ziparchiver-master-checkbox" onchange="ziparchiverToggleMasterCheckbox(this.checked)" class="rounded text-blue-600 focus:ring-blue-500">
+            </th>
+            <th class="p-3">File / Path</th>
+            <th class="p-3">Uncompressed</th>
+            <th class="p-3">Compressed</th>
+            <th class="p-3">Date Modified</th>
+            <th class="p-3 text-right">Actions</th>
+           </tr>
+          </thead>
+          <tbody id="ziparchiver-extract-tbody" class="divide-y divide-gray-100 dark:divide-gray-800 text-gray-700 dark:text-gray-200 font-medium">
+           <!-- Injected via JavaScript -->
+          </tbody>
+         </table>
+        </div>
+       </div>
+
+       <!-- Extraction Progress Bar (Used during extract all) -->
+       <div id="ziparchiver-extract-progress-container" class="hidden space-y-2 p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50">
+        <div class="flex items-center justify-between text-xs font-semibold">
+         <span id="ziparchiver-extract-status-text" class="text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
+          <i data-lucide="loader-2" style="width:14px;height:14px" class="animate-spin"></i>
+          Extracting files...
+         </span>
+         <span id="ziparchiver-extract-percent-text" class="font-mono text-blue-700 dark:text-blue-300 font-bold">0%</span>
+        </div>
+        <div class="w-full bg-blue-200 dark:bg-blue-900/60 rounded-full h-2.5 overflow-hidden">
+         <div id="ziparchiver-extract-progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-150" style="width: 0%"></div>
+        </div>
+       </div>
+
+      </div>
+
+     </div>
+
+    </div>
+   </main>
+
+   <!-- IN-APP FILE PREVIEW MODAL -->
+   <div id="ziparchiver-preview-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0;">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-3xl flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700 max-h-[90vh]">
+     <!-- Modal Header -->
+     <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50">
+      <div class="flex items-center gap-2.5 min-w-0">
+       <div id="ziparchiver-preview-icon" class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="file-text" style="width:16px;height:16px"></i>
+       </div>
+       <div class="min-w-0">
+        <h4 id="ziparchiver-preview-filename" class="font-bold text-sm text-gray-800 dark:text-gray-100 truncate">preview.txt</h4>
+        <p id="ziparchiver-preview-filesize" class="text-[11px] text-gray-500 dark:text-gray-400">0 KB</p>
+       </div>
+      </div>
+      <button onclick="ziparchiverClosePreviewModal()" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition">
+       <i data-lucide="x" style="width:18px;height:18px" class="text-gray-600 dark:text-gray-300"></i>
+      </button>
+     </div>
+
+     <!-- Modal Content Area -->
+     <div id="ziparchiver-preview-body" class="flex-1 overflow-auto p-4 bg-gray-50/50 dark:bg-gray-900/40 min-h-[250px] max-h-[60vh] flex items-center justify-center">
+      <!-- Injected preview content: image, code pre, audio, etc. -->
+     </div>
+
+     <!-- Modal Footer -->
+     <div class="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0 bg-white dark:bg-gray-800">
+      <div class="text-xs text-gray-500" id="ziparchiver-preview-type-info">Preview Mode</div>
+      <div class="flex items-center gap-2">
+       <button id="ziparchiver-preview-copy-btn" onclick="ziparchiverCopyPreviewText()" class="hidden px-3.5 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+        <i data-lucide="copy" style="width:13px;height:13px"></i>
+        <span id="ziparchiver-preview-copy-text">Copy Content</span>
+       </button>
+       <button id="ziparchiver-preview-download-btn" onclick="ziparchiverDownloadCurrentPreview()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5">
+        <i data-lucide="download" style="width:14px;height:14px"></i>
+        <span>Download File</span>
+       </button>
+      </div>
+     </div>
+    </div>
+   </div>
+
+   <!-- VIRTUAL FOLDER PATH EDITOR MODAL -->
+   <div id="ziparchiver-path-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0;">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-md p-6 space-y-4 border border-gray-200 dark:border-gray-700">
+     <div class="flex items-center justify-between">
+      <h4 class="font-bold text-sm text-gray-800 dark:text-gray-100 flex items-center gap-2">
+       <i data-lucide="folder-tree" style="width:16px;height:16px" class="text-blue-500"></i>
+       <span>Edit Archive Virtual Path</span>
+      </h4>
+      <button onclick="ziparchiverClosePathModal()" class="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition">
+       <i data-lucide="x" style="width:16px;height:16px" class="text-gray-500"></i>
+      </button>
+     </div>
+     <p class="text-xs text-gray-500 dark:text-gray-400">
+      Specify the folder path inside the ZIP where this file should be placed (e.g., <code class="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-blue-600">assets/images/</code> or leave blank for root).
+     </p>
+     <div>
+      <input type="text" id="ziparchiver-path-input" class="w-full py-2.5 px-3 text-xs font-medium rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="e.g. documents/reports/">
+     </div>
+     <div class="flex items-center justify-end gap-2 pt-2">
+      <button onclick="ziparchiverClosePathModal()" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-bold transition">
+       Cancel
+      </button>
+      <button onclick="ziparchiverSavePathModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-sm">
+       Apply Path
+      </button>
+     </div>
+    </div>
+   </div>
+
+   <!-- PASSWORD DECRYPTION PROMPT MODAL -->
+   <div id="ziparchiver-password-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0;">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-md p-6 space-y-4 border border-gray-200 dark:border-gray-700">
+     <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+       <div class="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-300 flex items-center justify-center">
+        <i data-lucide="lock" style="width:18px;height:18px"></i>
+       </div>
+       <div>
+        <h4 class="font-bold text-sm text-gray-800 dark:text-gray-100">Password Required</h4>
+        <p class="text-xs text-gray-500 dark:text-gray-400">This file/archive is encrypted</p>
+       </div>
+      </div>
+      <button onclick="ziparchiverClosePasswordModal()" class="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition">
+       <i data-lucide="x" style="width:16px;height:16px" class="text-gray-500"></i>
+      </button>
+     </div>
+
+     <p class="text-xs text-gray-600 dark:text-gray-300">
+      Please enter the archive decryption password to view or download <span id="ziparchiver-pwd-modal-filename" class="font-bold text-gray-800 dark:text-gray-100 font-mono">this file</span>:
+     </p>
+
+     <div class="space-y-1">
+      <div class="relative">
+       <input type="password" id="ziparchiver-modal-password-input" class="w-full py-2.5 pl-3 pr-10 text-xs font-medium rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Enter password" onkeydown="if(event.key==='Enter') ziparchiverSubmitPasswordModal()">
+       <button type="button" onclick="ziparchiverToggleModalPasswordVisibility()" class="p-1.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
+        <i id="ziparchiver-modal-pwd-icon" data-lucide="eye" style="width:14px;height:14px"></i>
+       </button>
+      </div>
+      <div id="ziparchiver-modal-pwd-error" class="hidden text-xs text-red-500 font-semibold pt-1">
+       Incorrect password. Please try again.
+      </div>
+     </div>
+
+     <div class="flex items-center justify-end gap-2 pt-2">
+      <button onclick="ziparchiverClosePasswordModal()" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-bold transition">
+       Cancel
+      </button>
+      <button onclick="ziparchiverSubmitPasswordModal()" class="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm active:scale-95">
+       Unlock &amp; Proceed
+      </button>
+     </div>
+    </div>
+   </div>
+
+  </div>
+
+  <!-- STANDARD CALCULATOR STUDIO VIEW -->
+  <div id="calculator-view" class="hidden">
+   <header class="hero-header px-6 py-4 flex items-center gap-4">
+    <div class="flex items-center gap-3 flex-1 pl-12">
+     <button onclick="goHome()" class="flex items-center gap-1 hover:opacity-80 transition" title="Back to Home" style="background:none;border:none;padding:0;cursor:pointer;">
+      <img src="/assets/logo-light.png" alt="PockitUp" class="site-logo-sm logo-light" draggable="false" />
+      <img src="/assets/logo-dark.png" alt="PockitUp" class="site-logo-sm logo-dark" draggable="false" />
+     </button>
+     <span class="text-gray-400 dark:text-gray-600">/</span>
+     <span class="font-semibold text-gray-700 dark:text-gray-200 text-lg inline-flex items-center gap-1.5">
+      <i data-lucide="calculator" style="width:18px;height:18px" class="text-amber-500"></i>
+      Standard Calculator
+     </span>
+    </div>
+   </header>
+
+   <main class="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
+    <!-- PAGE TITLE -->
+    <div class="text-center mb-2">
+     <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/50 mb-3 text-amber-600 dark:text-amber-400 shadow-sm border border-amber-100 dark:border-amber-900/50">
+      <i data-lucide="calculator" style="width:28px;height:28px"></i>
+     </div>
+     <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-1.5">Standard Calculator</h1>
+     <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
+      Fast, accurate standard arithmetic with memory, calculation history, and live unit conversion.
+     </p>
+    </div>
+
+    <!-- CALCULATOR STUDIO CONTAINER -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+     <!-- MAIN CALCULATOR DEVICE (7 Cols on large screen) -->
+     <div class="lg:col-span-7 bg-white dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700/80 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4 font-sans select-none backdrop-blur-md">
+      
+      <!-- Top Bar: Title & Action Controls -->
+      <div class="flex items-center justify-between text-gray-700 dark:text-gray-200">
+       <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+         <i id="calc-header-icon" data-lucide="calculator" style="width:17px;height:17px"></i>
+        </div>
+        <span id="calc-current-mode-title" class="font-bold text-base tracking-tight text-gray-800 dark:text-gray-100">Standard</span>
+       </div>
+
+       <!-- Action Icons -->
+       <div class="flex items-center gap-1">
+        <!-- Sound Toggle Button -->
+        <button id="calc-sound-btn" onclick="calcToggleSound()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700/70 rounded-xl transition text-gray-600 dark:text-gray-300" title="Toggle audio click feedback">
+         <i id="calc-sound-icon" data-lucide="volume-2" style="width:16px;height:16px"></i>
+        </button>
+        <!-- History Drawer Button -->
+        <button id="calc-history-toggle-btn" onclick="calcToggleSideTab('history')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700/70 rounded-xl transition text-gray-600 dark:text-gray-300 relative" title="View calculation history">
+         <i data-lucide="history" style="width:16px;height:16px"></i>
+         <span id="calc-history-count-dot" class="hidden absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500"></span>
+        </button>
+        <!-- Settings Modal Button -->
+        <button onclick="calcOpenSettingsModal()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700/70 rounded-xl transition text-gray-600 dark:text-gray-300" title="Calculator settings">
+         <i data-lucide="settings" style="width:16px;height:16px"></i>
+        </button>
+       </div>
+      </div>
+
+      <!-- SCREEN 1: STANDARD CALCULATION DISPLAY (INSET SCREEN) -->
+      <div id="calc-standard-screen" class="space-y-3">
+       <div class="bg-gray-50/80 dark:bg-gray-900/90 border border-gray-200/80 dark:border-gray-700/70 rounded-2xl p-4 flex flex-col justify-between min-h-[105px] shadow-inner relative">
+        <!-- Top Display Line: Copy Button on Left, Calculation Operations on Right -->
+        <div class="flex items-center justify-between text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-mono tracking-wide h-5">
+         <button type="button" onclick="calcCopyResult(event)" class="p-1 hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-400 hover:text-amber-500 rounded-lg transition" title="Copy result to clipboard">
+          <i data-lucide="copy" style="width:13px;height:13px"></i>
+         </button>
+         <div id="calc-equation-display" class="truncate max-w-[85%] text-right font-mono"></div>
+        </div>
+        <!-- Main Large Digit Display -->
+        <div class="flex items-center justify-end overflow-hidden pt-1">
+         <span id="calc-main-display" class="text-4xl sm:text-5xl font-semibold text-gray-900 dark:text-white tracking-tight break-all font-mono">
+          0
+         </span>
+        </div>
+       </div>
+
+       <!-- MEMORY BAR (6 buttons) -->
+       <div class="grid grid-cols-6 gap-1 text-[11px] font-semibold text-center text-gray-700 dark:text-gray-300 py-0.5">
+        <button id="calc-mem-mc" onclick="calcMemoryClear()" class="py-1.5 rounded-xl opacity-40 cursor-default hover:bg-gray-100 dark:hover:bg-gray-700/60 transition">MC</button>
+        <button id="calc-mem-mr" onclick="calcMemoryRecall()" class="py-1.5 rounded-xl opacity-40 cursor-default hover:bg-gray-100 dark:hover:bg-gray-700/60 transition">MR</button>
+        <button onclick="calcMemoryAdd()" class="py-1.5 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-700 dark:text-amber-300 transition active:scale-95">M+</button>
+        <button onclick="calcMemorySubtract()" class="py-1.5 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-700 dark:text-amber-300 transition active:scale-95">M−</button>
+        <button onclick="calcMemoryStore()" class="py-1.5 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-700 dark:text-amber-300 transition active:scale-95">MS</button>
+        <button id="calc-mem-dropdown" onclick="calcToggleSideTab('memory')" class="py-1.5 rounded-xl opacity-40 cursor-default hover:bg-gray-100 dark:hover:bg-gray-700/60 transition flex items-center justify-center gap-0.5">
+         <span>M</span>
+         <i data-lucide="chevron-down" style="width:11px;height:11px"></i>
+        </button>
+       </div>
+      </div>
+
+      <!-- SCREEN 2: DUAL UNIT CONVERTER DISPLAY (Smartphone style inside calculator) -->
+      <div id="calc-converter-screen" class="hidden space-y-3">
+       <!-- Horizontal Category Chips (Matching Reference) -->
+       <div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs font-semibold">
+        <button onclick="calcSelectConvCat('length')" class="calc-cat-chip px-3 py-1.5 rounded-full bg-amber-500 text-white shadow-sm transition whitespace-nowrap" data-cat="length">Length</button>
+        <button onclick="calcSelectConvCat('weight')" class="calc-cat-chip px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap" data-cat="weight">Mass</button>
+        <button onclick="calcSelectConvCat('temperature')" class="calc-cat-chip px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap" data-cat="temperature">Temperature</button>
+        <button onclick="calcSelectConvCat('volume')" class="calc-cat-chip px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap" data-cat="volume">Volume</button>
+        <button onclick="calcSelectConvCat('area')" class="calc-cat-chip px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap" data-cat="area">Area</button>
+        <button onclick="calcSelectConvCat('data')" class="calc-cat-chip px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap" data-cat="data">Data</button>
+        <button onclick="calcSelectConvCat('speed')" class="calc-cat-chip px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap" data-cat="speed">Speed</button>
+        <button onclick="calcSelectConvCat('time')" class="calc-cat-chip px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap" data-cat="time">Time</button>
+       </div>
+
+       <!-- Dual Unit Inset Display (Exact 1:1 smartphone style from reference) -->
+       <div class="bg-gray-50/80 dark:bg-gray-900/90 border border-gray-200/80 dark:border-gray-700/70 rounded-2xl p-3.5 space-y-2.5 shadow-inner">
+        <!-- Top Field (Unit 1) -->
+        <div id="calc-conv-field-top" onclick="calcFocusConvField('top')" class="p-3 rounded-xl border-2 border-amber-500 bg-white dark:bg-gray-800 cursor-pointer transition shadow-sm">
+         <div class="flex items-center justify-between gap-2">
+          <select id="calc-conv-unit-top" onchange="calcOnUnitChange('top')" class="bg-transparent font-bold text-sm text-gray-800 dark:text-gray-100 outline-none cursor-pointer pr-1 truncate max-w-[140px]"></select>
+          <div class="flex items-baseline gap-1 text-right overflow-hidden">
+           <span id="calc-conv-val-top" class="text-2xl sm:text-3xl font-mono font-bold text-gray-900 dark:text-white tracking-tight">1</span>
+           <span id="calc-conv-sym-top" class="text-xs sm:text-sm font-semibold text-gray-400">in</span>
+          </div>
+         </div>
+        </div>
+
+        <!-- Divider with Swap Action -->
+        <div class="flex items-center justify-between px-2">
+         <div class="h-px bg-gray-200 dark:bg-gray-700 flex-1"></div>
+         <button onclick="calcSwapConvUnits()" class="mx-3 p-1.5 rounded-xl bg-gray-200/80 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-amber-500 hover:scale-110 transition shadow-sm" title="Swap Units">
+          <i data-lucide="arrow-up-down" style="width:14px;height:14px"></i>
+         </button>
+         <div class="h-px bg-gray-200 dark:bg-gray-700 flex-1"></div>
+        </div>
+
+        <!-- Bottom Field (Unit 2) -->
+        <div id="calc-conv-field-bottom" onclick="calcFocusConvField('bottom')" class="p-3 rounded-xl border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-700 bg-white/60 dark:bg-gray-800/60 cursor-pointer transition">
+         <div class="flex items-center justify-between gap-2">
+          <select id="calc-conv-unit-bottom" onchange="calcOnUnitChange('bottom')" class="bg-transparent font-bold text-sm text-gray-800 dark:text-gray-100 outline-none cursor-pointer pr-1 truncate max-w-[140px]"></select>
+          <div class="flex items-baseline gap-1 text-right overflow-hidden">
+           <span id="calc-conv-val-bottom" class="text-2xl sm:text-3xl font-mono font-bold text-emerald-600 dark:text-emerald-400 tracking-tight">2.54</span>
+           <span id="calc-conv-sym-bottom" class="text-xs sm:text-sm font-semibold text-gray-400">cm</span>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+
+      <!-- STANDARD 6x4 KEYPAD GRID (Operates both Standard math and Live Conversion) -->
+      <div id="calc-keypad-grid" class="grid grid-cols-4 gap-2 text-sm sm:text-base font-semibold">
+       
+       <!-- ROW 1: %, CE, C, Backspace -->
+       <button onclick="calcInputPercent()" class="calc-btn calc-btn-func" data-key="%">%</button>
+       <button onclick="calcClearEntry()" class="calc-btn calc-btn-func" data-key="Delete">CE</button>
+       <button onclick="calcClearAll()" class="calc-btn calc-btn-func" data-key="Escape">C</button>
+       <button onclick="calcBackspace()" class="calc-btn calc-btn-func flex items-center justify-center" data-key="Backspace">
+        <i data-lucide="delete" style="width:18px;height:18px"></i>
+       </button>
+
+       <!-- ROW 2: 1/x, x², √x, ÷ -->
+       <button onclick="calcReciprocal()" class="calc-btn calc-btn-math" data-key="r">¹/x</button>
+       <button onclick="calcSquare()" class="calc-btn calc-btn-math" data-key="s">x²</button>
+       <button onclick="calcSquareRoot()" class="calc-btn calc-btn-math" data-key="@">²√x</button>
+       <button onclick="calcOperator('÷')" class="calc-btn calc-btn-op" data-key="/">÷</button>
+
+       <!-- ROW 3: 7, 8, 9, × -->
+       <button onclick="calcDigit('7')" class="calc-btn calc-btn-num" data-key="7">7</button>
+       <button onclick="calcDigit('8')" class="calc-btn calc-btn-num" data-key="8">8</button>
+       <button onclick="calcDigit('9')" class="calc-btn calc-btn-num" data-key="9">9</button>
+       <button onclick="calcOperator('×')" class="calc-btn calc-btn-op" data-key="*">×</button>
+
+       <!-- ROW 4: 4, 5, 6, − -->
+       <button onclick="calcDigit('4')" class="calc-btn calc-btn-num" data-key="4">4</button>
+       <button onclick="calcDigit('5')" class="calc-btn calc-btn-num" data-key="5">5</button>
+       <button onclick="calcDigit('6')" class="calc-btn calc-btn-num" data-key="6">6</button>
+       <button onclick="calcOperator('−')" class="calc-btn calc-btn-op" data-key="-">−</button>
+
+       <!-- ROW 5: 1, 2, 3, + -->
+       <button onclick="calcDigit('1')" class="calc-btn calc-btn-num" data-key="1">1</button>
+       <button onclick="calcDigit('2')" class="calc-btn calc-btn-num" data-key="2">2</button>
+       <button onclick="calcDigit('3')" class="calc-btn calc-btn-num" data-key="3">3</button>
+       <button onclick="calcOperator('+')" class="calc-btn calc-btn-op" data-key="+">+</button>
+
+       <!-- ROW 6: +/−, 0, ., = (Accent Color) -->
+       <button onclick="calcToggleSign()" class="calc-btn calc-btn-num" data-key="F9">+/−</button>
+       <button onclick="calcDigit('0')" class="calc-btn calc-btn-num" data-key="0">0</button>
+       <button onclick="calcDecimal()" class="calc-btn calc-btn-num" data-key=".">.</button>
+       <button id="calc-equals-btn" onclick="calcEquals()" class="calc-btn font-bold text-white shadow-md active:scale-95 transition" data-key="Enter" style="background-color: #f59e0b; color: #ffffff;">
+        =
+       </button>
+      </div>
+
+     </div>
+
+     <!-- RIGHT SIDECAR: HISTORY, MEMORY & CONVERTER STUDIO (5 Cols) -->
+     <div class="lg:col-span-5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 shadow-sm space-y-4">
+      
+      <!-- Sidecar Tab Switcher -->
+      <div class="flex items-center gap-1.5 p-1 bg-gray-100 dark:bg-gray-900/80 rounded-2xl border border-gray-200 dark:border-gray-800 text-xs font-bold">
+       <button id="calc-sidetab-history-btn" onclick="calcSwitchSideTab('history')" class="flex-1 py-2 px-3 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm transition flex items-center justify-center gap-1.5">
+        <i data-lucide="history" style="width:13px;height:13px" class="text-amber-500"></i>
+        <span>History</span>
+       </button>
+       <button id="calc-sidetab-memory-btn" onclick="calcSwitchSideTab('memory')" class="flex-1 py-2 px-3 rounded-xl text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center justify-center gap-1.5">
+        <i data-lucide="database" style="width:13px;height:13px" class="text-blue-500"></i>
+        <span>Memory</span>
+       </button>
+       <button id="calc-sidetab-converter-btn" onclick="calcSwitchSideTab('converter')" class="flex-1 py-2 px-3 rounded-xl text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center justify-center gap-1.5">
+        <i data-lucide="repeat" style="width:13px;height:13px" class="text-emerald-500"></i>
+        <span>Convert</span>
+       </button>
+      </div>
+
+      <!-- PANEL 1: CALCULATION HISTORY -->
+      <div id="calc-panel-history" class="space-y-3">
+       <div class="flex items-center justify-between text-xs">
+        <span class="font-bold text-gray-700 dark:text-gray-300">Calculation Log</span>
+        <div class="flex items-center gap-2">
+         <button onclick="calcExportHistory()" class="text-gray-500 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition" title="Export as text">Export</button>
+         <span class="text-gray-300 dark:text-gray-600">•</span>
+         <button onclick="calcClearHistory()" class="text-red-500 hover:underline font-medium transition">Clear All</button>
+        </div>
+       </div>
+
+       <!-- History Items List -->
+       <div id="calc-history-list" class="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+        <!-- Empty State -->
+        <div class="text-center py-12 space-y-2 text-gray-400 dark:text-gray-500">
+         <i data-lucide="clock" style="width:28px;height:28px" class="mx-auto opacity-40"></i>
+         <p class="text-xs font-semibold">There's no history yet</p>
+         <p class="text-[11px] opacity-75">Your completed calculations will appear here</p>
+        </div>
+       </div>
+      </div>
+
+      <!-- PANEL 2: MEMORY STACK -->
+      <div id="calc-panel-memory" class="hidden space-y-3">
+       <div class="flex items-center justify-between text-xs">
+        <span class="font-bold text-gray-700 dark:text-gray-300">Memory Slots</span>
+        <button onclick="calcMemoryClear()" class="text-red-500 hover:underline font-medium transition">Clear Memory</button>
+       </div>
+
+       <!-- Memory Items List -->
+       <div id="calc-memory-list" class="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+        <!-- Empty State -->
+        <div class="text-center py-12 space-y-2 text-gray-400 dark:text-gray-500">
+         <i data-lucide="database" style="width:28px;height:28px" class="mx-auto opacity-40"></i>
+         <p class="text-xs font-semibold">There's nothing saved in memory</p>
+         <p class="text-[11px] opacity-75">Use MS to store values or M+/M− to accumulate</p>
+        </div>
+       </div>
+      </div>
+
+      <!-- PANEL 3: CONVERTER CATEGORIES & QUICK FORMULAS -->
+      <div id="calc-panel-converter" class="hidden space-y-4 text-xs">
+       <div class="space-y-2">
+        <span class="font-bold text-gray-700 dark:text-gray-300">Categories</span>
+        
+        <!-- Category Grid in Sidecar -->
+        <div class="grid grid-cols-2 gap-2">
+         <button onclick="calcSelectConvCat('length')" class="calc-side-cat-btn p-2.5 rounded-2xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-bold flex items-center gap-2 transition" data-cat="length">
+          <i data-lucide="ruler" style="width:16px;height:16px"></i>
+          <span>Length</span>
+         </button>
+         <button onclick="calcSelectConvCat('weight')" class="calc-side-cat-btn p-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold flex items-center gap-2 transition" data-cat="weight">
+          <i data-lucide="scale" style="width:16px;height:16px"></i>
+          <span>Mass</span>
+         </button>
+         <button onclick="calcSelectConvCat('temperature')" class="calc-side-cat-btn p-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold flex items-center gap-2 transition" data-cat="temperature">
+          <i data-lucide="thermometer" style="width:16px;height:16px"></i>
+          <span>Temperature</span>
+         </button>
+         <button onclick="calcSelectConvCat('volume')" class="calc-side-cat-btn p-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold flex items-center gap-2 transition" data-cat="volume">
+          <i data-lucide="beaker" style="width:16px;height:16px"></i>
+          <span>Volume</span>
+         </button>
+         <button onclick="calcSelectConvCat('area')" class="calc-side-cat-btn p-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold flex items-center gap-2 transition" data-cat="area">
+          <i data-lucide="grid" style="width:16px;height:16px"></i>
+          <span>Area</span>
+         </button>
+         <button onclick="calcSelectConvCat('data')" class="calc-side-cat-btn p-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold flex items-center gap-2 transition" data-cat="data">
+          <i data-lucide="hard-drive" style="width:16px;height:16px"></i>
+          <span>Data</span>
+         </button>
+         <button onclick="calcSelectConvCat('speed')" class="calc-side-cat-btn p-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold flex items-center gap-2 transition" data-cat="speed">
+          <i data-lucide="gauge" style="width:16px;height:16px"></i>
+          <span>Speed</span>
+         </button>
+         <button onclick="calcSelectConvCat('time')" class="calc-side-cat-btn p-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold flex items-center gap-2 transition" data-cat="time">
+          <i data-lucide="clock" style="width:16px;height:16px"></i>
+          <span>Time</span>
+         </button>
+        </div>
+       </div>
+
+       <!-- Formula / Quick Info Box -->
+       <div class="p-3.5 bg-gray-50 dark:bg-gray-900/60 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-2">
+        <div class="font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+         <i data-lucide="info" style="width:14px;height:14px" class="text-amber-500"></i>
+         <span>Live Conversion</span>
+        </div>
+        <p id="calc-conv-formula-text" class="text-gray-600 dark:text-gray-400 font-mono text-[11px] leading-relaxed">
+         1 Inch (in) = 2.54 Centimetres (cm)
+        </p>
+       </div>
+
+       <button onclick="calcSwitchSideTab('history')" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-bold transition shadow-sm flex items-center justify-center gap-1.5 active:scale-95">
+        <i data-lucide="calculator" style="width:14px;height:14px"></i>
+        <span>Return to Standard Math</span>
+       </button>
+      </div>
+
+     </div>
+
+    </div>
+   </main>
+
+   <!-- CALCULATOR SETTINGS MODAL -->
+   <div id="calc-settings-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0;">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-md p-6 space-y-5 border border-gray-200 dark:border-gray-700">
+     <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+       <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+        <i data-lucide="settings" style="width:18px;height:18px"></i>
+       </div>
+       <h4 class="font-bold text-base text-gray-800 dark:text-gray-100">Calculator Settings</h4>
+      </div>
+      <button onclick="calcCloseSettingsModal()" class="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition">
+       <i data-lucide="x" style="width:16px;height:16px" class="text-gray-500"></i>
+      </button>
+     </div>
+
+     <div class="space-y-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
+      
+      <!-- Decimal Precision -->
+      <div class="space-y-1.5">
+       <label class="block">Decimal Precision</label>
+       <select id="calc-setting-precision" class="w-full py-2.5 px-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 font-medium">
+        <option value="auto" selected>Auto (Dynamic up to 12 decimals)</option>
+        <option value="0">0 Decimals (Integers only)</option>
+        <option value="2">2 Decimals (Financial / Currency)</option>
+        <option value="4">4 Decimals (Precision)</option>
+        <option value="6">6 Decimals (High Precision)</option>
+       </select>
+      </div>
+
+      <!-- Digit Grouping (Commas) -->
+      <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/60 rounded-2xl border border-gray-200 dark:border-gray-700">
+       <div>
+        <div class="font-bold text-gray-800 dark:text-gray-200">Thousands Separator</div>
+        <div class="text-[11px] text-gray-500 font-normal">Format numbers like 1,234,567.89</div>
+       </div>
+       <input type="checkbox" id="calc-setting-grouping" checked class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 cursor-pointer">
+      </div>
+
+      <!-- Button Sound Effect -->
+      <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/60 rounded-2xl border border-gray-200 dark:border-gray-700">
+       <div>
+        <div class="font-bold text-gray-800 dark:text-gray-200">Keypad Audio Click</div>
+        <div class="text-[11px] text-gray-500 font-normal">Subtle acoustic mechanical tick on tap</div>
+       </div>
+       <input type="checkbox" id="calc-setting-sound" checked class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 cursor-pointer">
+      </div>
+
+      <!-- Accent Equals Color Theme -->
+      <div class="space-y-1.5">
+       <label class="block">Equals Key Accent Color</label>
+       <div class="flex items-center gap-3">
+        <button onclick="calcSetAccentTheme('#f59e0b', '#ffffff')" class="w-7 h-7 rounded-full border-2 border-white shadow-sm transition hover:scale-110" style="background-color: #f59e0b;" title="Amber Gold (Default)"></button>
+        <button onclick="calcSetAccentTheme('#3b82f6', '#ffffff')" class="w-7 h-7 rounded-full border-2 border-white shadow-sm transition hover:scale-110" style="background-color: #3b82f6;" title="Electric Blue"></button>
+        <button onclick="calcSetAccentTheme('#10b981', '#ffffff')" class="w-7 h-7 rounded-full border-2 border-white shadow-sm transition hover:scale-110" style="background-color: #10b981;" title="Emerald Green"></button>
+        <button onclick="calcSetAccentTheme('#c084fc', '#1e1e1e')" class="w-7 h-7 rounded-full border-2 border-white shadow-sm transition hover:scale-110" style="background-color: #c084fc;" title="Lavender Purple"></button>
+        <button onclick="calcSetAccentTheme('#ec4899', '#ffffff')" class="w-7 h-7 rounded-full border-2 border-white shadow-sm transition hover:scale-110" style="background-color: #ec4899;" title="Rose Pink"></button>
+        <button onclick="calcSetAccentTheme('#06b6d4', '#1e1e1e')" class="w-7 h-7 rounded-full border-2 border-white shadow-sm transition hover:scale-110" style="background-color: #06b6d4;" title="Cyan Glow"></button>
+       </div>
+      </div>
+
+     </div>
+
+     <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+      <button onclick="calcSaveSettings()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition shadow-sm active:scale-95">
+       Save &amp; Apply
+      </button>
+     </div>
+    </div>
+   </div>
+
+  </div>
   <div id="lightbox-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%;">
    <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full flex flex-col overflow-hidden" style="max-width: 90vw; max-height: 95vh;">
     <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">

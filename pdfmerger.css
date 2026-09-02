@@ -201,4 +201,112 @@ html.dark .section-heading h2 { color: #f1f5f9; }
   padding: 6px !important;
 }
 
+/* ===================== STANDARD CALCULATOR MODERN STYLING ===================== */
+.calc-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  border-radius: 14px;
+  transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  outline: none;
+  font-size: 1.05rem;
+}
+
+.calc-btn:active, .calc-btn-active {
+  transform: scale(0.94) !important;
+  filter: brightness(0.93);
+}
+
+/* Number Keys */
+.calc-btn-num {
+  background-color: #ffffff;
+  color: #1e293b;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.calc-btn-num:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+.dark .calc-btn-num {
+  background-color: #1e293b;
+  color: #f8fafc;
+  border-color: #334155;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.dark .calc-btn-num:hover {
+  background-color: #273549;
+  border-color: #475569;
+  transform: translateY(-1px);
+}
+
+/* Function Edit Keys (C, CE, %, ⌫) */
+.calc-btn-func {
+  background-color: #f1f5f9;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+.calc-btn-func:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+.dark .calc-btn-func {
+  background-color: #0f172a;
+  color: #94a3b8;
+  border-color: #1e293b;
+}
+.dark .calc-btn-func:hover {
+  background-color: #1e293b;
+  color: #f8fafc;
+}
+
+/* Math Keys (1/x, x², √x) */
+.calc-btn-math {
+  background-color: #f8fafc;
+  color: #64748b;
+  border-color: #e2e8f0;
+}
+.calc-btn-math:hover {
+  background-color: #f1f5f9;
+  color: #334155;
+}
+.dark .calc-btn-math {
+  background-color: #151f30;
+  color: #cbd5e1;
+  border-color: #223249;
+}
+.dark .calc-btn-math:hover {
+  background-color: #1e293b;
+  color: #ffffff;
+}
+
+/* Arithmetic Operator Keys (÷, ×, −, +) */
+.calc-btn-op {
+  background-color: #fff7ed;
+  color: #ea580c;
+  border-color: #fed7aa;
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+.calc-btn-op:hover {
+  background-color: #ffedd5;
+  border-color: #fdba74;
+}
+.dark .calc-btn-op {
+  background-color: #2a1b15;
+  color: #fb923c;
+  border-color: #572615;
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+.dark .calc-btn-op:hover {
+  background-color: #3d2419;
+  border-color: #8c3b1b;
+}
+
 
