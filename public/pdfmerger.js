@@ -1,5 +1,16 @@
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
+// Escape dynamic values before inserting them into HTML text or attributes.
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[char]));
+}
+
 // ===================== APP NAVIGATION =====================
 function openTool(tool) {
   document.getElementById('home-view').classList.add('hidden');
@@ -713,7 +724,7 @@ function renderList() {
     div.className = 'file-item flex items-center gap-3 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm';
     div.draggable = true;
     div.dataset.idx = i;
-    div.innerHTML = `<i data-lucide="grip-vertical" style="width:16px;height:16px" class="text-gray-400"></i><span class="flex-1 truncate text-sm font-medium text-gray-800 dark:text-gray-200">${f.name}</span><span class="text-xs text-gray-400">${(f.size/1024).toFixed(0)} KB</span><button class="text-red-400 hover:text-red-600 dark:hover:text-red-500" onclick="removeFile(${i})"><i data-lucide="x" style="width:16px;height:16px"></i></button>`;
+  div.innerHTML = `<i data-lucide="grip-vertical" style="width:16px;height:16px" class="text-gray-400"></i><span class="flex-1 truncate text-sm font-medium text-gray-800 dark:text-gray-200">${escapeHtml(f.name)}</span><span class="text-xs text-gray-400">${(f.size/1024).toFixed(0)} KB</span><button class="text-red-400 hover:text-red-600 dark:hover:text-red-500" onclick="removeFile(${i})"><i data-lucide="x" style="width:16px;height:16px"></i></button>`;
     div.addEventListener('dragstart', () => { dragIdx = i; div.classList.add('dragging'); });
     div.addEventListener('dragend', () => { div.classList.remove('dragging'); dragIdx = null; });
     div.addEventListener('dragover', e => e.preventDefault());
@@ -988,7 +999,7 @@ function renderCompressorFileList() {
     const sizeMB = compressorFile.size / 1024 / 1024;
     const div = document.createElement('div');
     div.className = 'flex items-center gap-3 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm';
-    div.innerHTML = `<i data-lucide="file-text" style="width:20px;height:20px" class="text-emerald-500"></i><span class="flex-1 truncate text-sm font-medium text-gray-800 dark:text-gray-200">${compressorFile.name}</span><span class="text-xs text-gray-400 flex-shrink-0">${sizeMB.toFixed(2)} MB</span><button class="text-red-400 hover:text-red-600 dark:hover:text-red-500 flex-shrink-0 ml-1" onclick="removeCompressorFile()"><i data-lucide="x" style="width:16px;height:16px"></i></button>`;
+    div.innerHTML = `<i data-lucide="file-text" style="width:20px;height:20px" class="text-emerald-500"></i><span class="flex-1 truncate text-sm font-medium text-gray-800 dark:text-gray-200">${escapeHtml(compressorFile.name)}</span><span class="text-xs text-gray-400 flex-shrink-0">${sizeMB.toFixed(2)} MB</span><button class="text-red-400 hover:text-red-600 dark:hover:text-red-500 flex-shrink-0 ml-1" onclick="removeCompressorFile()"><i data-lucide="x" style="width:16px;height:16px"></i></button>`;
     compressFileList.appendChild(div);
   }
   lucide.createIcons();
@@ -2658,6 +2669,9 @@ function scrollToSectionFromSidebar(sectionId) {
 
 // ===================== DOM EVENT SETUP =====================
 document.addEventListener('DOMContentLoaded', () => {
+  const instaFrame = document.getElementById('insta-embed-frame');
+  if (instaFrame) instaFrame.addEventListener('load', instaEmbedLoaded);
+
   initTheme();
   setupMergerDrop();
   setupCompressorDrop();
@@ -5900,6 +5914,7 @@ function pdftoexcelRenderSpreadsheetMockup(sheetIndex = 0) {
     for (let c = 0; c < maxCols; c++) {
       const val = row[c] !== undefined && row[c] !== null ? row[c] : '';
       const isNum = typeof val === 'number';
+      const safeVal = escapeHtml(val);
 
       tableHtml += `
         <td class="py-2 px-3 border-r border-gray-100 dark:border-gray-700/40 truncate max-w-[200px] ${
@@ -5908,8 +5923,8 @@ function pdftoexcelRenderSpreadsheetMockup(sheetIndex = 0) {
             : isFirstRow
             ? 'text-left text-gray-900 dark:text-gray-100 font-semibold'
             : 'text-left text-gray-700 dark:text-gray-300'
-        }" title="${typeof val === 'string' ? val.replace(/"/g, '&quot;') : val}">
-          ${val !== '' ? val : '<span class="text-gray-300 dark:text-gray-600">-</span>'}
+        }" title="${safeVal}">
+          ${val !== '' ? safeVal : '<span class="text-gray-300 dark:text-gray-600">-</span>'}
         </td>
       `;
     }
@@ -9132,8 +9147,8 @@ function ziparchiverRenderQueue() {
           </div>
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-gray-800 dark:text-gray-100 truncate">${item.name}</span>
-              ${item.virtualPath ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-mono bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800 truncate" title="Virtual path: ${item.virtualPath}">📁 ${item.virtualPath}</span>` : ''}
+            <span class="text-xs font-bold text-gray-800 dark:text-gray-100 truncate">${escapeHtml(item.name)}</span>
+            ${item.virtualPath ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-mono bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800 truncate" title="Virtual path: ${escapeHtml(item.virtualPath)}">📁 ${escapeHtml(item.virtualPath)}</span>` : ''}
             </div>
             <div class="flex items-center gap-2 text-[11px] text-gray-400 mt-0.5">
               <span>${formatBytes(item.size)}</span>
@@ -9274,8 +9289,8 @@ async function ziparchiverCreateZip() {
         const percent = Math.round(((i + 1) / ziparchiverQueue.length) * 85);
         if (progressBar) progressBar.style.width = percent + '%';
         if (percentText) percentText.textContent = percent + '%';
-        if (statusText) {
-          statusText.innerHTML = `<i data-lucide="lock" style="width:14px;height:14px" class="text-blue-500"></i> Encrypting ${item.name}...`;
+          if (statusText) {
+            statusText.innerHTML = `<i data-lucide="lock" style="width:14px;height:14px" class="text-blue-500"></i> Encrypting ${escapeHtml(item.name)}...`;
           lucide.createIcons();
         }
 
@@ -9331,7 +9346,7 @@ async function ziparchiverCreateZip() {
           if (progressBar) progressBar.style.width = percent + '%';
           if (percentText) percentText.textContent = percent + '%';
           if (statusText && metadata.currentFile) {
-            statusText.innerHTML = `<i data-lucide="loader-2" style="width:14px;height:14px" class="animate-spin"></i> Compressing ${metadata.currentFile}...`;
+            statusText.innerHTML = `<i data-lucide="loader-2" style="width:14px;height:14px" class="animate-spin"></i> Compressing ${escapeHtml(metadata.currentFile)}...`;
             lucide.createIcons();
           }
         }
@@ -9705,10 +9720,10 @@ function ziparchiverFilterTable() {
             </div>
             <div class="min-w-0">
               <div class="flex items-center">
-                <span class="font-bold text-gray-800 dark:text-gray-100 block truncate" title="${entry.path}">${entry.name}</span>
+                <span class="font-bold text-gray-800 dark:text-gray-100 block truncate" title="${escapeHtml(entry.path)}">${escapeHtml(entry.name)}</span>
                 ${lockBadge}
               </div>
-              ${entry.path !== entry.name ? `<span class="text-[10px] text-gray-400 truncate block font-mono">/${entry.path}</span>` : ''}
+              ${entry.path !== entry.name ? `<span class="text-[10px] text-gray-400 truncate block font-mono">/${escapeHtml(entry.path)}</span>` : ''}
             </div>
           </div>
         </td>
@@ -9982,7 +9997,7 @@ async function ziparchiverPreviewFile(id) {
       if (bodyEl) {
         bodyEl.innerHTML = `
           <div class="max-h-[55vh] flex items-center justify-center p-2">
-            <img src="${ziparchiverCurrentPreviewUrl}" class="max-h-[50vh] max-w-full object-contain rounded-xl shadow-sm border border-gray-200 dark:border-gray-700" alt="${entry.name}">
+            <img src="${ziparchiverCurrentPreviewUrl}" class="max-h-[50vh] max-w-full object-contain rounded-xl shadow-sm border border-gray-200 dark:border-gray-700" alt="${escapeHtml(entry.name)}">
           </div>
         `;
       }
@@ -10008,7 +10023,7 @@ async function ziparchiverPreviewFile(id) {
             <div class="w-16 h-16 rounded-2xl bg-pink-100 dark:bg-pink-950/60 text-pink-500 mx-auto flex items-center justify-center">
               <i data-lucide="music" style="width:32px;height:32px"></i>
             </div>
-            <h4 class="font-bold text-sm text-gray-800 dark:text-gray-100">${entry.name}</h4>
+            <h4 class="font-bold text-sm text-gray-800 dark:text-gray-100">${escapeHtml(entry.name)}</h4>
             <audio controls src="${ziparchiverCurrentPreviewUrl}" class="w-full max-w-md mx-auto"></audio>
           </div>
         `;
@@ -10021,7 +10036,7 @@ async function ziparchiverPreviewFile(id) {
             <div class="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-500 mx-auto flex items-center justify-center">
               <i data-lucide="${info.icon}" style="width:28px;height:28px"></i>
             </div>
-            <h4 class="font-bold text-sm text-gray-800 dark:text-gray-100">${entry.name}</h4>
+            <h4 class="font-bold text-sm text-gray-800 dark:text-gray-100">${escapeHtml(entry.name)}</h4>
             <p class="text-xs text-gray-500 max-w-xs mx-auto">
               Binary format (${entry.ext.toUpperCase() || 'FILE'}). Click Download to extract and view on your machine.
             </p>
@@ -10035,7 +10050,7 @@ async function ziparchiverPreviewFile(id) {
       ziparchiverClosePreviewModal();
       ziparchiverPromptPasswordForEntry(entry, () => ziparchiverPreviewFile(id));
     } else if (bodyEl) {
-      bodyEl.innerHTML = `<div class="text-red-500 text-xs p-4">Error loading preview: ${err.message}</div>`;
+      bodyEl.innerHTML = `<div class="text-red-500 text-xs p-4">Error loading preview: ${escapeHtml(err.message)}</div>`;
     }
   }
 }
