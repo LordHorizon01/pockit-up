@@ -196,9 +196,33 @@ html.dark .section-heading h2 { color: #f1f5f9; }
   right: 24px !important;
 }
 
-.scrolled #theme-toggle, .scrolled #menu-toggle {
+/* Home page only: align with sticky navigation bar when scrolled */
+body:not(.in-tool-view):not(:has(#home-view.hidden)).scrolled #theme-toggle,
+body:not(.in-tool-view):not(:has(#home-view.hidden)).scrolled #menu-toggle {
   top: 6px !important;
   padding: 6px !important;
+}
+
+/* Inside ALL tool views & upcoming tools:
+   Buttons stay strictly in the tool navbar (where "logo / tool name" is) and scroll away naturally with the page.
+   They never float over the tool view when scrolled (prevents covering calculator/tool controls). */
+body:has(#home-view.hidden) #menu-toggle,
+body:has(#home-view.hidden) #theme-toggle,
+body.in-tool-view #menu-toggle,
+body.in-tool-view #theme-toggle {
+  position: absolute !important;
+  top: 17px !important;
+  padding: 0.625rem !important; /* 10px = p-2.5 */
+  z-index: 40 !important;
+}
+
+body:has(#home-view.hidden).scrolled #menu-toggle,
+body:has(#home-view.hidden).scrolled #theme-toggle,
+body.in-tool-view.scrolled #menu-toggle,
+body.in-tool-view.scrolled #theme-toggle {
+  position: absolute !important;
+  top: 17px !important;
+  padding: 0.625rem !important;
 }
 
 /* ===================== STANDARD CALCULATOR MODERN STYLING ===================== */

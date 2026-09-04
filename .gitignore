@@ -1,6 +1,88 @@
-node_modules/
+# =============================================================================
+# PockitUp Enterprise .gitignore
+# Hardened security rules protecting API keys, secrets, virtualenvs & user data
+# =============================================================================
+
+# --- Environment & API Credentials ---
 .env
-.env.local
+.env.*
+!.env.example
+*.env
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+secrets/
+credentials.json
+client_secret*.json
+
+# --- Python Environment & Caches ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- Node.js & Package Managers ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+.npm/
+
+# --- Build Outputs & Distribution ---
 dist/
 build/
 .vite/
+.cache/
+*.tsbuildinfo
+
+# --- Temporary User Uploads & Data Privacy ---
+temp/
+tmp/
+uploads/
+cache/
+scratch/
+*.tmp
+
+# --- Database Files (Auth & User Data) ---
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-wal
+
+# --- OS & Editor Specific Files ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# --- IDE & Editor Settings ---
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+.project
+.settings/
