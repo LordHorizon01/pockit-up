@@ -1,0 +1,23 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">PockitUp mark</title>
+  <desc id="desc">A rounded violet toolbox mark with a bright spark.</desc>
+  <defs>
+    <linearGradient id="pocket" x1="26" y1="18" x2="133" y2="143" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#4F46E5"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="50" y1="28" x2="112" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#C4B5FD" stop-opacity="0.12"/>
+    </linearGradient>
+    <filter id="shadow" x="8" y="8" width="144" height="144" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#312E81" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <rect x="20" y="28" width="120" height="104" rx="28" fill="url(#pocket)"/>
+    <path d="M50 30V25C50 17.268 56.268 11 64 11H96C103.732 11 110 17.268 110 25V30" stroke="#A78BFA" stroke-width="12" stroke-linecap="round"/>
+    <path d="M20 65C40 76 58 81 80 81C102 81 120 76 140 65" stroke="#312E81" stroke-opacity="0.32" stroke-width="8"/>
+    <path d="M83.5 45L75 75H91L82.5 111L110 72H94L103 45H83.5Z" fill="url(#shine)"/>
+  </g>
+</svg>
