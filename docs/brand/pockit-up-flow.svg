@@ -1,0 +1,52 @@
+<svg width="1200" height="370" viewBox="0 0 1200 370" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">PockitUp browser workflow</title>
+  <desc id="desc">Files enter the browser, tools process them locally, and the result is downloaded.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="370" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5F3FF"/>
+      <stop offset="1" stop-color="#EEF2FF"/>
+    </linearGradient>
+    <linearGradient id="node" x1="60" y1="70" x2="300" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#4F46E5"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#4338CA" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0L10 5L0 10V0Z" fill="#818CF8"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="370" rx="28" fill="url(#bg)"/>
+  <circle cx="1080" cy="54" r="120" fill="#C4B5FD" fill-opacity="0.2"/>
+  <circle cx="118" cy="330" r="100" fill="#A5B4FC" fill-opacity="0.18"/>
+  <path d="M328 185H432" stroke="#818CF8" stroke-width="4" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M768 185H872" stroke="#818CF8" stroke-width="4" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <g filter="url(#cardShadow)">
+    <rect x="58" y="65" width="270" height="240" rx="22" fill="white"/>
+    <rect x="465" y="65" width="270" height="240" rx="22" fill="white"/>
+    <rect x="872" y="65" width="270" height="240" rx="22" fill="white"/>
+  </g>
+  <rect x="84" y="91" width="62" height="62" rx="18" fill="#EDE9FE"/>
+  <path d="M104 105H126C132.627 105 138 110.373 138 117V136C138 142.627 132.627 148 126 148H104C97.373 148 92 142.627 92 136V117C92 110.373 97.373 105 104 105Z" stroke="#6D28D9" stroke-width="5"/>
+  <path d="M104 105V99C104 95.686 106.686 93 110 93H120C123.314 93 126 95.686 126 99V105" stroke="#8B5CF6" stroke-width="5" stroke-linecap="round"/>
+  <path d="M116 111L111 128H121L116 143L130 125H121L126 111H116Z" fill="#6D28D9"/>
+  <text x="84" y="190" fill="#111827" font-family="Arial, sans-serif" font-size="24" font-weight="700">1. Pick a file</text>
+  <text x="84" y="220" fill="#6B7280" font-family="Arial, sans-serif" font-size="16">Drop PDFs, images, and</text>
+  <text x="84" y="244" fill="#6B7280" font-family="Arial, sans-serif" font-size="16">documents into a tool.</text>
+  <text x="84" y="278" fill="#7C3AED" font-family="Arial, sans-serif" font-size="14" font-weight="700">NO ACCOUNT REQUIRED</text>
+  <rect x="491" y="91" width="62" height="62" rx="18" fill="#DBEAFE"/>
+  <path d="M511 121H533M522 110V132" stroke="#2563EB" stroke-width="6" stroke-linecap="round"/>
+  <path d="M507 139L537 109" stroke="#2563EB" stroke-width="4" stroke-linecap="round"/>
+  <text x="491" y="190" fill="#111827" font-family="Arial, sans-serif" font-size="24" font-weight="700">2. Shape it</text>
+  <text x="491" y="220" fill="#6B7280" font-family="Arial, sans-serif" font-size="16">Merge, compress, convert,</text>
+  <text x="491" y="244" fill="#6B7280" font-family="Arial, sans-serif" font-size="16">organize, or preview.</text>
+  <text x="491" y="278" fill="#2563EB" font-family="Arial, sans-serif" font-size="14" font-weight="700">BROWSER-FIRST TOOLS</text>
+  <rect x="898" y="91" width="62" height="62" rx="18" fill="#D1FAE5"/>
+  <path d="M929 106V136M917 125L929 137L941 125" stroke="#059669" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M912 146H946" stroke="#059669" stroke-width="5" stroke-linecap="round"/>
+  <text x="898" y="190" fill="#111827" font-family="Arial, sans-serif" font-size="24" font-weight="700">3. Take it</text>
+  <text x="898" y="220" fill="#6B7280" font-family="Arial, sans-serif" font-size="16">Download the finished</text>
+  <text x="898" y="244" fill="#6B7280" font-family="Arial, sans-serif" font-size="16">file when it is ready.</text>
+  <text x="898" y="278" fill="#059669" font-family="Arial, sans-serif" font-size="14" font-weight="700">YOUR FILE, YOUR DEVICE</text>
+</svg>

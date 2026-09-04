@@ -45,7 +45,8 @@ function rateLimitMiddleware(req, res, next) {
 export default defineConfig({
   server: {
     port: 5173,
-    open: '/pdfmerger.html',
+<<<<<<< HEAD
+    open: '/',
     headers: {
       'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'SAMEORIGIN',
@@ -79,4 +80,8 @@ export default defineConfig({
       }
     }
   ]
+=======
+    open: '/'
+  }
+>>>>>>> origin/main
 });
