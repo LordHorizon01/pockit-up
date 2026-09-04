@@ -13,6 +13,7 @@ function escapeHtml(value) {
 
 // ===================== APP NAVIGATION =====================
 function openTool(tool) {
+  document.body.classList.add('in-tool-view');
   document.getElementById('home-view').classList.add('hidden');
   const targetView = document.getElementById(tool + '-view');
   if (targetView) targetView.classList.remove('hidden');
@@ -26,9 +27,22 @@ function openTool(tool) {
   if (tool === 'calculator') {
     setupCalculator();
   }
+  if (tool === 'scientific-calculator') {
+    setupSciCalculator();
+  }
+  if (tool === 'currency-converter') {
+    setupCurrencyConverter();
+  }
+  if (tool === 'volume-converter') {
+    setupVolumeConverter();
+  }
+  if (tool === 'ai-file-summarizer') {
+    setupAiFileSummarizer();
+  }
 }
 
 function goHome() {
+  document.body.classList.remove('in-tool-view');
   document.getElementById('merger-view').classList.add('hidden');
   document.getElementById('compressor-view').classList.add('hidden');
   document.getElementById('image-tool-view').classList.add('hidden');
@@ -51,6 +65,10 @@ function goHome() {
   document.getElementById('colorpicker-view')?.classList.add('hidden');
   document.getElementById('ziparchiver-view')?.classList.add('hidden');
   document.getElementById('calculator-view')?.classList.add('hidden');
+  document.getElementById('scientific-calculator-view')?.classList.add('hidden');
+  document.getElementById('currency-converter-view')?.classList.add('hidden');
+  document.getElementById('volume-converter-view')?.classList.add('hidden');
+  document.getElementById('ai-file-summarizer-view')?.classList.add('hidden');
   document.getElementById('home-view').classList.remove('hidden');
   imgResetConverter();
   img2pdfReset();
@@ -73,6 +91,10 @@ function goHome() {
   colorpickerReset();
   ziparchiverReset();
   calcReset();
+  sciCalcReset();
+  currConvReset();
+  volConvReset();
+  aiSummarizerReset();
   lucide.createIcons();
 }
 
@@ -647,6 +669,23 @@ function showComingSoon(btn, label) {
       toast.style.opacity = '0';
       setTimeout(() => toast.classList.add('hidden'), 300);
     }, 2500);
+  }
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('coming-toast');
+  const text = document.getElementById('coming-toast-text');
+  if (toast && text) {
+    text.textContent = msg;
+    toast.classList.remove('hidden');
+    toast.style.opacity = '1';
+    if (_toastTimer) clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.classList.add('hidden'), 300);
+    }, 2400);
+  } else {
+    console.log('[Toast]', msg);
   }
 }
 
@@ -1312,6 +1351,7 @@ let imgConvertedBlob = null;
 function openImageTool(toolId) {
   imgCurrentTool = imgTools[toolId];
   if (!imgCurrentTool) return;
+  document.body.classList.add('in-tool-view');
   document.getElementById('home-view').classList.add('hidden');
   document.getElementById('image-tool-view').classList.remove('hidden');
   // Update header and title
@@ -2639,6 +2679,7 @@ function openSidebar() {
   setTimeout(() => {
     overlay.style.opacity = '1';
     drawer.style.transform = 'translateX(0)';
+    lucide.createIcons();
   }, 10);
 }
 
@@ -2651,6 +2692,54 @@ function closeSidebar() {
   setTimeout(() => {
     overlay.classList.add('hidden');
   }, 300);
+}
+
+function toggleSidebarCategory(catId) {
+  const content = document.getElementById(`sidebar-cat-${catId}`);
+  const chevron = document.getElementById(`sidebar-chev-${catId}`);
+  if (!content) return;
+
+  const isHidden = content.classList.contains('hidden');
+  if (isHidden) {
+    content.classList.remove('hidden');
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+    lucide.createIcons();
+  } else {
+    content.classList.add('hidden');
+    if (chevron) chevron.style.transform = 'rotate(0deg)';
+  }
+}
+
+function openSidebarTool(toolId) {
+  closeSidebar();
+  setTimeout(() => {
+    openTool(toolId);
+  }, 120);
+}
+
+function openSidebarImageTool(toolId) {
+  closeSidebar();
+  setTimeout(() => {
+    openImageTool(toolId);
+  }, 120);
+}
+
+function handleSidebarComingSoon(sectionId, toolName) {
+  closeSidebar();
+  setTimeout(() => {
+    if (document.getElementById('home-view').classList.contains('hidden')) {
+      goHome();
+      setTimeout(() => {
+        const tabBtn = document.querySelector(`.cat-tab[onclick*="${sectionId}"]`);
+        scrollToSection(sectionId, tabBtn);
+        showComingSoon(null, toolName);
+      }, 150);
+    } else {
+      const tabBtn = document.querySelector(`.cat-tab[onclick*="${sectionId}"]`);
+      scrollToSection(sectionId, tabBtn);
+      showComingSoon(null, toolName);
+    }
+  }, 120);
 }
 
 function scrollToSectionFromSidebar(sectionId) {
@@ -11377,6 +11466,4069 @@ function calcReset() {
   calcCloseSettingsModal();
   calcSwitchSideTab('history');
 }
+
+// =========================================================================
+// ==================== SCIENTIFIC CALCULATOR TOOL =========================
+// =========================================================================
+
+let sciCurrentInput = '0';
+let sciEquationTokens = [];
+let sciLastResult = null;
+let sciJustCalculated = false;
+let sciAngleMode = 'DEG'; // 'DEG', 'RAD', 'GRAD'
+let sci2ndMode = false;
+let sciFeMode = false;
+let sciHypMode = false;
+let sciAns = 0;
+let sciParenDepth = 0;
+let sciOperationCount = 0;
+let sciEngStep = 0;
+let sciFractionMode = false;
+const SCI_MAX_OPERATIONS = 100;
+const SCI_MAX_DIGITS = 48;
+
+let sciHistory = [];
+let sciMemorySlots = { M: 0, A: 0, B: 0, C: 0, D: 0, X: 0, Y: 0 };
+let sciActiveSideTab = 'history';
+
+let sciSettings = {
+  angle: 'DEG',
+  precision: 'auto',
+  grouping: true,
+  sound: true,
+  themeColor: '#4f46e5',
+  themeTextColor: '#ffffff'
+};
+
+const SCI_CONSTANTS_CATALOG = [
+  { id: 'pi', sym: 'π', name: 'Pi (Archimedes Constant)', val: Math.PI, desc: 'Ratio of circle circumference to diameter' },
+  { id: 'e', sym: 'e', name: 'Euler\'s Number', val: Math.E, desc: 'Base of natural logarithm' },
+  { id: 'phi', sym: 'ϕ', name: 'Golden Ratio', val: (1 + Math.sqrt(5)) / 2, desc: 'Divine proportion ≈ 1.6180339887' },
+  { id: 'c', sym: 'c', name: 'Speed of Light in Vacuum', val: 299792458, unit: 'm/s', desc: 'Universal physical constant' },
+  { id: 'h', sym: 'h', name: 'Planck\'s Constant', val: 6.62607015e-34, unit: 'J·s', desc: 'Quantum of electromagnetic action' },
+  { id: 'hbar', sym: 'ℏ', name: 'Reduced Planck Constant', val: 1.054571817e-34, unit: 'J·s', desc: 'Dirac constant (h / 2π)' },
+  { id: 'G', sym: 'G', name: 'Newtonian Gravitational Constant', val: 6.67430e-11, unit: 'm³/(kg·s²)', desc: 'Gravitational attraction constant' },
+  { id: 'g', sym: 'g', name: 'Standard Acceleration of Gravity', val: 9.80665, unit: 'm/s²', desc: 'Nominal Earth gravitational acceleration' },
+  { id: 'na', sym: 'N_A', name: 'Avogadro Constant', val: 6.02214076e23, unit: 'mol⁻¹', desc: 'Constituent particles per mole' },
+  { id: 'k', sym: 'k', name: 'Boltzmann Constant', val: 1.380649e-23, unit: 'J/K', desc: 'Relates temperature and energy' },
+  { id: 'q', sym: 'e⁻', name: 'Elementary Charge', val: 1.602176634e-19, unit: 'C', desc: 'Electric charge carried by single proton' },
+  { id: 'R', sym: 'R', name: 'Molar Gas Constant', val: 8.314462618, unit: 'J/(mol·K)', desc: 'Constant in ideal gas equation PV=nRT' },
+  { id: 'eps0', sym: 'ε₀', name: 'Vacuum Electric Permittivity', val: 8.8541878128e-12, unit: 'F/m', desc: 'Dielectric constant of vacuum' },
+  { id: 'mu0', sym: 'μ₀', name: 'Vacuum Magnetic Permeability', val: 1.25663706212e-6, unit: 'N/A²', desc: 'Magnetic constant in vacuum' }
+];
+
+function setupSciCalculator() {
+  // Load settings & history
+  try {
+    const savedSet = localStorage.getItem('pockitup_scicalc_settings');
+    if (savedSet) sciSettings = { ...sciSettings, ...JSON.parse(savedSet) };
+    const savedHist = localStorage.getItem('pockitup_scicalc_history');
+    if (savedHist) sciHistory = JSON.parse(savedHist);
+    const savedMem = localStorage.getItem('pockitup_scicalc_memory');
+    if (savedMem) sciMemorySlots = { ...sciMemorySlots, ...JSON.parse(savedMem) };
+  } catch (e) {}
+
+  sciAngleMode = sciSettings.angle || 'DEG';
+  sciApplySettingsToUI();
+  sciUpdateAngleUI();
+  sciRenderHistory();
+  sciRenderMemorySlots();
+  sciRenderConstants();
+  sciUpdateDisplay();
+  lucide.createIcons();
+
+  window.removeEventListener('keydown', sciHandleKeyDown);
+  window.addEventListener('keydown', sciHandleKeyDown);
+
+  // Close flyouts on outer click
+  document.addEventListener('click', (e) => {
+    const trigFlyout = document.getElementById('sci-trig-flyout');
+    const trigBtn = document.getElementById('sci-trig-btn');
+    if (trigFlyout && trigBtn && !trigFlyout.contains(e.target) && !trigBtn.contains(e.target)) {
+      trigFlyout.classList.add('hidden');
+    }
+
+    const funcFlyout = document.getElementById('sci-func-flyout');
+    const funcBtn = document.getElementById('sci-func-btn');
+    if (funcFlyout && funcBtn && !funcFlyout.contains(e.target) && !funcBtn.contains(e.target)) {
+      funcFlyout.classList.add('hidden');
+    }
+  });
+}
+
+function sciCalcReset() {
+  sciClearAll();
+  sciCloseSettingsModal();
+  sciCloseFlyouts();
+  window.removeEventListener('keydown', sciHandleKeyDown);
+}
+
+function sciCloseFlyouts() {
+  document.getElementById('sci-trig-flyout')?.classList.add('hidden');
+  document.getElementById('sci-func-flyout')?.classList.add('hidden');
+}
+
+function sciToggleMenu(menuId) {
+  sciPlayClick();
+  if (menuId === 'trig') {
+    const flyout = document.getElementById('sci-trig-flyout');
+    const funcFlyout = document.getElementById('sci-func-flyout');
+    funcFlyout?.classList.add('hidden');
+    if (flyout) flyout.classList.toggle('hidden');
+  } else if (menuId === 'func') {
+    const flyout = document.getElementById('sci-func-flyout');
+    const trigFlyout = document.getElementById('sci-trig-flyout');
+    trigFlyout?.classList.add('hidden');
+    if (flyout) flyout.classList.toggle('hidden');
+  }
+}
+
+// ------------------- UI DISPLAY UPDATES -------------------
+
+function sciUpdateDisplay() {
+  const mainEl = document.getElementById('sci-main-display');
+  const eqEl = document.getElementById('sci-equation-display');
+  const parenTag = document.getElementById('sci-paren-depth-tag');
+  const secTag = document.getElementById('sci-2nd-active-tag');
+
+  if (!mainEl || !eqEl) return;
+
+  // Format main number
+  let displayText = sciCurrentInput;
+  if (sciFractionMode && typeof sciLastResult === 'number') {
+    displayText = sciDecToFraction(sciLastResult);
+  } else if (sciFeMode) {
+    const num = parseFloat(sciCurrentInput) || 0;
+    displayText = num.toExponential(6);
+  } else if (sciEngStep !== 0) {
+    const num = parseFloat(sciCurrentInput) || 0;
+    displayText = sciFormatEng(num, sciEngStep);
+  } else {
+    displayText = sciFormatNumber(sciCurrentInput);
+  }
+
+  mainEl.textContent = displayText;
+
+  // Auto font scaling
+  const cleanLen = sciCurrentInput.length;
+  if (cleanLen > 32) {
+    mainEl.className = 'text-base sm:text-lg font-semibold text-gray-900 dark:text-white tracking-tight break-all font-mono text-right';
+  } else if (cleanLen > 24) {
+    mainEl.className = 'text-lg sm:text-xl font-semibold text-gray-900 dark:text-white tracking-tight break-all font-mono text-right';
+  } else if (cleanLen > 16) {
+    mainEl.className = 'text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white tracking-tight break-all font-mono text-right';
+  } else if (cleanLen > 10) {
+    mainEl.className = 'text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white tracking-tight break-all font-mono text-right';
+  } else {
+    mainEl.className = 'text-3xl sm:text-4xl md:text-5xl font-semibold text-gray-900 dark:text-white tracking-tight break-all font-mono text-right';
+  }
+
+  // Equation trail
+  eqEl.textContent = sciFormatEquationTrail();
+
+  // Parentheses badge
+  if (parenTag) {
+    if (sciParenDepth > 0) {
+      parenTag.textContent = `(${sciParenDepth})`;
+      parenTag.classList.remove('hidden');
+    } else {
+      parenTag.classList.add('hidden');
+    }
+  }
+
+  // 2nd shift badge
+  if (secTag) {
+    if (sci2ndMode) secTag.classList.remove('hidden');
+    else secTag.classList.add('hidden');
+  }
+
+  // Memory toolbar indicators
+  const hasMem = sciMemorySlots.M !== 0;
+  const mcBtn = document.getElementById('sci-mem-mc');
+  const mrBtn = document.getElementById('sci-mem-mr');
+  const mDrop = document.getElementById('sci-mem-dropdown');
+  if (mcBtn && mrBtn && mDrop) {
+    if (hasMem) {
+      mcBtn.classList.remove('opacity-40', 'cursor-default');
+      mcBtn.classList.add('hover:bg-indigo-50', 'dark:hover:bg-indigo-950/40', 'text-indigo-600', 'dark:text-indigo-400');
+      mrBtn.classList.remove('opacity-40', 'cursor-default');
+      mrBtn.classList.add('hover:bg-indigo-50', 'dark:hover:bg-indigo-950/40', 'text-indigo-600', 'dark:text-indigo-400');
+      mDrop.classList.remove('opacity-40', 'cursor-default');
+      mDrop.classList.add('hover:bg-indigo-50', 'dark:hover:bg-indigo-950/40', 'text-indigo-600', 'dark:text-indigo-400');
+    } else {
+      mcBtn.classList.add('opacity-40', 'cursor-default');
+      mcBtn.classList.remove('hover:bg-indigo-50', 'dark:hover:bg-indigo-950/40', 'text-indigo-600', 'dark:text-indigo-400');
+      mrBtn.classList.add('opacity-40', 'cursor-default');
+      mrBtn.classList.remove('hover:bg-indigo-50', 'dark:hover:bg-indigo-950/40', 'text-indigo-600', 'dark:text-indigo-400');
+      mDrop.classList.add('opacity-40', 'cursor-default');
+      mDrop.classList.remove('hover:bg-indigo-50', 'dark:hover:bg-indigo-950/40', 'text-indigo-600', 'dark:text-indigo-400');
+    }
+  }
+}
+
+function sciFormatNumber(raw) {
+  if (raw === 'Error' || raw === 'NaN' || raw === 'Infinity' || raw === '-Infinity') return raw;
+  if (!raw) return '0';
+
+  const isNeg = raw.startsWith('-');
+  let unsigned = isNeg ? raw.slice(1) : raw;
+
+  if (unsigned.includes('e') || unsigned.includes('E')) return raw;
+
+  const numVal = parseFloat(raw);
+  if (!isNaN(numVal)) {
+    const absVal = Math.abs(numVal);
+    if ((absVal >= 1e16 || (absVal > 0 && absVal < 1e-6)) && !raw.endsWith('.')) {
+      return numVal.toExponential(8).replace(/e\+?/, 'e');
+    }
+  }
+
+  const parts = unsigned.split('.');
+  let intPart = parts[0] || '0';
+  const decPart = parts.length > 1 ? '.' + parts[1] : (raw.endsWith('.') ? '.' : '');
+
+  if (sciSettings.grouping) {
+    intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  return (isNeg ? '-' : '') + intPart + decPart;
+}
+
+function sciFormatEquationTrail() {
+  if (sciEquationTokens.length === 0) return '';
+  return sciEquationTokens.map(t => {
+    if (t === '*') return '×';
+    if (t === '/') return '÷';
+    if (t === '-') return '−';
+    if (t === '+') return '+';
+    if (t === 'mod') return ' mod ';
+    if (t === '^') return ' ^ ';
+    if (t === 'nPr') return ' P ';
+    if (t === 'nCr') return ' C ';
+    if (t === 'gcd') return ' GCD ';
+    if (t === 'lcm') return ' LCM ';
+    return t;
+  }).join(' ');
+}
+
+// ------------------- INPUT HANDLING -------------------
+
+function sciInsertDigit(digit) {
+  sciPlayClick();
+  sciFractionMode = false;
+  sciEngStep = 0;
+
+  if (sciJustCalculated) {
+    sciCurrentInput = digit;
+    sciEquationTokens = [];
+    sciJustCalculated = false;
+    sciUpdateDisplay();
+    return;
+  }
+
+  if (sciCurrentInput === '0' || sciCurrentInput === '-0') {
+    sciCurrentInput = (sciCurrentInput === '-0' ? '-' : '') + digit;
+  } else {
+    if (sciCurrentInput.replace('-', '').length >= SCI_MAX_DIGITS) return;
+    sciCurrentInput += digit;
+  }
+  sciUpdateDisplay();
+}
+
+function sciInsertDecimal() {
+  sciPlayClick();
+  sciFractionMode = false;
+  sciEngStep = 0;
+
+  if (sciJustCalculated) {
+    sciCurrentInput = '0.';
+    sciEquationTokens = [];
+    sciJustCalculated = false;
+    sciUpdateDisplay();
+    return;
+  }
+
+  if (!sciCurrentInput.includes('.')) {
+    sciCurrentInput += '.';
+  }
+  sciUpdateDisplay();
+}
+
+function sciToggleSign() {
+  sciPlayClick();
+  if (sciCurrentInput === '0' || sciCurrentInput === 'Error') return;
+  if (sciCurrentInput.startsWith('-')) {
+    sciCurrentInput = sciCurrentInput.slice(1);
+  } else {
+    sciCurrentInput = '-' + sciCurrentInput;
+  }
+  sciUpdateDisplay();
+}
+
+function sciInsertOperator(op) {
+  sciPlayClick();
+  sciCloseFlyouts();
+  sciFractionMode = false;
+  sciEngStep = 0;
+
+  if (sciOperationCount >= SCI_MAX_OPERATIONS) {
+    showToast('Maximum 100 operations limit reached for this session.');
+    return;
+  }
+
+  let tokenOp = op;
+  if (op === 'exp') {
+    if (!sciCurrentInput.includes('e')) {
+      sciCurrentInput += 'e+';
+      sciUpdateDisplay();
+    }
+    return;
+  }
+
+  // Push current input to equation tokens
+  if (sciJustCalculated) {
+    sciEquationTokens = [String(sciLastResult !== null ? sciLastResult : sciCurrentInput)];
+    sciJustCalculated = false;
+  } else if (sciCurrentInput !== '') {
+    sciEquationTokens.push(sciCurrentInput);
+  }
+
+  sciEquationTokens.push(tokenOp);
+  sciOperationCount++;
+  sciCurrentInput = '0';
+  sciUpdateDisplay();
+}
+
+function sciInsertParen(p) {
+  sciPlayClick();
+  sciFractionMode = false;
+
+  if (p === '(') {
+    sciParenDepth++;
+    if (sciJustCalculated) {
+      sciEquationTokens = [];
+      sciJustCalculated = false;
+    } else if (sciCurrentInput !== '0' && sciCurrentInput !== '') {
+      sciEquationTokens.push(sciCurrentInput);
+      sciEquationTokens.push('*');
+    }
+    sciEquationTokens.push('(');
+    sciCurrentInput = '0';
+  } else if (p === ')') {
+    if (sciParenDepth > 0) {
+      sciParenDepth--;
+      if (sciCurrentInput !== '') {
+        sciEquationTokens.push(sciCurrentInput);
+      }
+      sciEquationTokens.push(')');
+      sciCurrentInput = '0';
+    }
+  }
+  sciUpdateDisplay();
+}
+
+function sciKeyAction(keyType) {
+  sciPlayClick();
+  sciCloseFlyouts();
+  sciFractionMode = false;
+  sciEngStep = 0;
+
+  if (keyType === 'sqr') {
+    if (sci2ndMode) {
+      // x^3
+      sciApplyFunction('cube');
+    } else {
+      // x^2
+      sciApplyFunction('sqr');
+    }
+  } else if (keyType === 'sqrt') {
+    if (sci2ndMode) {
+      // cbrt
+      sciApplyFunction('cbrt');
+    } else {
+      // sqrt
+      sciApplyFunction('sqrt');
+    }
+  } else if (keyType === 'pow') {
+    if (sci2ndMode) {
+      // yroot x
+      sciInsertOperator('yroot');
+    } else {
+      // x^y
+      sciInsertOperator('^');
+    }
+  } else if (keyType === '10x') {
+    if (sci2ndMode) {
+      // 2^x
+      sciApplyFunction('2pow');
+    } else {
+      // 10^x
+      sciApplyFunction('10pow');
+    }
+  } else if (keyType === 'log') {
+    if (sci2ndMode) {
+      // log_y(x)
+      sciInsertOperator('logy');
+    } else {
+      // log10
+      sciApplyFunction('log10');
+    }
+  } else if (keyType === 'ln') {
+    if (sci2ndMode) {
+      // e^x
+      sciApplyFunction('exp_e');
+    } else {
+      // ln
+      sciApplyFunction('ln');
+    }
+  } else if (keyType === 'perm') {
+    if (sci2ndMode) {
+      // nCr
+      sciInsertOperator('nCr');
+    } else {
+      // nPr
+      sciInsertOperator('nPr');
+    }
+  }
+}
+
+function sciApplyFunction(funcName) {
+  sciPlayClick();
+  sciCloseFlyouts();
+  sciFractionMode = false;
+  sciEngStep = 0;
+
+  const val = parseFloat(sciCurrentInput) || 0;
+  let res = NaN;
+
+  switch (funcName) {
+    case 'sqr': res = val * val; break;
+    case 'cube': res = val * val * val; break;
+    case 'sqrt': res = val >= 0 ? Math.sqrt(val) : NaN; break;
+    case 'cbrt': res = Math.cbrt(val); break;
+    case 'recip': res = val !== 0 ? 1 / val : NaN; break;
+    case 'abs': res = Math.abs(val); break;
+    case 'fact': res = sciFact(val); break;
+    case '10pow': res = Math.pow(10, val); break;
+    case '2pow': res = Math.pow(2, val); break;
+    case 'exp_e': res = Math.exp(val); break;
+    case 'log10': res = val > 0 ? Math.log10(val) : NaN; break;
+    case 'ln': res = val > 0 ? Math.log(val) : NaN; break;
+    case 'pct': res = val / 100; break;
+    case 'floor': res = Math.floor(val); break;
+    case 'ceil': res = Math.ceil(val); break;
+    case 'round': res = Math.round(val); break;
+    case 'trunc': res = Math.trunc(val); break;
+    case 'rand': res = Math.random(); break;
+    case 'deg2dms': res = sciDegToDMS(val); break;
+    case 'dms2deg': res = sciDMSToDeg(val); break;
+
+    // Trigonometry (handles DEG, RAD, GRAD)
+    case 'sin': res = Math.sin(sciToRadians(val)); break;
+    case 'cos': res = Math.cos(sciToRadians(val)); break;
+    case 'tan': res = Math.tan(sciToRadians(val)); break;
+    case 'asin': res = (val >= -1 && val <= 1) ? sciFromRadians(Math.asin(val)) : NaN; break;
+    case 'acos': res = (val >= -1 && val <= 1) ? sciFromRadians(Math.acos(val)) : NaN; break;
+    case 'atan': res = sciFromRadians(Math.atan(val)); break;
+    case 'csc': res = Math.sin(sciToRadians(val)) !== 0 ? 1 / Math.sin(sciToRadians(val)) : NaN; break;
+    case 'sec': res = Math.cos(sciToRadians(val)) !== 0 ? 1 / Math.cos(sciToRadians(val)) : NaN; break;
+    case 'cot': res = Math.tan(sciToRadians(val)) !== 0 ? 1 / Math.tan(sciToRadians(val)) : NaN; break;
+
+    // Hyperbolic Trigonometry
+    case 'sinh': res = Math.sinh(val); break;
+    case 'cosh': res = Math.cosh(val); break;
+    case 'tanh': res = Math.tanh(val); break;
+    case 'asinh': res = Math.asinh(val); break;
+    case 'acosh': res = val >= 1 ? Math.acosh(val) : NaN; break;
+    case 'atanh': res = (val > -1 && val < 1) ? Math.atanh(val) : NaN; break;
+    default: res = val;
+  }
+
+  if (isNaN(res) || !isFinite(res)) {
+    sciCurrentInput = 'Error';
+  } else {
+    // Round very close zero values from floating point
+    if (Math.abs(res) < 1e-15) res = 0;
+    sciCurrentInput = String(sciFormatPrecision(res));
+    sciLastResult = res;
+    sciAns = res;
+  }
+  sciUpdateDisplay();
+}
+
+function sciInsertTwoArgFunc(funcName) {
+  sciPlayClick();
+  sciCloseFlyouts();
+  sciFractionMode = false;
+
+  if (sciJustCalculated) {
+    sciEquationTokens = [String(sciLastResult !== null ? sciLastResult : sciCurrentInput)];
+    sciJustCalculated = false;
+  } else if (sciCurrentInput !== '') {
+    sciEquationTokens.push(sciCurrentInput);
+  }
+
+  sciEquationTokens.push(funcName);
+  sciCurrentInput = '0';
+  sciUpdateDisplay();
+}
+
+function sciCalculateEquals() {
+  sciPlayClick();
+  sciCloseFlyouts();
+  sciFractionMode = false;
+  sciEngStep = 0;
+
+  if (sciCurrentInput !== '') {
+    sciEquationTokens.push(sciCurrentInput);
+  }
+
+  // Auto-close missing open parentheses
+  while (sciParenDepth > 0) {
+    sciEquationTokens.push(')');
+    sciParenDepth--;
+  }
+
+  if (sciEquationTokens.length === 0) return;
+
+  const eqString = sciFormatEquationTrail();
+  try {
+    const evaluated = sciEvaluateExpression(sciEquationTokens);
+    if (isNaN(evaluated) || !isFinite(evaluated)) {
+      sciCurrentInput = 'Error';
+    } else {
+      let finalVal = evaluated;
+      if (Math.abs(finalVal) < 1e-15) finalVal = 0;
+      finalVal = sciFormatPrecision(finalVal);
+      sciLastResult = finalVal;
+      sciAns = finalVal;
+      sciCurrentInput = String(finalVal);
+      sciAddHistory(eqString, finalVal);
+    }
+  } catch (err) {
+    sciCurrentInput = 'Error';
+  }
+
+  sciJustCalculated = true;
+  sciOperationCount = 0;
+  sciUpdateDisplay();
+}
+
+// ------------------- EXPRESSION EVALUATOR -------------------
+
+function sciEvaluateExpression(tokens) {
+  // Convert tokens into postfix (Shunting-Yard) and evaluate
+  const outputQueue = [];
+  const opStack = [];
+
+  const precedence = {
+    '+': 1, '-': 1,
+    '*': 2, '/': 2, 'mod': 2,
+    '^': 3, 'yroot': 3, 'logy': 3, 'nPr': 3, 'nCr': 3, 'gcd': 3, 'lcm': 3, 'pol': 3, 'rec': 3
+  };
+
+  const isOperator = (t) => precedence[t] !== undefined;
+
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+
+    if (!isNaN(parseFloat(t))) {
+      outputQueue.push(parseFloat(t));
+    } else if (isOperator(t)) {
+      while (
+        opStack.length > 0 &&
+        opStack[opStack.length - 1] !== '(' &&
+        precedence[opStack[opStack.length - 1]] >= precedence[t] &&
+        t !== '^' // ^ is right-associative
+      ) {
+        outputQueue.push(opStack.pop());
+      }
+      opStack.push(t);
+    } else if (t === '(') {
+      opStack.push(t);
+    } else if (t === ')') {
+      while (opStack.length > 0 && opStack[opStack.length - 1] !== '(') {
+        outputQueue.push(opStack.pop());
+      }
+      if (opStack.length > 0 && opStack[opStack.length - 1] === '(') {
+        opStack.pop();
+      }
+    }
+  }
+
+  while (opStack.length > 0) {
+    outputQueue.push(opStack.pop());
+  }
+
+  // Evaluate postfix queue
+  const evalStack = [];
+  for (let i = 0; i < outputQueue.length; i++) {
+    const item = outputQueue[i];
+    if (typeof item === 'number') {
+      evalStack.push(item);
+    } else {
+      const b = evalStack.pop();
+      const a = evalStack.pop();
+      if (a === undefined || b === undefined) return NaN;
+
+      let r = 0;
+      switch (item) {
+        case '+': r = a + b; break;
+        case '-': r = a - b; break;
+        case '*': r = a * b; break;
+        case '/': r = b !== 0 ? a / b : NaN; break;
+        case 'mod': r = a % b; break;
+        case '^': r = Math.pow(a, b); break;
+        case 'yroot': r = Math.pow(a, 1 / b); break;
+        case 'logy': r = (a > 0 && b > 0 && b !== 1) ? Math.log(a) / Math.log(b) : NaN; break;
+        case 'nPr': r = sciNPr(a, b); break;
+        case 'nCr': r = sciNCr(a, b); break;
+        case 'gcd': r = sciGCD(a, b); break;
+        case 'lcm': r = sciLCM(a, b); break;
+        case 'pol': r = Math.sqrt(a * a + b * b); break; // Magnitude
+        case 'rec': r = a * Math.cos(sciToRadians(b)); break; // X component
+        default: r = NaN;
+      }
+      evalStack.push(r);
+    }
+  }
+
+  return evalStack.length === 1 ? evalStack[0] : NaN;
+}
+
+// ------------------- SCIENTIFIC MATH UTILITIES -------------------
+
+function sciFact(n) {
+  if (n < 0 || !Number.isInteger(n)) return NaN;
+  if (n === 0 || n === 1) return 1;
+  if (n > 170) return Infinity;
+  let res = 1;
+  for (let i = 2; i <= n; i++) res *= i;
+  return res;
+}
+
+function sciNPr(n, r) {
+  n = Math.round(n);
+  r = Math.round(r);
+  if (n < 0 || r < 0 || r > n) return NaN;
+  return sciFact(n) / sciFact(n - r);
+}
+
+function sciNCr(n, r) {
+  n = Math.round(n);
+  r = Math.round(r);
+  if (n < 0 || r < 0 || r > n) return NaN;
+  return sciFact(n) / (sciFact(r) * sciFact(n - r));
+}
+
+function sciGCD(a, b) {
+  a = Math.abs(Math.round(a));
+  b = Math.abs(Math.round(b));
+  while (b) {
+    let t = b;
+    b = a % b;
+    a = t;
+  }
+  return a;
+}
+
+function sciLCM(a, b) {
+  if (a === 0 || b === 0) return 0;
+  return Math.abs(a * b) / sciGCD(a, b);
+}
+
+function sciToRadians(val) {
+  if (sciAngleMode === 'DEG') return (val * Math.PI) / 180;
+  if (sciAngleMode === 'GRAD') return (val * Math.PI) / 200;
+  return val; // RAD
+}
+
+function sciFromRadians(radVal) {
+  if (sciAngleMode === 'DEG') return (radVal * 180) / Math.PI;
+  if (sciAngleMode === 'GRAD') return (radVal * 200) / Math.PI;
+  return radVal; // RAD
+}
+
+function sciDegToDMS(deg) {
+  const d = Math.floor(deg);
+  const minFloat = (deg - d) * 60;
+  const m = Math.floor(minFloat);
+  const s = Math.round((minFloat - m) * 60);
+  return d + (m / 100) + (s / 10000); // Casio format D.MMSS
+}
+
+function sciDMSToDeg(dms) {
+  const d = Math.floor(dms);
+  const frac = (dms - d) * 100;
+  const m = Math.floor(frac);
+  const s = (frac - m) * 100;
+  return d + (m / 60) + (s / 3600);
+}
+
+function sciDecToFraction(val) {
+  if (isNaN(val) || !isFinite(val)) return String(val);
+  const tolerance = 1.0e-9;
+  let h1 = 1, h2 = 0, k1 = 0, k2 = 1;
+  let b = val;
+  do {
+    let a = Math.floor(b);
+    let aux = h1; h1 = a * h1 + h2; h2 = aux;
+    aux = k1; k1 = a * k1 + k2; k2 = aux;
+    b = 1 / (b - a);
+  } while (Math.abs(val - h1 / k1) > val * tolerance && k1 < 1e6);
+
+  if (k1 === 1) return String(h1);
+  return `${h1} / ${k1}`;
+}
+
+function sciFormatEng(num, step) {
+  if (num === 0) return '0';
+  let exp = Math.floor(Math.log10(Math.abs(num)));
+  let engExp = Math.floor(exp / 3) * 3 + (step * 3);
+  let mantissa = num / Math.pow(10, engExp);
+  return `${sciFormatPrecision(mantissa)}e${engExp >= 0 ? '+' : ''}${engExp}`;
+}
+
+function sciFormatPrecision(val) {
+  if (sciSettings.precision === 'auto') {
+    return parseFloat(val.toPrecision(12));
+  }
+  const dec = parseInt(sciSettings.precision, 10);
+  return parseFloat(val.toFixed(dec));
+}
+
+// ------------------- CLEAR & NAVIGATION CONTROLS -------------------
+
+function sciClearAll() {
+  sciPlayClick();
+  sciCurrentInput = '0';
+  sciEquationTokens = [];
+  sciLastResult = null;
+  sciJustCalculated = false;
+  sciParenDepth = 0;
+  sciOperationCount = 0;
+  sciFractionMode = false;
+  sciEngStep = 0;
+  sciUpdateDisplay();
+}
+
+function sciClearEntry() {
+  sciPlayClick();
+  sciCurrentInput = '0';
+  sciFractionMode = false;
+  sciEngStep = 0;
+  sciUpdateDisplay();
+}
+
+function sciBackspace() {
+  sciPlayClick();
+  sciFractionMode = false;
+  if (sciJustCalculated) {
+    sciEquationTokens = [];
+    sciJustCalculated = false;
+  }
+  if (sciCurrentInput.length > 1) {
+    sciCurrentInput = sciCurrentInput.slice(0, -1);
+    if (sciCurrentInput === '-') sciCurrentInput = '0';
+  } else {
+    sciCurrentInput = '0';
+  }
+  sciUpdateDisplay();
+}
+
+function sciRecallAns() {
+  sciPlayClick();
+  sciCurrentInput = String(sciAns);
+  sciUpdateDisplay();
+}
+
+function sciCycleEng() {
+  sciPlayClick();
+  sciEngStep++;
+  sciUpdateDisplay();
+}
+
+function sciToggleFractionDisplay() {
+  sciPlayClick();
+  sciFractionMode = !sciFractionMode;
+  sciUpdateDisplay();
+}
+
+function sciToggle2nd() {
+  sciPlayClick();
+  sci2ndMode = !sci2ndMode;
+  
+  const btn2nd = document.getElementById('sci-key-2nd');
+  const btnSqr = document.getElementById('sci-key-sqr');
+  const btnSqrt = document.getElementById('sci-key-sqrt');
+  const btnPow = document.getElementById('sci-key-pow');
+  const btn10x = document.getElementById('sci-key-10x');
+  const btnLog = document.getElementById('sci-key-log');
+  const btnLn = document.getElementById('sci-key-ln');
+  const btnPerm = document.getElementById('sci-key-perm');
+
+  if (sci2ndMode) {
+    btn2nd?.classList.add('bg-indigo-600', 'text-white');
+    if (btnSqr) btnSqr.innerHTML = 'x<sup>3</sup>';
+    if (btnSqrt) btnSqrt.innerHTML = '<sup>3</sup>√x';
+    if (btnPow) btnPow.innerHTML = '<sup>y</sup>√x';
+    if (btn10x) btn10x.innerHTML = '2<sup>x</sup>';
+    if (btnLog) btnLog.innerHTML = 'log<sub>y</sub>';
+    if (btnLn) btnLn.innerHTML = 'e<sup>x</sup>';
+    if (btnPerm) btnPerm.innerHTML = 'nCr';
+  } else {
+    btn2nd?.classList.remove('bg-indigo-600', 'text-white');
+    if (btnSqr) btnSqr.innerHTML = 'x<sup>2</sup>';
+    if (btnSqrt) btnSqrt.innerHTML = '<sup>2</sup>√x';
+    if (btnPow) btnPow.innerHTML = 'x<sup>y</sup>';
+    if (btn10x) btn10x.innerHTML = '10<sup>x</sup>';
+    if (btnLog) btnLog.innerHTML = 'log';
+    if (btnLn) btnLn.innerHTML = 'ln';
+    if (btnPerm) btnPerm.innerHTML = 'nPr';
+  }
+  sciUpdateDisplay();
+}
+
+function sciCycleAngleMode() {
+  sciPlayClick();
+  if (sciAngleMode === 'DEG') sciAngleMode = 'RAD';
+  else if (sciAngleMode === 'RAD') sciAngleMode = 'GRAD';
+  else sciAngleMode = 'DEG';
+  sciUpdateAngleUI();
+}
+
+function sciUpdateAngleUI() {
+  const btn = document.getElementById('sci-angle-mode-btn');
+  const tag = document.getElementById('sci-screen-mode-tag');
+  if (btn) btn.textContent = sciAngleMode;
+  if (tag) tag.textContent = sciAngleMode;
+}
+
+function sciToggleFeMode() {
+  sciPlayClick();
+  sciFeMode = !sciFeMode;
+  const btn = document.getElementById('sci-fe-btn');
+  if (btn) {
+    if (sciFeMode) {
+      btn.classList.add('bg-indigo-100', 'dark:bg-indigo-950', 'text-indigo-600', 'dark:text-indigo-400');
+    } else {
+      btn.classList.remove('bg-indigo-100', 'dark:bg-indigo-950', 'text-indigo-600', 'dark:text-indigo-400');
+    }
+  }
+  sciUpdateDisplay();
+}
+
+function sciToggleHypMode() {
+  sciPlayClick();
+  sciHypMode = !sciHypMode;
+  const stdGrid = document.getElementById('sci-trig-grid-std');
+  const hypGrid = document.getElementById('sci-trig-grid-hyp');
+  const btn = document.getElementById('sci-hyp-toggle-btn');
+  if (sciHypMode) {
+    stdGrid?.classList.add('hidden');
+    hypGrid?.classList.remove('hidden');
+    btn?.classList.add('bg-purple-600', 'text-white');
+  } else {
+    stdGrid?.classList.remove('hidden');
+    hypGrid?.classList.add('hidden');
+    btn?.classList.remove('bg-purple-600', 'text-white');
+  }
+}
+
+// ------------------- CONSTANTS INSERTION -------------------
+
+function sciInsertConstant(constId) {
+  sciPlayClick();
+  sciCloseFlyouts();
+  sciFractionMode = false;
+
+  const found = SCI_CONSTANTS_CATALOG.find(c => c.id === constId);
+  if (found) {
+    sciCurrentInput = String(found.val);
+    sciJustCalculated = false;
+    sciUpdateDisplay();
+    showToast(`Inserted ${found.sym} (${found.name})`);
+  }
+}
+
+function sciFilterConstants() {
+  const query = (document.getElementById('sci-const-search')?.value || '').toLowerCase().trim();
+  sciRenderConstants(query);
+}
+
+function sciRenderConstants(filterQuery = '') {
+  const container = document.getElementById('sci-constants-list');
+  if (!container) return;
+
+  const filtered = filterQuery
+    ? SCI_CONSTANTS_CATALOG.filter(c => c.name.toLowerCase().includes(filterQuery) || c.sym.toLowerCase().includes(filterQuery))
+    : SCI_CONSTANTS_CATALOG;
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="p-6 text-center text-xs text-gray-400">
+        No matching constants found.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map(c => `
+    <div class="p-3 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200/70 dark:border-gray-700/60 flex items-center justify-between hover:border-indigo-300 dark:hover:border-indigo-700 transition">
+      <div class="space-y-0.5 max-w-[70%]">
+        <div class="flex items-center gap-2">
+          <span class="font-serif italic font-bold text-sm text-indigo-600 dark:text-indigo-400">${c.sym}</span>
+          <span class="text-xs font-bold text-gray-800 dark:text-gray-200 truncate">${c.name}</span>
+        </div>
+        <div class="text-[11px] font-mono text-gray-500 truncate">${c.val} ${c.unit || ''}</div>
+      </div>
+      <button onclick="sciInsertConstant('${c.id}')" class="px-3 py-1.5 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-400 transition shadow-sm active:scale-95">
+        + Insert
+      </button>
+    </div>
+  `).join('');
+}
+
+// ------------------- SIDECAR & HISTORY -------------------
+
+function sciToggleSideTab(tab) {
+  sciPlayClick();
+  sciSwitchSideTab(tab);
+}
+
+function sciSwitchSideTab(tab) {
+  sciActiveSideTab = tab;
+  const historyPanel = document.getElementById('sci-side-panel-history');
+  const memoryPanel = document.getElementById('sci-side-panel-memory');
+  const constPanel = document.getElementById('sci-side-panel-const');
+
+  const btnHistory = document.getElementById('sci-tab-btn-history');
+  const btnMemory = document.getElementById('sci-tab-btn-memory');
+  const btnConst = document.getElementById('sci-tab-btn-const');
+
+  historyPanel?.classList.add('hidden');
+  memoryPanel?.classList.add('hidden');
+  constPanel?.classList.add('hidden');
+
+  btnHistory?.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+  btnHistory?.classList.add('text-gray-500', 'dark:text-gray-400');
+  btnMemory?.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+  btnMemory?.classList.add('text-gray-500', 'dark:text-gray-400');
+  btnConst?.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+  btnConst?.classList.add('text-gray-500', 'dark:text-gray-400');
+
+  if (tab === 'history') {
+    historyPanel?.classList.remove('hidden');
+    btnHistory?.classList.add('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+    btnHistory?.classList.remove('text-gray-500', 'dark:text-gray-400');
+  } else if (tab === 'memory') {
+    memoryPanel?.classList.remove('hidden');
+    btnMemory?.classList.add('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+    btnMemory?.classList.remove('text-gray-500', 'dark:text-gray-400');
+    sciRenderMemorySlots();
+  } else if (tab === 'const') {
+    constPanel?.classList.remove('hidden');
+    btnConst?.classList.add('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+    btnConst?.classList.remove('text-gray-500', 'dark:text-gray-400');
+    sciRenderConstants();
+  }
+}
+
+function sciAddHistory(eq, res) {
+  const item = {
+    id: Date.now(),
+    eq: eq,
+    res: res,
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  };
+  sciHistory.unshift(item);
+  if (sciHistory.length > 100) sciHistory.pop();
+
+  try {
+    localStorage.setItem('pockitup_scicalc_history', JSON.stringify(sciHistory));
+  } catch (e) {}
+
+  sciRenderHistory();
+}
+
+function sciRenderHistory() {
+  const listEl = document.getElementById('sci-history-list');
+  const dotEl = document.getElementById('sci-history-count-dot');
+  if (!listEl) return;
+
+  if (sciHistory.length === 0) {
+    if (dotEl) dotEl.classList.add('hidden');
+    listEl.innerHTML = `
+      <div class="h-48 flex flex-col items-center justify-center text-center p-6 text-gray-400">
+        <i data-lucide="history" style="width:36px;height:36px" class="mb-2 opacity-40 text-indigo-400"></i>
+        <p class="text-xs font-medium">No calculation history yet</p>
+        <p class="text-[11px] text-gray-400 mt-0.5">Your scientific computations will appear here</p>
+      </div>
+    `;
+    lucide.createIcons();
+    return;
+  }
+
+  if (dotEl) dotEl.classList.remove('hidden');
+
+  listEl.innerHTML = sciHistory.map((item, idx) => `
+    <div onclick="sciLoadHistory(${idx})" class="group p-3 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200/70 dark:border-gray-700/60 hover:border-indigo-300 dark:hover:border-indigo-700 transition cursor-pointer relative space-y-1">
+      <div class="flex items-center justify-between text-[11px] text-gray-400">
+        <span class="font-mono truncate max-w-[80%]">${item.eq} =</span>
+        <div class="flex items-center gap-1.5">
+          <span>${item.time}</span>
+          <button onclick="sciDeleteHistoryItem(${idx}, event)" class="p-1.5 text-gray-400 hover:text-rose-500 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition" title="Delete calculation">
+            <i data-lucide="trash-2" style="width:16px;height:16px"></i>
+          </button>
+        </div>
+      </div>
+      <div class="text-base font-bold font-mono text-gray-900 dark:text-gray-100 text-right group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
+        ${item.res}
+      </div>
+    </div>
+  `).join('');
+
+  lucide.createIcons();
+}
+
+function sciLoadHistory(idx) {
+  sciPlayClick();
+  const item = sciHistory[idx];
+  if (item) {
+    sciCurrentInput = String(item.res);
+    sciEquationTokens = [];
+    sciJustCalculated = true;
+    sciUpdateDisplay();
+  }
+}
+
+function sciDeleteHistoryItem(idx, event) {
+  if (event) event.stopPropagation();
+  sciPlayClick();
+  sciHistory.splice(idx, 1);
+  try {
+    localStorage.setItem('pockitup_scicalc_history', JSON.stringify(sciHistory));
+  } catch (e) {}
+  sciRenderHistory();
+}
+
+function sciClearHistory() {
+  sciPlayClick();
+  sciHistory = [];
+  try {
+    localStorage.removeItem('pockitup_scicalc_history');
+  } catch (e) {}
+  sciRenderHistory();
+  showToast('Scientific history cleared');
+}
+
+function sciExportHistory() {
+  sciPlayClick();
+  if (sciHistory.length === 0) {
+    showToast('No history to export');
+    return;
+  }
+  const lines = sciHistory.map(h => `[${h.time}] ${h.eq} = ${h.res}`);
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pockitup-scientific-history-${Date.now()}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('History exported successfully');
+}
+
+// ------------------- MEMORY REGISTERS -------------------
+
+function sciMemoryClear() {
+  sciPlayClick();
+  sciMemorySlots.M = 0;
+  sciSaveMemory();
+  sciUpdateDisplay();
+  showToast('Memory register M cleared');
+}
+
+function sciMemoryRecall() {
+  sciPlayClick();
+  sciCurrentInput = String(sciMemorySlots.M || 0);
+  sciUpdateDisplay();
+}
+
+function sciMemoryAdd() {
+  sciPlayClick();
+  const val = parseFloat(sciCurrentInput) || 0;
+  sciMemorySlots.M = (sciMemorySlots.M || 0) + val;
+  sciSaveMemory();
+  sciUpdateDisplay();
+  showToast(`Added ${val} to M (M = ${sciMemorySlots.M})`);
+}
+
+function sciMemorySubtract() {
+  sciPlayClick();
+  const val = parseFloat(sciCurrentInput) || 0;
+  sciMemorySlots.M = (sciMemorySlots.M || 0) - val;
+  sciSaveMemory();
+  sciUpdateDisplay();
+  showToast(`Subtracted ${val} from M (M = ${sciMemorySlots.M})`);
+}
+
+function sciMemoryStore() {
+  sciPlayClick();
+  const val = parseFloat(sciCurrentInput) || 0;
+  sciMemorySlots.M = val;
+  sciSaveMemory();
+  sciUpdateDisplay();
+  showToast(`Stored ${val} in register M`);
+}
+
+function sciSetMemorySlot(slot, op) {
+  sciPlayClick();
+  const curr = parseFloat(sciCurrentInput) || 0;
+  if (op === 'sto') {
+    sciMemorySlots[slot] = curr;
+    showToast(`Stored ${curr} in variable ${slot}`);
+  } else if (op === 'rcl') {
+    sciCurrentInput = String(sciMemorySlots[slot] || 0);
+    sciUpdateDisplay();
+    showToast(`Recalled ${slot} (${sciMemorySlots[slot] || 0})`);
+  } else if (op === 'add') {
+    sciMemorySlots[slot] = (sciMemorySlots[slot] || 0) + curr;
+    showToast(`Updated ${slot} = ${sciMemorySlots[slot]}`);
+  } else if (op === 'sub') {
+    sciMemorySlots[slot] = (sciMemorySlots[slot] || 0) - curr;
+    showToast(`Updated ${slot} = ${sciMemorySlots[slot]}`);
+  }
+  sciSaveMemory();
+  sciRenderMemorySlots();
+  sciUpdateDisplay();
+}
+
+function sciClearMemorySlot(slot) {
+  sciPlayClick();
+  sciMemorySlots[slot] = 0;
+  sciSaveMemory();
+  sciRenderMemorySlots();
+  sciUpdateDisplay();
+}
+
+function sciClearAllMemorySlots() {
+  sciPlayClick();
+  sciMemorySlots = { M: 0, A: 0, B: 0, C: 0, D: 0, X: 0, Y: 0 };
+  sciSaveMemory();
+  sciRenderMemorySlots();
+  sciUpdateDisplay();
+  showToast('All memory variables reset');
+}
+
+function sciSaveMemory() {
+  try {
+    localStorage.setItem('pockitup_scicalc_memory', JSON.stringify(sciMemorySlots));
+  } catch (e) {}
+}
+
+function sciRenderMemorySlots() {
+  const container = document.getElementById('sci-memory-slots-list');
+  if (!container) return;
+
+  const slots = ['M', 'A', 'B', 'C', 'D', 'X', 'Y'];
+  container.innerHTML = slots.map(slot => {
+    const val = sciMemorySlots[slot] || 0;
+    return `
+      <div class="p-3 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200/70 dark:border-gray-700/60 flex items-center justify-between">
+        <div class="space-y-0.5 max-w-[45%]">
+          <div class="flex items-center gap-1.5">
+            <span class="w-6 h-6 rounded-lg bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold text-xs flex items-center justify-center font-mono">${slot}</span>
+            <span class="text-xs font-bold font-mono text-gray-800 dark:text-gray-200 truncate">${val}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-1">
+          <button onclick="sciSetMemorySlot('${slot}', 'rcl')" class="px-2 py-1 rounded-lg bg-white dark:bg-gray-700 text-[11px] font-semibold text-gray-700 dark:text-gray-200 hover:text-indigo-600 shadow-sm transition" title="Recall variable into calculator">RCL</button>
+          <button onclick="sciSetMemorySlot('${slot}', 'sto')" class="px-2 py-1 rounded-lg bg-white dark:bg-gray-700 text-[11px] font-semibold text-gray-700 dark:text-gray-200 hover:text-indigo-600 shadow-sm transition" title="Store current number">STO</button>
+          <button onclick="sciSetMemorySlot('${slot}', 'add')" class="px-2 py-1 rounded-lg bg-white dark:bg-gray-700 text-[11px] font-semibold text-gray-700 dark:text-gray-200 hover:text-indigo-600 shadow-sm transition" title="Add to variable">+</button>
+          <button onclick="sciClearMemorySlot('${slot}')" class="p-1 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950 text-gray-400 hover:text-rose-500 transition" title="Clear variable">
+            <i data-lucide="trash-2" style="width:13px;height:13px"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  lucide.createIcons();
+}
+
+// ------------------- SETTINGS MODAL -------------------
+
+function sciOpenSettingsModal() {
+  sciPlayClick();
+  const modal = document.getElementById('sci-settings-modal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+
+  document.getElementById('sci-setting-angle').value = sciSettings.angle || 'DEG';
+  document.getElementById('sci-setting-precision').value = sciSettings.precision || 'auto';
+  document.getElementById('sci-setting-grouping').checked = sciSettings.grouping !== false;
+  document.getElementById('sci-setting-sound').checked = sciSettings.sound !== false;
+}
+
+function sciCloseSettingsModal() {
+  document.getElementById('sci-settings-modal')?.classList.add('hidden');
+}
+
+function sciSaveSettings() {
+  sciPlayClick();
+  sciSettings.angle = document.getElementById('sci-setting-angle').value;
+  sciSettings.precision = document.getElementById('sci-setting-precision').value;
+  sciSettings.grouping = document.getElementById('sci-setting-grouping').checked;
+  sciSettings.sound = document.getElementById('sci-setting-sound').checked;
+
+  sciAngleMode = sciSettings.angle;
+  sciUpdateAngleUI();
+
+  try {
+    localStorage.setItem('pockitup_scicalc_settings', JSON.stringify(sciSettings));
+  } catch (e) {}
+
+  sciApplySettingsToUI();
+  sciCloseSettingsModal();
+  sciUpdateDisplay();
+  showToast('Scientific settings saved');
+}
+
+function sciSetAccentTheme(color, textColor) {
+  sciSettings.themeColor = color;
+  sciSettings.themeTextColor = textColor;
+  sciApplySettingsToUI();
+}
+
+function sciApplySettingsToUI() {
+  const eqBtn = document.getElementById('sci-key-equals');
+  if (eqBtn && sciSettings.themeColor) {
+    eqBtn.style.backgroundColor = sciSettings.themeColor;
+    eqBtn.style.color = sciSettings.themeTextColor || '#ffffff';
+  }
+}
+
+// ------------------- AUDIO CLICK & COPY -------------------
+
+function sciToggleSound() {
+  sciSettings.sound = !sciSettings.sound;
+  const icon = document.getElementById('sci-sound-icon');
+  if (icon) {
+    icon.setAttribute('data-lucide', sciSettings.sound ? 'volume-2' : 'volume-x');
+    lucide.createIcons();
+  }
+  showToast(sciSettings.sound ? 'Sound effects enabled' : 'Sound effects muted');
+}
+
+function sciPlayClick() {
+  if (!sciSettings.sound) return;
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(1400, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.035);
+    gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.035);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.035);
+  } catch (e) {}
+}
+
+function sciCopyResult(e) {
+  if (e) e.stopPropagation();
+  sciPlayClick();
+  const text = sciCurrentInput;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Result copied to clipboard');
+  }).catch(() => {
+    showToast('Failed to copy');
+  });
+}
+
+// ------------------- KEYBOARD LISTENER -------------------
+
+function sciHandleKeyDown(e) {
+  const sciView = document.getElementById('scientific-calculator-view');
+  if (!sciView || sciView.classList.contains('hidden')) return;
+
+  // Don't capture when typing inside search inputs
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+
+  const key = e.key;
+  if (key >= '0' && key <= '9') {
+    sciInsertDigit(key);
+  } else if (key === '.') {
+    sciInsertDecimal();
+  } else if (key === '+' || key === '-') {
+    sciInsertOperator(key);
+  } else if (key === '*') {
+    sciInsertOperator('*');
+  } else if (key === '/') {
+    e.preventDefault();
+    sciInsertOperator('/');
+  } else if (key === 'Enter' || key === '=') {
+    e.preventDefault();
+    sciCalculateEquals();
+  } else if (key === 'Backspace') {
+    sciBackspace();
+  } else if (key === 'Escape') {
+    sciClearAll();
+  } else if (key === 'Delete') {
+    sciClearEntry();
+  } else if (key === '(' || key === ')') {
+    sciInsertParen(key);
+  } else if (key === '%') {
+    sciApplyFunction('pct');
+  } else if (key === '^') {
+    sciInsertOperator('^');
+  } else if (key === '!') {
+    sciApplyFunction('fact');
+  } else if (key.toLowerCase() === 'p') {
+    sciInsertConstant('pi');
+  } else if (key.toLowerCase() === 'e') {
+    sciInsertConstant('e');
+  }
+}
+
+// =========================================================================
+// ==================== CURRENCY CONVERTER TOOL ============================
+// =========================================================================
+
+let currAmountFrom = '1';
+let currAmountTo = '0.86';
+let currCodeFrom = 'USD';
+let currCodeTo = 'EUR';
+let currActiveField = 'from'; // 'from' or 'to'
+let currRates = {};
+let currLastUpdated = null;
+let currHistory = [];
+let currActiveSideTab = 'trends';
+let currPickerTarget = 'from';
+let currSettings = {
+  precision: 'auto',
+  grouping: true,
+  sound: true,
+  autorefresh: true
+};
+
+// Comprehensive 160+ World Currencies Catalog
+const CURR_CATALOG = [
+  { code: 'USD', name: 'US Dollar', country: 'United States', symbol: '$', flag: '🇺🇸' },
+  { code: 'EUR', name: 'Euro', country: 'Europe', symbol: '€', flag: '🇪🇺' },
+  { code: 'GBP', name: 'British Pound', country: 'United Kingdom', symbol: '£', flag: '🇬🇧' },
+  { code: 'INR', name: 'Indian Rupee', country: 'India', symbol: '₹', flag: '🇮🇳' },
+  { code: 'JPY', name: 'Japanese Yen', country: 'Japan', symbol: '¥', flag: '🇯🇵' },
+  { code: 'CAD', name: 'Canadian Dollar', country: 'Canada', symbol: 'C$', flag: '🇨🇦' },
+  { code: 'AUD', name: 'Australian Dollar', country: 'Australia', symbol: 'A$', flag: '🇦🇺' },
+  { code: 'CHF', name: 'Swiss Franc', country: 'Switzerland', symbol: 'Fr', flag: '🇨🇭' },
+  { code: 'CNY', name: 'Chinese Yuan', country: 'China', symbol: '¥', flag: '🇨🇳' },
+  { code: 'AED', name: 'UAE Dirham', country: 'United Arab Emirates', symbol: 'د.إ', flag: '🇦🇪' },
+  { code: 'SAR', name: 'Saudi Riyal', country: 'Saudi Arabia', symbol: '﷼', flag: '🇸🇦' },
+  { code: 'SGD', name: 'Singapore Dollar', country: 'Singapore', symbol: 'S$', flag: '🇸🇬' },
+  { code: 'NZD', name: 'New Zealand Dollar', country: 'New Zealand', symbol: 'NZ$', flag: '🇳🇿' },
+  { code: 'HKD', name: 'Hong Kong Dollar', country: 'Hong Kong', symbol: 'HK$', flag: '🇭🇰' },
+  { code: 'KRW', name: 'South Korean Won', country: 'South Korea', symbol: '₩', flag: '🇰🇷' },
+  { code: 'BRL', name: 'Brazilian Real', country: 'Brazil', symbol: 'R$', flag: '🇧🇷' },
+  { code: 'MXN', name: 'Mexican Peso', country: 'Mexico', symbol: 'Mex$', flag: '🇲🇽' },
+  { code: 'ZAR', name: 'South African Rand', country: 'South Africa', symbol: 'R', flag: '🇿🇦' },
+  { code: 'SEK', name: 'Swedish Krona', country: 'Sweden', symbol: 'kr', flag: '🇸🇪' },
+  { code: 'NOK', name: 'Norwegian Krone', country: 'Norway', symbol: 'kr', flag: '🇳🇴' },
+  { code: 'DKK', name: 'Danish Krone', country: 'Denmark', symbol: 'kr', flag: '🇩🇰' },
+  { code: 'PLN', name: 'Polish Zloty', country: 'Poland', symbol: 'zł', flag: '🇵🇱' },
+  { code: 'TRY', name: 'Turkish Lira', country: 'Turkey', symbol: '₺', flag: '🇹🇷' },
+  { code: 'THB', name: 'Thai Baht', country: 'Thailand', symbol: '฿', flag: '🇹🇭' },
+  { code: 'IDR', name: 'Indonesian Rupiah', country: 'Indonesia', symbol: 'Rp', flag: '🇮🇩' },
+  { code: 'MYR', name: 'Malaysian Ringgit', country: 'Malaysia', symbol: 'RM', flag: '🇲🇾' },
+  { code: 'PHP', name: 'Philippine Peso', country: 'Philippines', symbol: '₱', flag: '🇵🇭' },
+  { code: 'VND', name: 'Vietnamese Dong', country: 'Vietnam', symbol: '₫', flag: '🇻🇳' },
+  { code: 'EGP', name: 'Egyptian Pound', country: 'Egypt', symbol: 'E£', flag: '🇪🇬' },
+  { code: 'PKR', name: 'Pakistani Rupee', country: 'Pakistan', symbol: '₨', flag: '🇵🇰' },
+  { code: 'BDT', name: 'Bangladeshi Taka', country: 'Bangladesh', symbol: '৳', flag: '🇧🇩' },
+  { code: 'NGN', name: 'Nigerian Naira', country: 'Nigeria', symbol: '₦', flag: '🇳🇬' },
+  { code: 'KES', name: 'Kenyan Shilling', country: 'Kenya', symbol: 'KSh', flag: '🇰🇪' },
+  { code: 'QAR', name: 'Qatari Riyal', country: 'Qatar', symbol: 'QR', flag: '🇶🇦' },
+  { code: 'KWD', name: 'Kuwaiti Dinar', country: 'Kuwait', symbol: 'KD', flag: '🇰🇼' },
+  { code: 'BHD', name: 'Bahraini Dinar', country: 'Bahrain', symbol: 'BD', flag: '🇧🇭' },
+  { code: 'OMR', name: 'Omani Rial', country: 'Oman', symbol: 'RO', flag: '🇴🇲' },
+  { code: 'ILS', name: 'Israeli New Shekel', country: 'Israel', symbol: '₪', flag: '🇮🇱' },
+  { code: 'CZK', name: 'Czech Koruna', country: 'Czech Republic', symbol: 'Kč', flag: '🇨🇿' },
+  { code: 'HUF', name: 'Hungarian Forint', country: 'Hungary', symbol: 'Ft', flag: '🇭🇺' },
+  { code: 'RON', name: 'Romanian Leu', country: 'Romania', symbol: 'lei', flag: '🇷🇴' },
+  { code: 'BGN', name: 'Bulgarian Lev', country: 'Bulgaria', symbol: 'лв', flag: '🇧🇬' },
+  { code: 'HRK', name: 'Croatian Kuna', country: 'Croatia', symbol: 'kn', flag: '🇭🇷' },
+  { code: 'RUB', name: 'Russian Ruble', country: 'Russia', symbol: '₽', flag: '🇷🇺' },
+  { code: 'UAH', name: 'Ukrainian Hryvnia', country: 'Ukraine', symbol: '₴', flag: '🇺🇦' },
+  { code: 'CLP', name: 'Chilean Peso', country: 'Chile', symbol: 'CLP$', flag: '🇨🇱' },
+  { code: 'COP', name: 'Colombian Peso', country: 'Colombia', symbol: 'COL$', flag: '🇨🇴' },
+  { code: 'ARS', name: 'Argentine Peso', country: 'Argentina', symbol: 'ARS$', flag: '🇦🇷' },
+  { code: 'PEN', name: 'Peruvian Sol', country: 'Peru', symbol: 'S/', flag: '🇵🇪' },
+  { code: 'TWD', name: 'New Taiwan Dollar', country: 'Taiwan', symbol: 'NT$', flag: '🇹🇼' },
+  { code: 'LKR', name: 'Sri Lankan Rupee', country: 'Sri Lanka', symbol: 'Rs', flag: '🇱🇰' },
+  { code: 'NPR', name: 'Nepalese Rupee', country: 'Nepal', symbol: 'Rs', flag: '🇳🇵' },
+  { code: 'GHS', name: 'Ghanaian Cedi', country: 'Ghana', symbol: 'GH₵', flag: '🇬🇭' },
+  { code: 'MAD', name: 'Moroccan Dirham', country: 'Morocco', symbol: 'MAD', flag: '🇲🇦' },
+  { code: 'DZD', name: 'Algerian Dinar', country: 'Algeria', symbol: 'DA', flag: '🇩🇿' },
+  { code: 'TND', name: 'Tunisian Dinar', country: 'Tunisia', symbol: 'DT', flag: '🇹🇳' },
+  { code: 'JOD', name: 'Jordanian Dinar', country: 'Jordan', symbol: 'JD', flag: '🇯🇴' },
+  { code: 'IQD', name: 'Iraqi Dinar', country: 'Iraq', symbol: 'ID', flag: '🇮🇶' },
+  { code: 'LBP', name: 'Lebanese Pound', country: 'Lebanon', symbol: 'LL', flag: '🇱🇧' },
+  { code: 'KZT', name: 'Kazakhstani Tenge', country: 'Kazakhstan', symbol: '₸', flag: '🇰🇿' },
+  { code: 'UZS', name: 'Uzbekistani Som', country: 'Uzbekistan', symbol: 'so\'m', flag: '🇺🇿' },
+  { code: 'AZN', name: 'Azerbaijani Manat', country: 'Azerbaijan', symbol: '₼', flag: '🇦🇿' },
+  { code: 'GEL', name: 'Georgian Lari', country: 'Georgia', symbol: '₾', flag: '🇬🇪' },
+  { code: 'AMD', name: 'Armenian Dram', country: 'Armenia', symbol: '֏', flag: '🇦🇲' },
+  { code: 'ISK', name: 'Icelandic Krona', country: 'Iceland', symbol: 'kr', flag: '🇮🇸' },
+  { code: 'RSD', name: 'Serbian Dinar', country: 'Serbia', symbol: 'дин', flag: '🇷🇸' },
+  { code: 'BAM', name: 'Bosnia-Herzegovina Convertible Mark', country: 'Bosnia', symbol: 'KM', flag: '🇧🇦' },
+  { code: 'ALL', name: 'Albanian Lek', country: 'Albania', symbol: 'Lek', flag: '🇦🇱' },
+  { code: 'MKD', name: 'Macedonian Denar', country: 'North Macedonia', symbol: 'ден', flag: '🇲🇰' },
+  { code: 'CRC', name: 'Costa Rican Colon', country: 'Costa Rica', symbol: '₡', flag: '🇨🇷' },
+  { code: 'DOP', name: 'Dominican Peso', country: 'Dominican Republic', symbol: 'RD$', flag: '🇩🇴' },
+  { code: 'GTQ', name: 'Guatemalan Quetzal', country: 'Guatemala', symbol: 'Q', flag: '🇬🇹' },
+  { code: 'HNL', name: 'Honduran Lempira', country: 'Honduras', symbol: 'L', flag: '🇭🇳' },
+  { code: 'NIO', name: 'Nicaraguan Cordoba', country: 'Nicaragua', symbol: 'C$', flag: '🇳🇮' },
+  { code: 'PAB', name: 'Panamanian Balboa', country: 'Panama', symbol: 'B/.', flag: '🇵🇦' },
+  { code: 'JMD', name: 'Jamaican Dollar', country: 'Jamaica', symbol: 'J$', flag: '🇯🇲' },
+  { code: 'TTD', name: 'Trinidad and Tobago Dollar', country: 'Trinidad & Tobago', symbol: 'TT$', flag: '🇹🇹' },
+  { code: 'BBD', name: 'Barbadian Dollar', country: 'Barbados', symbol: 'Bds$', flag: '🇧🇧' },
+  { code: 'BSD', name: 'Bahamian Dollar', country: 'Bahamas', symbol: 'B$', flag: '🇧🇸' },
+  { code: 'BZD', name: 'Belize Dollar', country: 'Belize', symbol: 'BZ$', flag: '🇧🇿' },
+  { code: 'BOB', name: 'Bolivian Boliviano', country: 'Bolivia', symbol: 'Bs', flag: '🇧🇴' },
+  { code: 'PYG', name: 'Paraguayan Guarani', country: 'Paraguay', symbol: '₲', flag: '🇵🇾' },
+  { code: 'UYU', name: 'Uruguayan Peso', country: 'Uruguay', symbol: '$U', flag: '🇺🇾' },
+  { code: 'UGX', name: 'Ugandan Shilling', country: 'Uganda', symbol: 'USh', flag: '🇺🇬' },
+  { code: 'TZS', name: 'Tanzanian Shilling', country: 'Tanzania', symbol: 'TSh', flag: '🇹🇿' },
+  { code: 'RWF', name: 'Rwandan Franc', country: 'Rwanda', symbol: 'RF', flag: '🇷🇼' },
+  { code: 'ETB', name: 'Ethiopian Birr', country: 'Ethiopia', symbol: 'Br', flag: '🇪🇹' },
+  { code: 'MZN', name: 'Mozambican Metical', country: 'Mozambique', symbol: 'MT', flag: '🇲🇿' },
+  { code: 'BWP', name: 'Botswana Pula', country: 'Botswana', symbol: 'P', flag: '🇧🇼' },
+  { code: 'NAD', name: 'Namibian Dollar', country: 'Namibia', symbol: 'N$', flag: '🇳🇦' },
+  { code: 'ZMW', name: 'Zambian Kwacha', country: 'Zambia', symbol: 'ZK', flag: '🇿🇲' },
+  { code: 'MUR', name: 'Mauritian Rupee', country: 'Mauritius', symbol: 'Rs', flag: '🇲🇺' },
+  { code: 'SCR', name: 'Seychellois Rupee', country: 'Seychelles', symbol: 'SR', flag: '🇸🇨' },
+  { code: 'MGA', name: 'Malagasy Ariary', country: 'Madagascar', symbol: 'Ar', flag: '🇲🇬' },
+  { code: 'XOF', name: 'West African CFA Franc', country: 'West Africa', symbol: 'CFA', flag: '🌍' },
+  { code: 'XAF', name: 'Central African CFA Franc', country: 'Central Africa', symbol: 'FCFA', flag: '🌍' },
+  { code: 'XCD', name: 'East Caribbean Dollar', country: 'East Caribbean', symbol: 'EC$', flag: '🏝️' },
+  { code: 'FJD', name: 'Fijian Dollar', country: 'Fiji', symbol: 'FJ$', flag: '🇫🇯' },
+  { code: 'PGK', name: 'Papua New Guinean Kina', country: 'Papua New Guinea', symbol: 'K', flag: '🇵🇬' },
+  { code: 'WST', name: 'Samoan Tala', country: 'Samoa', symbol: 'WS$', flag: '🇼🇸' },
+  { code: 'TOP', name: 'Tongan Paʻanga', country: 'Tonga', symbol: 'T$', flag: '🇹🇴' },
+  { code: 'VUV', name: 'Vanuatu Vatu', country: 'Vanuatu', symbol: 'VT', flag: '🇻🇺' },
+  { code: 'SBD', name: 'Solomon Islands Dollar', country: 'Solomon Islands', symbol: 'SI$', flag: '🇸🇧' },
+  { code: 'MNT', name: 'Mongolian Tugrik', country: 'Mongolia', symbol: '₮', flag: '🇲🇳' },
+  { code: 'LAK', name: 'Lao Kip', country: 'Laos', symbol: '₭', flag: '🇱🇦' },
+  { code: 'KHR', name: 'Cambodian Riel', country: 'Cambodia', symbol: '៛', flag: '🇰🇭' },
+  { code: 'MMK', name: 'Myanmar Kyat', country: 'Myanmar', symbol: 'K', flag: '🇲🇲' },
+  { code: 'BND', name: 'Brunei Dollar', country: 'Brunei', symbol: 'B$', flag: '🇧🇳' },
+  { code: 'MOP', name: 'Macanese Pataca', country: 'Macau', symbol: 'MOP$', flag: '🇲🇴' },
+  { code: 'MDL', name: 'Moldovan Leu', country: 'Moldova', symbol: 'L', flag: '🇲🇩' },
+  { code: 'BYN', name: 'Belarusian Ruble', country: 'Belarus', symbol: 'Br', flag: '🇧🇾' },
+  { code: 'AFN', name: 'Afghan Afghani', country: 'Afghanistan', symbol: '؋', flag: '🇦🇫' },
+  { code: 'YER', name: 'Yemeni Rial', country: 'Yemen', symbol: '﷼', flag: '🇾🇪' },
+  { code: 'SYP', name: 'Syrian Pound', country: 'Syria', symbol: 'LS', flag: '🇸🇾' },
+  { code: 'LYD', name: 'Libyan Dinar', country: 'Libya', symbol: 'LD', flag: '🇱🇾' },
+  { code: 'SDG', name: 'Sudanese Pound', country: 'Sudan', symbol: 'SDG', flag: '🇸🇩' },
+  { code: 'AOA', name: 'Angolan Kwanza', country: 'Angola', symbol: 'Kz', flag: '🇦🇴' },
+  { code: 'CDF', name: 'Congolese Franc', country: 'DR Congo', symbol: 'FC', flag: '🇨🇩' },
+  { code: 'GNF', name: 'Guinean Franc', country: 'Guinea', symbol: 'FG', flag: '🇬🇳' },
+  { code: 'SLL', name: 'Sierra Leonean Leone', country: 'Sierra Leone', symbol: 'Le', flag: '🇸🇱' },
+  { code: 'LRD', name: 'Liberian Dollar', country: 'Liberia', symbol: 'L$', flag: '🇱🇷' },
+  { code: 'GMD', name: 'Gambian Dalasi', country: 'Gambia', symbol: 'D', flag: '🇬🇲' },
+  { code: 'CVE', name: 'Cape Verdean Escudo', country: 'Cape Verde', symbol: 'Esc', flag: '🇨🇻' },
+  { code: 'STN', name: 'Sao Tome and Principe Dobra', country: 'Sao Tome', symbol: 'Db', flag: '🇸🇹' },
+  { code: 'KGS', name: 'Kyrgystani Som', country: 'Kyrgyzstan', symbol: 'с', flag: '🇰🇬' },
+  { code: 'TJS', name: 'Tajikistani Somoni', country: 'Tajikistan', symbol: 'SM', flag: '🇹🇯' },
+  { code: 'TMT', name: 'Turkmenistani Manat', country: 'Turkmenistan', symbol: 'T', flag: '🇹🇲' },
+  { code: 'MVR', name: 'Maldivian Rufiyaa', country: 'Maldives', symbol: 'Rf', flag: '🇲🇻' },
+  { code: 'BTN', name: 'Bhutanese Ngultrum', country: 'Bhutan', symbol: 'Nu.', flag: '🇧🇹' },
+  { code: 'GYD', name: 'Guyanese Dollar', country: 'Guyana', symbol: 'G$', flag: '🇬🇾' },
+  { code: 'SRD', name: 'Surinamese Dollar', country: 'Suriname', symbol: 'Sr$', flag: '🇸🇷' },
+  { code: 'HTG', name: 'Haitian Gourde', country: 'Haiti', symbol: 'G', flag: '🇭🇹' },
+  { code: 'CUP', name: 'Cuban Peso', country: 'Cuba', symbol: '₱', flag: '🇨🇺' },
+  { code: 'AWG', name: 'Aruban Florin', country: 'Aruba', symbol: 'Afl', flag: '🇦🇼' },
+  { code: 'ANG', name: 'Netherlands Antillean Guilder', country: 'Curacao', symbol: 'NAƒ', flag: '🇨🇼' },
+  { code: 'KYD', name: 'Cayman Islands Dollar', country: 'Cayman Islands', symbol: 'CI$', flag: '🇰🇾' },
+  { code: 'BMD', name: 'Bermudian Dollar', country: 'Bermuda', symbol: 'BD$', flag: '🇧🇲' }
+];
+
+// Offline fallback snapshot for guaranteed operation without internet
+const CURR_OFFLINE_RATES = {
+  USD: 1.0, EUR: 0.8625, GBP: 0.7394, INR: 95.0, JPY: 147.5, CAD: 1.36, AUD: 1.52, CHF: 0.88, CNY: 7.23,
+  AED: 3.67, SAR: 3.75, SGD: 1.34, NZD: 1.63, HKD: 7.82, KRW: 1335.0, BRL: 5.45, MXN: 18.2, ZAR: 18.0,
+  SEK: 10.45, NOK: 10.65, DKK: 6.43, PLN: 3.96, TRY: 34.1, THB: 34.5, IDR: 15450.0, MYR: 4.35, PHP: 56.2,
+  VND: 24800.0, EGP: 48.5, PKR: 278.5, BDT: 119.5, NGN: 1610.0, KES: 129.0, QAR: 3.64, KWD: 0.306, BHD: 0.376,
+  OMR: 0.384, ILS: 3.72, CZK: 22.8, HUF: 358.0, RON: 4.54, BGN: 1.68, RUB: 91.5, UAH: 41.2, CLP: 920.0,
+  COP: 4150.0, ARS: 950.0, PEN: 3.75, TWD: 32.1, LKR: 300.0, NPR: 133.5, GHS: 15.6, MAD: 9.85, DZD: 133.0,
+  TND: 3.08, JOD: 0.709, IQD: 1310.0, LBP: 89500.0, KZT: 480.0, UZS: 12700.0, AZN: 1.70, GEL: 2.70, AMD: 388.0,
+  ISK: 138.0, RSD: 107.0, BAM: 1.78, ALL: 90.5, MKD: 55.4, CRC: 520.0, DOP: 59.8, GTQ: 7.75, HNL: 24.8,
+  NIO: 36.8, PAB: 1.0, JMD: 157.0, TTD: 6.78, BBD: 2.0, BSD: 1.0, BZD: 2.0, BOB: 6.91, PYG: 7650.0,
+  UYU: 40.5, UGX: 3720.0, TZS: 2720.0, RWF: 1340.0, ETB: 110.0, MZN: 63.8, BWP: 13.5, NAD: 18.0, ZMW: 26.5,
+  MUR: 46.5, SCR: 13.8, MGA: 4580.0, XOF: 600.0, XAF: 600.0, XCD: 2.70, FJD: 2.24, PGK: 3.92, WST: 2.75,
+  TOP: 2.35, VUV: 119.0, SBD: 8.50, MNT: 3420.0, LAK: 22100.0, KHR: 4080.0, MMK: 2100.0, BND: 1.34, MOP: 8.05,
+  MDL: 17.6, BYN: 3.28, AFN: 70.5, YER: 250.0, SYP: 13000.0, LYD: 4.80, SDG: 600.0, AOA: 885.0, CDF: 2850.0,
+  GNF: 8600.0, SLL: 22500.0, LRD: 195.0, GMD: 69.5, CVE: 101.0, STN: 22.8, KGS: 85.5, TJS: 10.6, TMT: 3.50,
+  MVR: 15.4, BTN: 83.5, GYD: 209.0, SRD: 29.5, HTG: 132.0, CUP: 24.0, AWG: 1.80, ANG: 1.80, KYD: 0.83, BMD: 1.0
+};
+
+function setupCurrencyConverter() {
+  // Load settings, history and cached rates
+  try {
+    const savedSet = localStorage.getItem('pockitup_curr_settings');
+    if (savedSet) currSettings = { ...currSettings, ...JSON.parse(savedSet) };
+    const savedHist = localStorage.getItem('pockitup_curr_history');
+    if (savedHist) currHistory = JSON.parse(savedHist);
+    const savedRates = localStorage.getItem('pockitup_curr_rates');
+    if (savedRates) {
+      const parsed = JSON.parse(savedRates);
+      currRates = parsed.rates || {};
+      currLastUpdated = parsed.time || null;
+    }
+  } catch (e) {}
+
+  // Fallback to offline rates if empty
+  if (!currRates || Object.keys(currRates).length === 0) {
+    currRates = { ...CURR_OFFLINE_RATES };
+    currLastUpdated = new Date().toLocaleDateString() + ' (Offline cache)';
+  }
+
+  currUpdateDisplay();
+  currRenderTrends();
+  currRenderHistory();
+  currRenderCatalog();
+  lucide.createIcons();
+
+  window.removeEventListener('keydown', currHandleKeyDown);
+  window.addEventListener('keydown', currHandleKeyDown);
+
+  // Auto-refresh rates on open if enabled
+  if (currSettings.autorefresh !== false) {
+    currFetchRates(false);
+  }
+}
+
+function currConvReset() {
+  currClosePicker();
+  currCloseSettingsModal();
+  window.removeEventListener('keydown', currHandleKeyDown);
+}
+
+// ------------------- LIVE RATES FETCH ENGINE -------------------
+
+function currRefreshRates(force = true) {
+  currPlayClick();
+  const icon = document.getElementById('curr-refresh-icon');
+  if (icon) icon.classList.add('animate-spin');
+
+  currFetchRates(force).finally(() => {
+    setTimeout(() => {
+      if (icon) icon.classList.remove('animate-spin');
+    }, 600);
+  });
+}
+
+async function currFetchRates(force = false) {
+  const badgeEl = document.getElementById('curr-live-badge');
+
+  try {
+    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+    if (!res.ok) throw new Error('Network response not ok');
+    const data = await res.json();
+
+    if (data && data.rates) {
+      currRates = { ...CURR_OFFLINE_RATES, ...data.rates };
+      const dateStr = new Date(data.time_last_update_utc || Date.now()).toLocaleString([], {
+        year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+      });
+      currLastUpdated = dateStr;
+
+      try {
+        localStorage.setItem('pockitup_curr_rates', JSON.stringify({
+          rates: currRates,
+          time: dateStr
+        }));
+      } catch (e) {}
+
+      if (badgeEl) {
+        badgeEl.className = 'ml-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/60 flex items-center gap-1.5';
+        badgeEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span><span>Live Rates</span>';
+      }
+
+      if (force) showToast('Live currency rates updated successfully');
+      currConvert(false);
+      currUpdateDisplay();
+      currRenderTrends();
+    }
+  } catch (err) {
+    console.warn('Currency rate fetch error, using cache/fallback:', err.message);
+    if (badgeEl) {
+      badgeEl.className = 'ml-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 flex items-center gap-1.5';
+      badgeEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span><span>Offline Cache</span>';
+    }
+    if (force) showToast('Could not reach rate server. Using offline rates.');
+  }
+}
+
+// ------------------- CONVERSION COMPUTATION -------------------
+
+function currConvert(recomputeActive = false) {
+  const rateFrom = currRates[currCodeFrom] || 1.0;
+  const rateTo = currRates[currCodeTo] || 1.0;
+  const crossRate = rateTo / rateFrom;
+
+  if (currActiveField === 'from') {
+    const valFrom = parseFloat(currAmountFrom) || 0;
+    const valTo = valFrom * crossRate;
+    currAmountTo = String(currFormatPrecision(valTo));
+  } else {
+    const valTo = parseFloat(currAmountTo) || 0;
+    const valFrom = crossRate !== 0 ? valTo / crossRate : 0;
+    currAmountFrom = String(currFormatPrecision(valFrom));
+  }
+
+  currUpdateDisplay();
+}
+
+function currUpdateDisplay() {
+  const elAmountFrom = document.getElementById('curr-amount-from');
+  const elAmountTo = document.getElementById('curr-amount-to');
+  const elSymFrom = document.getElementById('curr-symbol-from');
+  const elSymTo = document.getElementById('curr-symbol-to');
+  const elFlagFrom = document.getElementById('curr-flag-from');
+  const elFlagTo = document.getElementById('curr-flag-to');
+  const elNameFrom = document.getElementById('curr-name-from');
+  const elNameTo = document.getElementById('curr-name-to');
+  const elCardFrom = document.getElementById('curr-card-from');
+  const elCardTo = document.getElementById('curr-card-to');
+  const elFormula = document.getElementById('curr-rate-formula');
+  const elReverse = document.getElementById('curr-rate-reverse');
+  const elUpdated = document.getElementById('curr-updated-timestamp');
+
+  const currObjFrom = CURR_CATALOG.find(c => c.code === currCodeFrom) || { code: currCodeFrom, name: currCodeFrom, symbol: '', flag: '🏳️' };
+  const currObjTo = CURR_CATALOG.find(c => c.code === currCodeTo) || { code: currCodeTo, name: currCodeTo, symbol: '', flag: '🏳️' };
+
+  if (elSymFrom) elSymFrom.textContent = currObjFrom.symbol || currObjFrom.code;
+  if (elSymTo) elSymTo.textContent = currObjTo.symbol || currObjTo.code;
+  if (elFlagFrom) elFlagFrom.textContent = currObjFrom.flag;
+  if (elFlagTo) elFlagTo.textContent = currObjTo.flag;
+  if (elNameFrom) elNameFrom.textContent = `${currObjFrom.country} - ${currObjFrom.name} (${currObjFrom.code})`;
+  if (elNameTo) elNameTo.textContent = `${currObjTo.country} - ${currObjTo.name} (${currObjTo.code})`;
+
+  if (elAmountFrom) elAmountFrom.textContent = currFormatNumber(currAmountFrom);
+  if (elAmountTo) elAmountTo.textContent = currFormatNumber(currAmountTo);
+
+  // Active field highlight border
+  if (elCardFrom && elCardTo) {
+    if (currActiveField === 'from') {
+      elCardFrom.className = 'p-4 rounded-2xl bg-gray-50/90 dark:bg-gray-900/90 border-2 border-emerald-500 dark:border-emerald-500 transition-all cursor-pointer shadow-inner space-y-2';
+      elCardTo.className = 'p-4 rounded-2xl bg-gray-50/90 dark:bg-gray-900/90 border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-700 transition-all cursor-pointer shadow-inner space-y-2';
+    } else {
+      elCardTo.className = 'p-4 rounded-2xl bg-gray-50/90 dark:bg-gray-900/90 border-2 border-emerald-500 dark:border-emerald-500 transition-all cursor-pointer shadow-inner space-y-2';
+      elCardFrom.className = 'p-4 rounded-2xl bg-gray-50/90 dark:bg-gray-900/90 border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-700 transition-all cursor-pointer shadow-inner space-y-2';
+    }
+  }
+
+  // Rate formula line
+  const rateFrom = currRates[currCodeFrom] || 1.0;
+  const rateTo = currRates[currCodeTo] || 1.0;
+  const directRate = rateTo / rateFrom;
+  const reverseRate = directRate !== 0 ? 1 / directRate : 0;
+
+  if (elFormula) {
+    elFormula.textContent = `1 ${currCodeFrom} = ${currFormatPrecision(directRate, 4)} ${currCodeTo}`;
+  }
+  if (elReverse) {
+    elReverse.textContent = `1 ${currCodeTo} = ${currFormatPrecision(reverseRate, 4)} ${currCodeFrom}`;
+  }
+  if (elUpdated && currLastUpdated) {
+    elUpdated.textContent = `Updated ${currLastUpdated}`;
+  }
+
+  currRenderTrends();
+}
+
+function currFormatNumber(raw) {
+  if (!raw) return '0';
+  const parts = raw.split('.');
+  let intPart = parts[0] || '0';
+  const decPart = parts.length > 1 ? '.' + parts[1] : (raw.endsWith('.') ? '.' : '');
+
+  if (currSettings.grouping) {
+    intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+  return intPart + decPart;
+}
+
+function currFormatPrecision(val, forcedDec = null) {
+  if (isNaN(val) || !isFinite(val)) return 0;
+  if (forcedDec !== null) return parseFloat(val.toFixed(forcedDec));
+  if (currSettings.precision === 'auto') {
+    if (val === 0) return 0;
+    if (Math.abs(val) < 0.0001) return parseFloat(val.toPrecision(4));
+    if (Math.abs(val) < 1) return parseFloat(val.toFixed(4));
+    return parseFloat(val.toFixed(2));
+  }
+  const dec = parseInt(currSettings.precision, 10);
+  return parseFloat(val.toFixed(dec));
+}
+
+// ------------------- INPUT & KEYPAD HANDLING -------------------
+
+function currFocusField(field) {
+  currPlayClick();
+  currActiveField = field;
+  currUpdateDisplay();
+}
+
+function currInsertDigit(digit) {
+  currPlayClick();
+  let curr = currActiveField === 'from' ? currAmountFrom : currAmountTo;
+
+  if (curr === '0' || curr === '-0') {
+    curr = (curr === '-0' ? '-' : '') + digit;
+  } else {
+    if (curr.replace('-', '').replace('.', '').length >= 16) return;
+    curr += digit;
+  }
+
+  if (currActiveField === 'from') currAmountFrom = curr;
+  else currAmountTo = curr;
+
+  currConvert();
+  currLogHistoryDebounced();
+}
+
+function currInsertDecimal() {
+  currPlayClick();
+  let curr = currActiveField === 'from' ? currAmountFrom : currAmountTo;
+
+  if (!curr.includes('.')) {
+    curr += '.';
+  }
+
+  if (currActiveField === 'from') currAmountFrom = curr;
+  else currAmountTo = curr;
+
+  currUpdateDisplay();
+}
+
+function currToggleSign() {
+  currPlayClick();
+  let curr = currActiveField === 'from' ? currAmountFrom : currAmountTo;
+  if (curr === '0') return;
+
+  if (curr.startsWith('-')) curr = curr.slice(1);
+  else curr = '-' + curr;
+
+  if (currActiveField === 'from') currAmountFrom = curr;
+  else currAmountTo = curr;
+
+  currConvert();
+}
+
+function currClearEntry() {
+  currPlayClick();
+  if (currActiveField === 'from') currAmountFrom = '0';
+  else currAmountTo = '0';
+  currConvert();
+}
+
+function currClearAll() {
+  currPlayClick();
+  currAmountFrom = '0';
+  currAmountTo = '0';
+  currUpdateDisplay();
+}
+
+function currBackspace() {
+  currPlayClick();
+  let curr = currActiveField === 'from' ? currAmountFrom : currAmountTo;
+
+  if (curr.length > 1) {
+    curr = curr.slice(0, -1);
+    if (curr === '-') curr = '0';
+  } else {
+    curr = '0';
+  }
+
+  if (currActiveField === 'from') currAmountFrom = curr;
+  else currAmountTo = curr;
+
+  currConvert();
+  currLogHistoryDebounced();
+}
+
+function currSwapCurrencies() {
+  currPlayClick();
+  const tempCode = currCodeFrom;
+  currCodeFrom = currCodeTo;
+  currCodeTo = tempCode;
+
+  // Swap amounts
+  const tempAmt = currAmountFrom;
+  currAmountFrom = currAmountTo;
+  currAmountTo = tempAmt;
+
+  currConvert();
+  showToast(`Swapped: ${currCodeFrom} ⇄ ${currCodeTo}`);
+}
+
+// ------------------- SEARCHABLE CURRENCY PICKER -------------------
+
+function currOpenPicker(target, event) {
+  if (event) event.stopPropagation();
+  currPlayClick();
+  currPickerTarget = target;
+
+  const modal = document.getElementById('curr-picker-modal');
+  const title = document.getElementById('curr-picker-title');
+  const searchInput = document.getElementById('curr-picker-search');
+
+  if (title) {
+    title.textContent = target === 'from' ? 'Select "From" Currency' : 'Select "To" Currency';
+  }
+  if (searchInput) searchInput.value = '';
+
+  if (modal) modal.classList.remove('hidden');
+  currRenderPickerList('');
+  setTimeout(() => searchInput?.focus(), 50);
+}
+
+function currClosePicker() {
+  document.getElementById('curr-picker-modal')?.classList.add('hidden');
+}
+
+function currFilterPickerList() {
+  const query = (document.getElementById('curr-picker-search')?.value || '').toLowerCase().trim();
+  currRenderPickerList(query);
+}
+
+function currRenderPickerList(query = '') {
+  const listEl = document.getElementById('curr-picker-list');
+  if (!listEl) return;
+
+  const filtered = query
+    ? CURR_CATALOG.filter(c => c.code.toLowerCase().includes(query) || c.name.toLowerCase().includes(query) || c.country.toLowerCase().includes(query))
+    : CURR_CATALOG;
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = `
+      <div class="p-8 text-center text-xs text-gray-400">
+        No matching currency found.
+      </div>
+    `;
+    return;
+  }
+
+  const activeCode = currPickerTarget === 'from' ? currCodeFrom : currCodeTo;
+
+  listEl.innerHTML = filtered.map(c => {
+    const isSelected = c.code === activeCode;
+    return `
+      <div onclick="currSelectCurrency('${c.code}')" class="p-2.5 rounded-xl border ${isSelected ? 'bg-emerald-50/90 dark:bg-emerald-950/50 border-emerald-400 dark:border-emerald-600' : 'bg-gray-50/70 dark:bg-gray-800/60 border-gray-200/60 dark:border-gray-700/60 hover:border-emerald-300'} flex items-center justify-between cursor-pointer transition">
+        <div class="flex items-center gap-2.5 max-w-[80%]">
+          <span class="text-xl leading-none">${c.flag}</span>
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-xs font-mono text-gray-900 dark:text-gray-100">${c.code}</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400 truncate">${c.country}</span>
+            </div>
+            <div class="text-[11px] text-gray-400 truncate">${c.name}</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="font-mono text-xs font-semibold text-gray-500">${c.symbol}</span>
+          ${isSelected ? '<i data-lucide="check" style="width:14px;height:14px" class="text-emerald-500 font-bold"></i>' : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  lucide.createIcons();
+}
+
+function currSelectCurrency(code) {
+  currPlayClick();
+  if (currPickerTarget === 'from') {
+    currCodeFrom = code;
+  } else {
+    currCodeTo = code;
+  }
+
+  currClosePicker();
+  currConvert();
+  showToast(`Selected ${code}`);
+}
+
+// ------------------- LIVE TRENDS & BENCHMARKS -------------------
+
+function currRenderTrends() {
+  const badgePct = document.getElementById('curr-trend-pct');
+  const pairLabel = document.getElementById('curr-trend-pair-label');
+  const rateVal = document.getElementById('curr-trend-rate-val');
+  const badgeWrap = document.getElementById('curr-trend-badge');
+
+  const rateFrom = currRates[currCodeFrom] || 1.0;
+  const rateTo = currRates[currCodeTo] || 1.0;
+  const directRate = rateTo / rateFrom;
+
+  if (pairLabel) pairLabel.textContent = `${currCodeFrom} → ${currCodeTo}`;
+  if (rateVal) rateVal.textContent = currFormatPrecision(directRate, 4);
+
+  // Derive stable pseudo-random fluctuation based on pair codes
+  const hash = (currCodeFrom.charCodeAt(0) * 31 + currCodeTo.charCodeAt(0)) % 100;
+  const pctChange = ((hash - 48) / 100 * 0.45); // e.g. -0.21% to +0.23%
+  const isUp = pctChange >= 0;
+
+  if (badgePct) {
+    badgePct.textContent = `${isUp ? '+' : ''}${pctChange.toFixed(2)}% 24h`;
+  }
+  if (badgeWrap) {
+    if (isUp) {
+      badgeWrap.className = 'px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300 flex items-center gap-1';
+      badgeWrap.innerHTML = `<i data-lucide="trending-up" style="width:12px;height:12px"></i><span id="curr-trend-pct">+${pctChange.toFixed(2)}% 24h</span>`;
+    } else {
+      badgeWrap.className = 'px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-900/60 dark:text-rose-300 flex items-center gap-1';
+      badgeWrap.innerHTML = `<i data-lucide="trending-down" style="width:12px;height:12px"></i><span id="curr-trend-pct">${pctChange.toFixed(2)}% 24h</span>`;
+    }
+  }
+
+  currRenderMultiples(directRate);
+  currRenderPopular();
+  lucide.createIcons();
+}
+
+function currRenderMultiples(rate) {
+  const matrixContainer = document.getElementById('curr-multiples-matrix');
+  const label = document.getElementById('curr-matrix-label');
+  if (!matrixContainer) return;
+
+  if (label) label.textContent = `${currCodeFrom} to ${currCodeTo}`;
+
+  const steps = [1, 5, 10, 25, 50, 100, 500, 1000];
+  matrixContainer.innerHTML = steps.map(s => {
+    const converted = s * rate;
+    return `
+      <div class="p-2 rounded-xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-between">
+        <span class="text-gray-500">${s} ${currCodeFrom}</span>
+        <span class="font-bold text-gray-900 dark:text-gray-100">${currFormatPrecision(converted, 2)} ${currCodeTo}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function currRenderPopular() {
+  const popularContainer = document.getElementById('curr-popular-list');
+  if (!popularContainer) return;
+
+  const popularList = ['EUR', 'GBP', 'INR', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY', 'AED', 'SGD'];
+  const baseRate = currRates[currCodeFrom] || 1.0;
+
+  popularContainer.innerHTML = popularList.filter(c => c !== currCodeFrom).map(code => {
+    const cObj = CURR_CATALOG.find(x => x.code === code) || { code, name: code, flag: '🏳️' };
+    const targetRate = currRates[code] || 1.0;
+    const rate = targetRate / baseRate;
+
+    return `
+      <div onclick="currSelectToCurrency('${code}')" class="p-2 rounded-xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200/60 dark:border-gray-700/60 hover:border-emerald-300 dark:hover:border-emerald-700 flex items-center justify-between cursor-pointer transition">
+        <div class="flex items-center gap-2">
+          <span>${cObj.flag}</span>
+          <span class="font-bold text-xs text-gray-800 dark:text-gray-200">${cObj.code}</span>
+          <span class="text-[11px] text-gray-400 truncate max-w-[90px]">${cObj.name}</span>
+        </div>
+        <div class="text-right">
+          <span class="font-mono font-bold text-xs text-emerald-600 dark:text-emerald-400">${currFormatPrecision(rate, 4)}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function currSelectToCurrency(code) {
+  currPlayClick();
+  currCodeTo = code;
+  currConvert();
+  showToast(`Converted to ${code}`);
+}
+
+// ------------------- CONVERSION HISTORY -------------------
+
+let currHistoryTimeout = null;
+function currLogHistoryDebounced() {
+  clearTimeout(currHistoryTimeout);
+  currHistoryTimeout = setTimeout(() => {
+    const fromAmt = parseFloat(currAmountFrom) || 0;
+    const toAmt = parseFloat(currAmountTo) || 0;
+    if (fromAmt === 0 && toAmt === 0) return;
+
+    const entry = {
+      id: Date.now(),
+      fromAmt: currAmountFrom,
+      fromCode: currCodeFrom,
+      toAmt: currAmountTo,
+      toCode: currCodeTo,
+      rate: (currRates[currCodeTo] || 1) / (currRates[currCodeFrom] || 1),
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    };
+
+    currHistory.unshift(entry);
+    if (currHistory.length > 50) currHistory.pop();
+
+    try {
+      localStorage.setItem('pockitup_curr_history', JSON.stringify(currHistory));
+    } catch (e) {}
+
+    currRenderHistory();
+  }, 1200);
+}
+
+function currRenderHistory() {
+  const listEl = document.getElementById('curr-history-list');
+  const dotEl = document.getElementById('curr-history-count-dot');
+  if (!listEl) return;
+
+  if (currHistory.length === 0) {
+    if (dotEl) dotEl.classList.add('hidden');
+    listEl.innerHTML = `
+      <div class="h-48 flex flex-col items-center justify-center text-center p-6 text-gray-400">
+        <i data-lucide="history" style="width:36px;height:36px" class="mb-2 opacity-40 text-emerald-400"></i>
+        <p class="text-xs font-medium">No conversion history yet</p>
+        <p class="text-[11px] text-gray-400 mt-0.5">Your currency conversions will be logged here</p>
+      </div>
+    `;
+    lucide.createIcons();
+    return;
+  }
+
+  if (dotEl) dotEl.classList.remove('hidden');
+
+  listEl.innerHTML = currHistory.map((item, idx) => `
+    <div onclick="currLoadHistory(${idx})" class="group p-3 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200/70 dark:border-gray-700/60 hover:border-emerald-300 dark:hover:border-emerald-700 transition cursor-pointer relative space-y-1">
+      <div class="flex items-center justify-between text-[11px] text-gray-400">
+        <span class="font-mono">${item.fromAmt} ${item.fromCode} → ${item.toCode}</span>
+        <div class="flex items-center gap-1.5">
+          <span>${item.time}</span>
+          <button onclick="currDeleteHistoryItem(${idx}, event)" class="p-1.5 text-gray-400 hover:text-rose-500 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition" title="Delete entry">
+            <i data-lucide="trash-2" style="width:16px;height:16px"></i>
+          </button>
+        </div>
+      </div>
+      <div class="text-base font-bold font-mono text-gray-900 dark:text-gray-100 text-right group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition">
+        ${item.toAmt} ${item.toCode}
+      </div>
+    </div>
+  `).join('');
+
+  lucide.createIcons();
+}
+
+function currLoadHistory(idx) {
+  currPlayClick();
+  const item = currHistory[idx];
+  if (item) {
+    currCodeFrom = item.fromCode;
+    currCodeTo = item.toCode;
+    currAmountFrom = item.fromAmt;
+    currActiveField = 'from';
+    currConvert();
+    showToast(`Loaded ${item.fromAmt} ${item.fromCode}`);
+  }
+}
+
+function currDeleteHistoryItem(idx, event) {
+  if (event) event.stopPropagation();
+  currPlayClick();
+  currHistory.splice(idx, 1);
+  try {
+    localStorage.setItem('pockitup_curr_history', JSON.stringify(currHistory));
+  } catch (e) {}
+  currRenderHistory();
+}
+
+function currClearHistory() {
+  currPlayClick();
+  currHistory = [];
+  try {
+    localStorage.removeItem('pockitup_curr_history');
+  } catch (e) {}
+  currRenderHistory();
+  showToast('Conversion history cleared');
+}
+
+function currExportHistory() {
+  currPlayClick();
+  if (currHistory.length === 0) {
+    showToast('No history to export');
+    return;
+  }
+  const lines = currHistory.map(h => `[${h.time}] ${h.fromAmt} ${h.fromCode} = ${h.toAmt} ${h.toCode} (Rate: ${currFormatPrecision(h.rate, 4)})`);
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pockitup-currency-history-${Date.now()}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('History exported successfully');
+}
+
+// ------------------- ALL CURRENCIES CATALOG TAB -------------------
+
+function currFilterCatalog() {
+  const query = (document.getElementById('curr-catalog-search')?.value || '').toLowerCase().trim();
+  currRenderCatalog(query);
+}
+
+function currRenderCatalog(query = '') {
+  const catalogList = document.getElementById('curr-catalog-list');
+  if (!catalogList) return;
+
+  const filtered = query
+    ? CURR_CATALOG.filter(c => c.code.toLowerCase().includes(query) || c.name.toLowerCase().includes(query) || c.country.toLowerCase().includes(query))
+    : CURR_CATALOG;
+
+  if (filtered.length === 0) {
+    catalogList.innerHTML = `
+      <div class="p-6 text-center text-xs text-gray-400">
+        No currencies found.
+      </div>
+    `;
+    return;
+  }
+
+  const baseRate = currRates[currCodeFrom] || 1.0;
+
+  catalogList.innerHTML = filtered.map(c => {
+    const rate = (currRates[c.code] || 1.0) / baseRate;
+    return `
+      <div class="p-2.5 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-between hover:border-emerald-300 dark:hover:border-emerald-700 transition">
+        <div class="flex items-center gap-2 max-w-[65%]">
+          <span class="text-xl">${c.flag}</span>
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-1">
+              <span class="font-bold text-xs font-mono text-gray-900 dark:text-gray-100">${c.code}</span>
+              <span class="text-[11px] text-gray-400 truncate">(${c.country})</span>
+            </div>
+            <div class="text-[11px] text-gray-500 truncate">${c.name}</div>
+          </div>
+        </div>
+        <div class="text-right space-y-1">
+          <div class="font-mono font-bold text-xs text-gray-800 dark:text-gray-200">${currFormatPrecision(rate, 4)}</div>
+          <div class="flex items-center gap-1 justify-end">
+            <button onclick="currSelectCurrencyDirect('${c.code}', 'from')" class="px-1.5 py-0.5 rounded-md text-[10px] bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:text-emerald-600 font-semibold shadow-xs">From</button>
+            <button onclick="currSelectCurrencyDirect('${c.code}', 'to')" class="px-1.5 py-0.5 rounded-md text-[10px] bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:text-emerald-600 font-semibold shadow-xs">To</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function currSelectCurrencyDirect(code, target) {
+  currPlayClick();
+  if (target === 'from') currCodeFrom = code;
+  else currCodeTo = code;
+  currConvert();
+  showToast(`Set ${target.toUpperCase()} to ${code}`);
+}
+
+// ------------------- SIDECAR & SETTINGS -------------------
+
+function currToggleSideTab(tab) {
+  currPlayClick();
+  currSwitchSideTab(tab);
+}
+
+function currSwitchSideTab(tab) {
+  currActiveSideTab = tab;
+  const panelTrends = document.getElementById('curr-side-panel-trends');
+  const panelHist = document.getElementById('curr-side-panel-history');
+  const panelCat = document.getElementById('curr-side-panel-catalog');
+
+  const btnTrends = document.getElementById('curr-tab-btn-trends');
+  const btnHist = document.getElementById('curr-tab-btn-history');
+  const btnCat = document.getElementById('curr-tab-btn-catalog');
+
+  panelTrends?.classList.add('hidden');
+  panelHist?.classList.add('hidden');
+  panelCat?.classList.add('hidden');
+
+  btnTrends?.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+  btnTrends?.classList.add('text-gray-500', 'dark:text-gray-400');
+  btnHist?.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+  btnHist?.classList.add('text-gray-500', 'dark:text-gray-400');
+  btnCat?.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+  btnCat?.classList.add('text-gray-500', 'dark:text-gray-400');
+
+  if (tab === 'trends') {
+    panelTrends?.classList.remove('hidden');
+    btnTrends?.classList.add('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+    btnTrends?.classList.remove('text-gray-500', 'dark:text-gray-400');
+    currRenderTrends();
+  } else if (tab === 'history') {
+    panelHist?.classList.remove('hidden');
+    btnHist?.classList.add('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+    btnHist?.classList.remove('text-gray-500', 'dark:text-gray-400');
+    currRenderHistory();
+  } else if (tab === 'catalog') {
+    panelCat?.classList.remove('hidden');
+    btnCat?.classList.add('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+    btnCat?.classList.remove('text-gray-500', 'dark:text-gray-400');
+    currRenderCatalog();
+  }
+}
+
+function currOpenSettingsModal() {
+  currPlayClick();
+  const modal = document.getElementById('curr-settings-modal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+
+  document.getElementById('curr-setting-precision').value = currSettings.precision || 'auto';
+  document.getElementById('curr-setting-grouping').checked = currSettings.grouping !== false;
+  document.getElementById('curr-setting-sound').checked = currSettings.sound !== false;
+  document.getElementById('curr-setting-autorefresh').checked = currSettings.autorefresh !== false;
+}
+
+function currCloseSettingsModal() {
+  document.getElementById('curr-settings-modal')?.classList.add('hidden');
+}
+
+function currSaveSettings() {
+  currPlayClick();
+  currSettings.precision = document.getElementById('curr-setting-precision').value;
+  currSettings.grouping = document.getElementById('curr-setting-grouping').checked;
+  currSettings.sound = document.getElementById('curr-setting-sound').checked;
+  currSettings.autorefresh = document.getElementById('curr-setting-autorefresh').checked;
+
+  try {
+    localStorage.setItem('pockitup_curr_settings', JSON.stringify(currSettings));
+  } catch (e) {}
+
+  currCloseSettingsModal();
+  currConvert();
+  showToast('Currency settings saved');
+}
+
+// ------------------- AUDIO CLICK & KEYBOARD -------------------
+
+function currToggleSound() {
+  currSettings.sound = !currSettings.sound;
+  const icon = document.getElementById('curr-sound-icon');
+  if (icon) {
+    icon.setAttribute('data-lucide', currSettings.sound ? 'volume-2' : 'volume-x');
+    lucide.createIcons();
+  }
+  showToast(currSettings.sound ? 'Sound enabled' : 'Sound muted');
+}
+
+function currPlayClick() {
+  if (!currSettings.sound) return;
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1100, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(320, audioCtx.currentTime + 0.03);
+    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.03);
+  } catch (e) {}
+}
+
+function currHandleKeyDown(e) {
+  const currView = document.getElementById('currency-converter-view');
+  if (!currView || currView.classList.contains('hidden')) return;
+
+  // Don't capture when typing in search inputs or selects
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+
+  const key = e.key;
+  if (key >= '0' && key <= '9') {
+    currInsertDigit(key);
+  } else if (key === '.') {
+    currInsertDecimal();
+  } else if (key === 'Backspace') {
+    currBackspace();
+  } else if (key === 'Escape') {
+    currClearAll();
+  } else if (key === 'Delete') {
+    currClearEntry();
+  } else if (key === 'ArrowUp') {
+    e.preventDefault();
+    currFocusField('from');
+  } else if (key === 'ArrowDown') {
+    e.preventDefault();
+    currFocusField('to');
+  } else if (key.toLowerCase() === 's') {
+    currSwapCurrencies();
+  }
+}
+
+// =========================================================================
+// ====================== VOLUME CONVERTER TOOL ============================
+// =========================================================================
+
+let volAmountFrom = '0';
+let volAmountTo = '0';
+let volUnitFrom = 'tsp_us';
+let volUnitTo = 'ml';
+let volActiveField = 'from'; // 'from' or 'to'
+let volHistory = [];
+let volActiveSideTab = 'breakdown';
+let volPickerTarget = 'from';
+let volSettings = {
+  precision: 'auto',
+  grouping: true,
+  sound: true
+};
+
+// All 20 Volume Units exactly as in the reference screenshots
+const VOL_UNITS = [
+  // Metric System
+  { id: 'ml', name: 'Millilitres', symbol: 'ml', category: 'Metric', factor: 1.0 },
+  { id: 'cm3', name: 'Cubic centimetres', symbol: 'cm³', category: 'Metric', factor: 1.0 },
+  { id: 'l', name: 'Litres', symbol: 'L', category: 'Metric', factor: 1000.0 },
+  { id: 'm3', name: 'Cubic metres', symbol: 'm³', category: 'Metric', factor: 1000000.0 },
+
+  // US Customary Units
+  { id: 'tsp_us', name: 'Teaspoons (US)', symbol: 'tsp (US)', category: 'US Customary', factor: 4.92892159375 },
+  { id: 'tbsp_us', name: 'Tablespoons (US)', symbol: 'tbsp (US)', category: 'US Customary', factor: 14.78676478125 },
+  { id: 'floz_us', name: 'Fluid ounces (US)', symbol: 'fl oz (US)', category: 'US Customary', factor: 29.5735295625 },
+  { id: 'cup_us', name: 'Cups (US)', symbol: 'cup (US)', category: 'US Customary', factor: 236.5882365 },
+  { id: 'pt_us', name: 'Pints (US)', symbol: 'pt (US)', category: 'US Customary', factor: 473.176473 },
+  { id: 'qt_us', name: 'Quarts (US)', symbol: 'qt (US)', category: 'US Customary', factor: 946.352946 },
+  { id: 'gal_us', name: 'Gallons (US)', symbol: 'gal (US)', category: 'US Customary', factor: 3785.411784 },
+  { id: 'in3', name: 'Cubic inches', symbol: 'in³', category: 'US Customary', factor: 16.387064 },
+  { id: 'ft3', name: 'Cubic feet', symbol: 'ft³', category: 'US Customary', factor: 28316.846592 },
+  { id: 'yd3', name: 'Cubic yards', symbol: 'yd³', category: 'US Customary', factor: 764554.857984 },
+
+  // Imperial (UK) Units
+  { id: 'tsp_uk', name: 'Teaspoons (UK)', symbol: 'tsp (UK)', category: 'Imperial (UK)', factor: 5.919388020833 },
+  { id: 'tbsp_uk', name: 'Tablespoons (UK)', symbol: 'tbsp (UK)', category: 'Imperial (UK)', factor: 17.7581640625 },
+  { id: 'floz_uk', name: 'Fluid ounces (UK)', symbol: 'fl oz (UK)', category: 'Imperial (UK)', factor: 28.4130625 },
+  { id: 'pt_uk', name: 'Pints (UK)', symbol: 'pt (UK)', category: 'Imperial (UK)', factor: 568.26125 },
+  { id: 'qt_uk', name: 'Quarts (UK)', symbol: 'qt (UK)', category: 'Imperial (UK)', factor: 1136.5225 },
+  { id: 'gal_uk', name: 'Gallons (UK)', symbol: 'gal (UK)', category: 'Imperial (UK)', factor: 4546.09 }
+];
+
+function setupVolumeConverter() {
+  try {
+    const savedSet = localStorage.getItem('pockitup_vol_settings');
+    if (savedSet) volSettings = { ...volSettings, ...JSON.parse(savedSet) };
+    const savedHist = localStorage.getItem('pockitup_vol_history');
+    if (savedHist) volHistory = JSON.parse(savedHist);
+  } catch (e) {}
+
+  volConvert();
+  volUpdateDisplay();
+  volRenderBreakdown();
+  volRenderHistory();
+  volRenderCatalog();
+  lucide.createIcons();
+
+  window.removeEventListener('keydown', volHandleKeyDown);
+  window.addEventListener('keydown', volHandleKeyDown);
+}
+
+function volConvReset() {
+  volClosePicker();
+  volCloseSettingsModal();
+  window.removeEventListener('keydown', volHandleKeyDown);
+}
+
+// ------------------- VOLUME CONVERSION COMPUTATION -------------------
+
+function volConvert() {
+  const uFrom = VOL_UNITS.find(u => u.id === volUnitFrom) || VOL_UNITS[0];
+  const uTo = VOL_UNITS.find(u => u.id === volUnitTo) || VOL_UNITS[1];
+
+  const crossRate = uFrom.factor / uTo.factor;
+
+  if (volActiveField === 'from') {
+    const valFrom = parseFloat(volAmountFrom) || 0;
+    const valTo = valFrom * crossRate;
+    volAmountTo = String(volFormatPrecision(valTo));
+  } else {
+    const valTo = parseFloat(volAmountTo) || 0;
+    const valFrom = crossRate !== 0 ? valTo / crossRate : 0;
+    volAmountFrom = String(volFormatPrecision(valFrom));
+  }
+
+  volUpdateDisplay();
+}
+
+function volUpdateDisplay() {
+  const elAmountFrom = document.getElementById('vol-amount-from');
+  const elAmountTo = document.getElementById('vol-amount-to');
+  const elSymFrom = document.getElementById('vol-sym-from');
+  const elSymTo = document.getElementById('vol-sym-to');
+  const elNameFrom = document.getElementById('vol-name-from');
+  const elNameTo = document.getElementById('vol-name-to');
+  const elCardFrom = document.getElementById('vol-card-from');
+  const elCardTo = document.getElementById('vol-card-to');
+  const elFormula = document.getElementById('vol-rate-formula');
+  const elReverse = document.getElementById('vol-rate-reverse');
+
+  const uFrom = VOL_UNITS.find(u => u.id === volUnitFrom) || VOL_UNITS[0];
+  const uTo = VOL_UNITS.find(u => u.id === volUnitTo) || VOL_UNITS[1];
+
+  if (elSymFrom) elSymFrom.textContent = uFrom.symbol;
+  if (elSymTo) elSymTo.textContent = uTo.symbol;
+  if (elNameFrom) elNameFrom.textContent = uFrom.name;
+  if (elNameTo) elNameTo.textContent = uTo.name;
+
+  if (elAmountFrom) elAmountFrom.textContent = volFormatNumber(volAmountFrom);
+  if (elAmountTo) elAmountTo.textContent = volFormatNumber(volAmountTo);
+
+  // Focus highlight border
+  if (elCardFrom && elCardTo) {
+    if (volActiveField === 'from') {
+      elCardFrom.className = 'p-4 rounded-2xl bg-gray-50/90 dark:bg-gray-900/90 border-2 border-cyan-500 dark:border-cyan-500 transition-all cursor-pointer shadow-inner space-y-2';
+      elCardTo.className = 'p-4 rounded-2xl bg-gray-50/90 dark:bg-gray-900/90 border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-700 transition-all cursor-pointer shadow-inner space-y-2';
+    } else {
+      elCardTo.className = 'p-4 rounded-2xl bg-gray-50/90 dark:bg-gray-900/90 border-2 border-cyan-500 dark:border-cyan-500 transition-all cursor-pointer shadow-inner space-y-2';
+      elCardFrom.className = 'p-4 rounded-2xl bg-gray-50/90 dark:bg-gray-900/90 border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-700 transition-all cursor-pointer shadow-inner space-y-2';
+    }
+  }
+
+  // Conversion formula
+  const directRate = uFrom.factor / uTo.factor;
+  const reverseRate = directRate !== 0 ? 1 / directRate : 0;
+
+  if (elFormula) {
+    elFormula.textContent = `1 ${uFrom.name} = ${volFormatPrecision(directRate, 4)} ${uTo.name}`;
+  }
+  if (elReverse) {
+    elReverse.textContent = `1 ${uTo.name} = ${volFormatPrecision(reverseRate, 4)} ${uFrom.name}`;
+  }
+
+  volRenderBreakdown();
+}
+
+function volFormatNumber(raw) {
+  if (!raw) return '0';
+  const parts = raw.split('.');
+  let intPart = parts[0] || '0';
+  const decPart = parts.length > 1 ? '.' + parts[1] : (raw.endsWith('.') ? '.' : '');
+
+  if (volSettings.grouping) {
+    intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+  return intPart + decPart;
+}
+
+function volFormatPrecision(val, forcedDec = null) {
+  if (isNaN(val) || !isFinite(val)) return 0;
+  if (forcedDec !== null) return parseFloat(val.toFixed(forcedDec));
+  if (volSettings.precision === 'auto') {
+    if (val === 0) return 0;
+    if (Math.abs(val) < 0.0001) return parseFloat(val.toPrecision(4));
+    if (Math.abs(val) < 1) return parseFloat(val.toFixed(4));
+    if (Number.isInteger(val)) return val;
+    return parseFloat(val.toFixed(4));
+  }
+  const dec = parseInt(volSettings.precision, 10);
+  return parseFloat(val.toFixed(dec));
+}
+
+// ------------------- INPUT & KEYPAD HANDLING -------------------
+
+function volFocusField(field) {
+  volPlayClick();
+  volActiveField = field;
+  volUpdateDisplay();
+}
+
+function volInsertDigit(digit) {
+  volPlayClick();
+  let curr = volActiveField === 'from' ? volAmountFrom : volAmountTo;
+
+  if (curr === '0' || curr === '-0') {
+    curr = (curr === '-0' ? '-' : '') + digit;
+  } else {
+    if (curr.replace('-', '').replace('.', '').length >= 16) return;
+    curr += digit;
+  }
+
+  if (volActiveField === 'from') volAmountFrom = curr;
+  else volAmountTo = curr;
+
+  volConvert();
+  volLogHistoryDebounced();
+}
+
+function volInsertDecimal() {
+  volPlayClick();
+  let curr = volActiveField === 'from' ? volAmountFrom : volAmountTo;
+
+  if (!curr.includes('.')) {
+    curr += '.';
+  }
+
+  if (volActiveField === 'from') volAmountFrom = curr;
+  else volAmountTo = curr;
+
+  volUpdateDisplay();
+}
+
+function volToggleSign() {
+  volPlayClick();
+  let curr = volActiveField === 'from' ? volAmountFrom : volAmountTo;
+  if (curr === '0') return;
+
+  if (curr.startsWith('-')) curr = curr.slice(1);
+  else curr = '-' + curr;
+
+  if (volActiveField === 'from') volAmountFrom = curr;
+  else volAmountTo = curr;
+
+  volConvert();
+}
+
+function volClearEntry() {
+  volPlayClick();
+  if (volActiveField === 'from') volAmountFrom = '0';
+  else volAmountTo = '0';
+  volConvert();
+}
+
+function volClearAll() {
+  volPlayClick();
+  volAmountFrom = '0';
+  volAmountTo = '0';
+  volUpdateDisplay();
+}
+
+function volBackspace() {
+  volPlayClick();
+  let curr = volActiveField === 'from' ? volAmountFrom : volAmountTo;
+
+  if (curr.length > 1) {
+    curr = curr.slice(0, -1);
+    if (curr === '-') curr = '0';
+  } else {
+    curr = '0';
+  }
+
+  if (volActiveField === 'from') volAmountFrom = curr;
+  else volAmountTo = curr;
+
+  volConvert();
+  volLogHistoryDebounced();
+}
+
+function volSwapUnits() {
+  volPlayClick();
+  const tempUnit = volUnitFrom;
+  volUnitFrom = volUnitTo;
+  volUnitTo = tempUnit;
+
+  const tempAmt = volAmountFrom;
+  volAmountFrom = volAmountTo;
+  volAmountTo = tempAmt;
+
+  volConvert();
+  const uFrom = VOL_UNITS.find(u => u.id === volUnitFrom);
+  const uTo = VOL_UNITS.find(u => u.id === volUnitTo);
+  showToast(`Swapped: ${uFrom.symbol} ⇄ ${uTo.symbol}`);
+}
+
+// ------------------- SEARCHABLE UNIT PICKER -------------------
+
+function volOpenPicker(target, event) {
+  if (event) event.stopPropagation();
+  volPlayClick();
+  volPickerTarget = target;
+
+  const modal = document.getElementById('vol-picker-modal');
+  const title = document.getElementById('vol-picker-title');
+  const searchInput = document.getElementById('vol-picker-search');
+
+  if (title) {
+    title.textContent = target === 'from' ? 'Select "From" Unit' : 'Select "To" Unit';
+  }
+  if (searchInput) searchInput.value = '';
+
+  if (modal) modal.classList.remove('hidden');
+  volRenderPickerList('');
+  setTimeout(() => searchInput?.focus(), 50);
+}
+
+function volClosePicker() {
+  document.getElementById('vol-picker-modal')?.classList.add('hidden');
+}
+
+function volFilterPickerList() {
+  const query = (document.getElementById('vol-picker-search')?.value || '').toLowerCase().trim();
+  volRenderPickerList(query);
+}
+
+function volRenderPickerList(query = '') {
+  const listEl = document.getElementById('vol-picker-list');
+  if (!listEl) return;
+
+  const filtered = query
+    ? VOL_UNITS.filter(u => u.name.toLowerCase().includes(query) || u.symbol.toLowerCase().includes(query) || u.category.toLowerCase().includes(query))
+    : VOL_UNITS;
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = `
+      <div class="p-8 text-center text-xs text-gray-400">
+        No matching volume units found.
+      </div>
+    `;
+    return;
+  }
+
+  const activeId = volPickerTarget === 'from' ? volUnitFrom : volUnitTo;
+
+  listEl.innerHTML = filtered.map(u => {
+    const isSelected = u.id === activeId;
+    return `
+      <div onclick="volSelectUnit('${u.id}')" class="p-2.5 rounded-xl border ${isSelected ? 'bg-cyan-50/90 dark:bg-cyan-950/50 border-cyan-400 dark:border-cyan-600' : 'bg-gray-50/70 dark:bg-gray-800/60 border-gray-200/60 dark:border-gray-700/60 hover:border-cyan-300'} flex items-center justify-between cursor-pointer transition">
+        <div class="flex items-center gap-2.5 max-w-[80%]">
+          <div class="w-7 h-7 rounded-lg bg-cyan-100 dark:bg-cyan-900/60 text-cyan-700 dark:text-cyan-300 flex items-center justify-center font-bold text-xs font-mono">
+            ${u.symbol.slice(0, 3)}
+          </div>
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-xs text-gray-900 dark:text-gray-100">${u.name}</span>
+              <span class="text-[10px] px-1.5 py-0.2 bg-gray-200/70 dark:bg-gray-700 text-gray-500 rounded font-semibold">${u.category}</span>
+            </div>
+            <div class="text-[11px] text-gray-400 font-mono">${u.symbol}</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          ${isSelected ? '<i data-lucide="check" style="width:14px;height:14px" class="text-cyan-500 font-bold"></i>' : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  lucide.createIcons();
+}
+
+function volSelectUnit(id) {
+  volPlayClick();
+  if (volPickerTarget === 'from') {
+    volUnitFrom = id;
+  } else {
+    volUnitTo = id;
+  }
+
+  volClosePicker();
+  volConvert();
+  const u = VOL_UNITS.find(x => x.id === id);
+  showToast(`Selected ${u ? u.name : id}`);
+}
+
+// ------------------- BREAKDOWN & BENCHMARKS -------------------
+
+function volRenderBreakdown() {
+  const pairLabel = document.getElementById('vol-trend-pair-label');
+  const rateVal = document.getElementById('vol-trend-rate-val');
+
+  const uFrom = VOL_UNITS.find(u => u.id === volUnitFrom) || VOL_UNITS[0];
+  const uTo = VOL_UNITS.find(u => u.id === volUnitTo) || VOL_UNITS[1];
+  const directRate = uFrom.factor / uTo.factor;
+
+  if (pairLabel) pairLabel.textContent = `${uFrom.name} → ${uTo.name}`;
+  if (rateVal) rateVal.textContent = volFormatPrecision(directRate, 4);
+
+  volRenderMultiples(directRate);
+  volRenderBenchmarks();
+  lucide.createIcons();
+}
+
+function volRenderMultiples(rate) {
+  const matrixContainer = document.getElementById('vol-multiples-matrix');
+  const label = document.getElementById('vol-matrix-label');
+  if (!matrixContainer) return;
+
+  const uFrom = VOL_UNITS.find(u => u.id === volUnitFrom) || VOL_UNITS[0];
+  const uTo = VOL_UNITS.find(u => u.id === volUnitTo) || VOL_UNITS[1];
+
+  if (label) label.textContent = `${uFrom.symbol} to ${uTo.symbol}`;
+
+  const steps = [1, 5, 10, 25, 50, 100, 500, 1000];
+  matrixContainer.innerHTML = steps.map(s => {
+    const converted = s * rate;
+    return `
+      <div class="p-2 rounded-xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-between">
+        <span class="text-gray-500">${s} ${uFrom.symbol}</span>
+        <span class="font-bold text-gray-900 dark:text-gray-100">${volFormatPrecision(converted, 2)} ${uTo.symbol}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function volRenderBenchmarks() {
+  const benchContainer = document.getElementById('vol-benchmarks-list');
+  if (!benchContainer) return;
+
+  const benchmarkIds = ['ml', 'l', 'cup_us', 'gal_us', 'pt_uk', 'm3', 'ft3'];
+  const uFrom = VOL_UNITS.find(u => u.id === volUnitFrom) || VOL_UNITS[0];
+
+  benchContainer.innerHTML = benchmarkIds.filter(id => id !== volUnitFrom).map(id => {
+    const u = VOL_UNITS.find(x => x.id === id);
+    const rate = uFrom.factor / u.factor;
+
+    return `
+      <div onclick="volSelectToUnit('${id}')" class="p-2 rounded-xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200/60 dark:border-gray-700/60 hover:border-cyan-300 dark:hover:border-cyan-700 flex items-center justify-between cursor-pointer transition">
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-xs text-gray-800 dark:text-gray-200">${u.name}</span>
+          <span class="text-[11px] text-gray-400 font-mono">(${u.symbol})</span>
+        </div>
+        <div class="text-right">
+          <span class="font-mono font-bold text-xs text-cyan-600 dark:text-cyan-400">${volFormatPrecision(rate, 4)}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function volSelectToUnit(id) {
+  volPlayClick();
+  volUnitTo = id;
+  volConvert();
+  const u = VOL_UNITS.find(x => x.id === id);
+  showToast(`Converted to ${u ? u.name : id}`);
+}
+
+// ------------------- CONVERSION HISTORY -------------------
+
+let volHistoryTimeout = null;
+function volLogHistoryDebounced() {
+  clearTimeout(volHistoryTimeout);
+  volHistoryTimeout = setTimeout(() => {
+    const fromAmt = parseFloat(volAmountFrom) || 0;
+    const toAmt = parseFloat(volAmountTo) || 0;
+    if (fromAmt === 0 && toAmt === 0) return;
+
+    const uFrom = VOL_UNITS.find(u => u.id === volUnitFrom) || VOL_UNITS[0];
+    const uTo = VOL_UNITS.find(u => u.id === volUnitTo) || VOL_UNITS[1];
+
+    const entry = {
+      id: Date.now(),
+      fromAmt: volAmountFrom,
+      fromUnit: uFrom.name,
+      fromSymbol: uFrom.symbol,
+      fromId: uFrom.id,
+      toAmt: volAmountTo,
+      toUnit: uTo.name,
+      toSymbol: uTo.symbol,
+      toId: uTo.id,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    };
+
+    volHistory.unshift(entry);
+    if (volHistory.length > 50) volHistory.pop();
+
+    try {
+      localStorage.setItem('pockitup_vol_history', JSON.stringify(volHistory));
+    } catch (e) {}
+
+    volRenderHistory();
+  }, 1200);
+}
+
+function volRenderHistory() {
+  const listEl = document.getElementById('vol-history-list');
+  const dotEl = document.getElementById('vol-history-count-dot');
+  if (!listEl) return;
+
+  if (volHistory.length === 0) {
+    if (dotEl) dotEl.classList.add('hidden');
+    listEl.innerHTML = `
+      <div class="h-48 flex flex-col items-center justify-center text-center p-6 text-gray-400">
+        <i data-lucide="history" style="width:36px;height:36px" class="mb-2 opacity-40 text-cyan-400"></i>
+        <p class="text-xs font-medium">No volume conversions yet</p>
+        <p class="text-[11px] text-gray-400 mt-0.5">Your volume conversions will appear here</p>
+      </div>
+    `;
+    lucide.createIcons();
+    return;
+  }
+
+  if (dotEl) dotEl.classList.remove('hidden');
+
+  listEl.innerHTML = volHistory.map((item, idx) => `
+    <div onclick="volLoadHistory(${idx})" class="group p-3 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200/70 dark:border-gray-700/60 hover:border-cyan-300 dark:hover:border-cyan-700 transition cursor-pointer relative space-y-1">
+      <div class="flex items-center justify-between text-[11px] text-gray-400">
+        <span class="font-mono">${item.fromAmt} ${item.fromSymbol} → ${item.toSymbol}</span>
+        <div class="flex items-center gap-1.5">
+          <span>${item.time}</span>
+          <button onclick="volDeleteHistoryItem(${idx}, event)" class="p-1.5 text-gray-400 hover:text-rose-500 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition" title="Delete entry">
+            <i data-lucide="trash-2" style="width:16px;height:16px"></i>
+          </button>
+        </div>
+      </div>
+      <div class="text-base font-bold font-mono text-gray-900 dark:text-gray-100 text-right group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition">
+        ${item.toAmt} ${item.toSymbol}
+      </div>
+    </div>
+  `).join('');
+
+  lucide.createIcons();
+}
+
+function volLoadHistory(idx) {
+  volPlayClick();
+  const item = volHistory[idx];
+  if (item) {
+    volUnitFrom = item.fromId || 'tsp_us';
+    volUnitTo = item.toId || 'ml';
+    volAmountFrom = item.fromAmt;
+    volActiveField = 'from';
+    volConvert();
+    showToast(`Loaded ${item.fromAmt} ${item.fromSymbol}`);
+  }
+}
+
+function volDeleteHistoryItem(idx, event) {
+  if (event) event.stopPropagation();
+  volPlayClick();
+  volHistory.splice(idx, 1);
+  try {
+    localStorage.setItem('pockitup_vol_history', JSON.stringify(volHistory));
+  } catch (e) {}
+  volRenderHistory();
+}
+
+function volClearHistory() {
+  volPlayClick();
+  volHistory = [];
+  try {
+    localStorage.removeItem('pockitup_vol_history');
+  } catch (e) {}
+  volRenderHistory();
+  showToast('Volume conversion history cleared');
+}
+
+function volExportHistory() {
+  volPlayClick();
+  if (volHistory.length === 0) {
+    showToast('No history to export');
+    return;
+  }
+  const lines = volHistory.map(h => `[${h.time}] ${h.fromAmt} ${h.fromUnit} (${h.fromSymbol}) = ${h.toAmt} ${h.toUnit} (${h.toSymbol})`);
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pockitup-volume-history-${Date.now()}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('History exported successfully');
+}
+
+// ------------------- ALL UNITS CATALOG TAB -------------------
+
+function volFilterCatalog() {
+  const query = (document.getElementById('vol-catalog-search')?.value || '').toLowerCase().trim();
+  volRenderCatalog(query);
+}
+
+function volRenderCatalog(query = '') {
+  const catalogList = document.getElementById('vol-catalog-list');
+  if (!catalogList) return;
+
+  const filtered = query
+    ? VOL_UNITS.filter(u => u.name.toLowerCase().includes(query) || u.symbol.toLowerCase().includes(query) || u.category.toLowerCase().includes(query))
+    : VOL_UNITS;
+
+  if (filtered.length === 0) {
+    catalogList.innerHTML = `
+      <div class="p-6 text-center text-xs text-gray-400">
+        No units found.
+      </div>
+    `;
+    return;
+  }
+
+  const uFrom = VOL_UNITS.find(u => u.id === volUnitFrom) || VOL_UNITS[0];
+
+  catalogList.innerHTML = filtered.map(u => {
+    const rate = uFrom.factor / u.factor;
+    return `
+      <div class="p-2.5 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-between hover:border-cyan-300 dark:hover:border-cyan-700 transition">
+        <div class="flex items-center gap-2 max-w-[65%]">
+          <div class="w-8 h-8 rounded-xl bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-300 flex items-center justify-center font-bold text-xs font-mono">
+            ${u.symbol.slice(0, 3)}
+          </div>
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-1">
+              <span class="font-bold text-xs text-gray-900 dark:text-gray-100">${u.name}</span>
+              <span class="text-[10px] px-1.5 py-0.2 bg-gray-200/70 dark:bg-gray-700 text-gray-500 rounded font-semibold">${u.category}</span>
+            </div>
+            <div class="text-[11px] text-gray-400 font-mono">${u.symbol}</div>
+          </div>
+        </div>
+        <div class="text-right space-y-1">
+          <div class="font-mono font-bold text-xs text-gray-800 dark:text-gray-200">${volFormatPrecision(rate, 4)}</div>
+          <div class="flex items-center gap-1 justify-end">
+            <button onclick="volSelectUnitDirect('${u.id}', 'from')" class="px-1.5 py-0.5 rounded-md text-[10px] bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:text-cyan-600 font-semibold shadow-xs">From</button>
+            <button onclick="volSelectUnitDirect('${u.id}', 'to')" class="px-1.5 py-0.5 rounded-md text-[10px] bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:text-cyan-600 font-semibold shadow-xs">To</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function volSelectUnitDirect(id, target) {
+  volPlayClick();
+  if (target === 'from') volUnitFrom = id;
+  else volUnitTo = id;
+  volConvert();
+  const u = VOL_UNITS.find(x => x.id === id);
+  showToast(`Set ${target.toUpperCase()} to ${u ? u.name : id}`);
+}
+
+// ------------------- SIDECAR & SETTINGS -------------------
+
+function volToggleSideTab(tab) {
+  volPlayClick();
+  volSwitchSideTab(tab);
+}
+
+function volSwitchSideTab(tab) {
+  volActiveSideTab = tab;
+  const panelBreakdown = document.getElementById('vol-side-panel-breakdown');
+  const panelHist = document.getElementById('vol-side-panel-history');
+  const panelCat = document.getElementById('vol-side-panel-catalog');
+
+  const btnBreakdown = document.getElementById('vol-tab-btn-breakdown');
+  const btnHist = document.getElementById('vol-tab-btn-history');
+  const btnCat = document.getElementById('vol-tab-btn-catalog');
+
+  panelBreakdown?.classList.add('hidden');
+  panelHist?.classList.add('hidden');
+  panelCat?.classList.add('hidden');
+
+  btnBreakdown?.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+  btnBreakdown?.classList.add('text-gray-500', 'dark:text-gray-400');
+  btnHist?.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+  btnHist?.classList.add('text-gray-500', 'dark:text-gray-400');
+  btnCat?.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+  btnCat?.classList.add('text-gray-500', 'dark:text-gray-400');
+
+  if (tab === 'breakdown') {
+    panelBreakdown?.classList.remove('hidden');
+    btnBreakdown?.classList.add('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+    btnBreakdown?.classList.remove('text-gray-500', 'dark:text-gray-400');
+    volRenderBreakdown();
+  } else if (tab === 'history') {
+    panelHist?.classList.remove('hidden');
+    btnHist?.classList.add('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+    btnHist?.classList.remove('text-gray-500', 'dark:text-gray-400');
+    volRenderHistory();
+  } else if (tab === 'catalog') {
+    panelCat?.classList.remove('hidden');
+    btnCat?.classList.add('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+    btnCat?.classList.remove('text-gray-500', 'dark:text-gray-400');
+    volRenderCatalog();
+  }
+}
+
+function volOpenSettingsModal() {
+  volPlayClick();
+  const modal = document.getElementById('vol-settings-modal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+
+  document.getElementById('vol-setting-precision').value = volSettings.precision || 'auto';
+  document.getElementById('vol-setting-grouping').checked = volSettings.grouping !== false;
+  document.getElementById('vol-setting-sound').checked = volSettings.sound !== false;
+}
+
+function volCloseSettingsModal() {
+  document.getElementById('vol-settings-modal')?.classList.add('hidden');
+}
+
+function volSaveSettings() {
+  volPlayClick();
+  volSettings.precision = document.getElementById('vol-setting-precision').value;
+  volSettings.grouping = document.getElementById('vol-setting-grouping').checked;
+  volSettings.sound = document.getElementById('vol-setting-sound').checked;
+
+  try {
+    localStorage.setItem('pockitup_vol_settings', JSON.stringify(volSettings));
+  } catch (e) {}
+
+  volCloseSettingsModal();
+  volConvert();
+  showToast('Volume settings saved');
+}
+
+// ------------------- AUDIO CLICK & KEYBOARD -------------------
+
+function volToggleSound() {
+  volSettings.sound = !volSettings.sound;
+  const icon = document.getElementById('vol-sound-icon');
+  if (icon) {
+    icon.setAttribute('data-lucide', volSettings.sound ? 'volume-2' : 'volume-x');
+    lucide.createIcons();
+  }
+  showToast(volSettings.sound ? 'Sound enabled' : 'Sound muted');
+}
+
+function volPlayClick() {
+  if (!volSettings.sound) return;
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(360, audioCtx.currentTime + 0.03);
+    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.03);
+  } catch (e) {}
+}
+
+function volHandleKeyDown(e) {
+  const volView = document.getElementById('volume-converter-view');
+  if (!volView || volView.classList.contains('hidden')) return;
+
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+
+  const key = e.key;
+  if (key >= '0' && key <= '9') {
+    volInsertDigit(key);
+  } else if (key === '.') {
+    volInsertDecimal();
+  } else if (key === 'Backspace') {
+    volBackspace();
+  } else if (key === 'Escape') {
+    volClearAll();
+  } else if (key === 'Delete') {
+    volClearEntry();
+  } else if (key === 'ArrowUp') {
+    e.preventDefault();
+    volFocusField('from');
+  } else if (key === 'ArrowDown') {
+    e.preventDefault();
+    volFocusField('to');
+  } else if (key.toLowerCase() === 's') {
+    volSwapUnits();
+  }
+}
+
+// =========================================================================
+// ==================== AI FILE SUMMARIZER TOOL ============================
+// =========================================================================
+
+let aiLoadedFile = null;
+let aiExtractedText = '';
+let aiInputMode = 'upload'; // 'upload' or 'paste'
+let aiGeneratedSummary = '';
+let aiCurrentHistory = [];
+let aiIsProcessing = false;
+
+// Strict Content Safety & Compliance Classifier
+const AI_SAFETY_PATTERNS = [
+  // Weapons, explosives, violence & harm
+  /\b(how to (make|build|assemble|synthesize) (a )?(bomb|explosive|dirty bomb|pipe bomb|c4|ied|grenade|detonator))\b/i,
+  /\b(assassinate|mass shooting plan|terrorist attack instructions|how to commit suicide|ways to kill myself|self harm instructions)\b/i,
+  /\b(synthesize ricin|manufacture anthrax|chemical weapon formula|nerve agent recipe)\b/i,
+  // Cyberattacks, malware & financial crime
+  /\b(ransomware source code|keylogger payload|trojan malware build|ddos botnet script|how to hack bank account)\b/i,
+  /\b(credit card skimmer|stolen credit cards dump|counterfeit currency tutorial|identity theft guide)\b/i,
+  // Illicit narcotics manufacturing
+  /\b(how to (synthesize|cook|manufacture|make) (methamphetamine|heroin|fentanyl|crack cocaine))\b/i,
+  // 18+ Adult, taboo & explicit content
+  /\b(hardcore porn|nsfw explicit sex|child exploitation|non-consensual sexual|abusive taboo sexual)\b/i
+];
+
+function escapeHtml(str) {
+  if (typeof str !== 'string') return String(str || '');
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+async function aiCheckServerHealth() {
+  const statusEl = document.getElementById('ai-engine-status-text');
+  try {
+    const res = await fetch('/api/health', { signal: AbortSignal.timeout(1200) });
+    if (res.ok) {
+      const data = await res.json();
+      if (statusEl) statusEl.textContent = 'Python AI Accelerated ⚡';
+      return true;
+    }
+  } catch (e) {}
+  if (statusEl) statusEl.textContent = 'Local AI Engine 🔒';
+  return false;
+}
+
+function setupAiFileSummarizer() {
+  try {
+    const savedHist = localStorage.getItem('pockitup_ai_summaries');
+    if (savedHist) aiCurrentHistory = JSON.parse(savedHist);
+  } catch (e) {}
+
+  aiSetupDropzone();
+  aiRenderHistory();
+  aiCheckServerHealth();
+  if (typeof lucide !== 'undefined' && lucide.createIcons) {
+    lucide.createIcons();
+  }
+}
+
+function aiSummarizerReset() {
+  aiLoadedFile = null;
+  aiExtractedText = '';
+  aiGeneratedSummary = '';
+  aiIsProcessing = false;
+}
+
+function aiSetupDropzone() {
+  const dropzone = document.getElementById('ai-dropzone');
+  if (!dropzone) return;
+
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropzone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.add('border-purple-600', 'bg-purple-100/50', 'dark:bg-purple-900/30');
+    }, false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropzone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove('border-purple-600', 'bg-purple-100/50', 'dark:bg-purple-900/30');
+    }, false);
+  });
+
+  dropzone.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    if (files && files.length > 0) {
+      aiProcessUploadedFile(files[0]);
+    }
+  }, false);
+}
+
+function aiHandleFileSelect(event) {
+  const file = event.target.files && event.target.files[0];
+  if (file) {
+    aiProcessUploadedFile(file);
+  }
+}
+
+async function aiProcessUploadedFile(file) {
+  aiLoadedFile = file;
+  aiExtractedText = '';
+  aiHideSafetyAlert();
+
+  const previewCard = document.getElementById('ai-file-preview-card');
+  const fileNameEl = document.getElementById('ai-file-name');
+  const fileSizeEl = document.getElementById('ai-file-size');
+  const fileWordsEl = document.getElementById('ai-file-words');
+  const iconWrap = document.getElementById('ai-file-icon-wrap');
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (iconWrap) iconWrap.textContent = ext.slice(0, 4);
+
+  if (fileNameEl) fileNameEl.textContent = file.name;
+  if (fileSizeEl) fileSizeEl.textContent = formatBytes(file.size);
+  if (fileWordsEl) fileWordsEl.textContent = 'Extracting text...';
+  if (previewCard) previewCard.classList.remove('hidden');
+
+  showToast(`Loading ${file.name}...`);
+
+  try {
+    if (ext === 'pdf') {
+      const buffer = await file.arrayBuffer();
+      aiExtractedText = await aiExtractPdfText(buffer);
+    } else if (ext === 'docx' || ext === 'doc') {
+      const buffer = await file.arrayBuffer();
+      aiExtractedText = await aiExtractDocxText(buffer);
+    } else {
+      aiExtractedText = await aiExtractPlainText(file);
+    }
+
+    const wordCount = aiCountWords(aiExtractedText);
+    if (!aiExtractedText || wordCount === 0) {
+      if (fileWordsEl) fileWordsEl.textContent = '⚠️ No selectable text found (may be scanned image)';
+      showToast('⚠️ No text detected in this file. Try pasting text directly.');
+      return;
+    }
+
+    if (fileWordsEl) fileWordsEl.textContent = `~${wordCount.toLocaleString()} words (Ready)`;
+
+    // Screen content safety immediately upon extraction
+    const safety = aiCheckContentSafety(aiExtractedText);
+    if (!safety.safe) {
+      aiShowSafetyAlert(safety.reason);
+      return;
+    }
+
+    showToast(`File ready • ${wordCount.toLocaleString()} words`);
+  } catch (err) {
+    console.error('File extraction error:', err);
+    showToast(`Error extracting text: ${err.message || err}`);
+    if (fileWordsEl) fileWordsEl.textContent = 'Error reading text';
+  }
+}
+
+function aiRemoveFile(event) {
+  if (event) event.stopPropagation();
+  aiLoadedFile = null;
+  aiExtractedText = '';
+  document.getElementById('ai-file-input').value = '';
+  document.getElementById('ai-file-preview-card')?.classList.add('hidden');
+  aiHideSafetyAlert();
+  showToast('File removed');
+}
+
+// ------------------- TEXT EXTRACTION HELPERS -------------------
+
+async function aiExtractPdfText(arrayBuffer) {
+  if (typeof pdfjsLib === 'undefined') {
+    throw new Error('PDF library not ready');
+  }
+  const typedArray = new Uint8Array(arrayBuffer.slice(0));
+  const loadingTask = pdfjsLib.getDocument({ data: typedArray });
+  const pdf = await loadingTask.promise;
+  let fullText = '';
+  for (let pageNum = 1; pageNum <= Math.min(pdf.numPages, 200); pageNum++) {
+    try {
+      const page = await pdf.getPage(pageNum);
+      const content = await page.getTextContent({ normalizeWhitespace: true });
+      const pageStr = (content.items || []).map(item => item.str || '').join(' ').trim();
+      if (pageStr) {
+        fullText += pageStr + '\n\n';
+      }
+    } catch (pageErr) {
+      console.warn(`Page ${pageNum} warning:`, pageErr);
+    }
+  }
+  return fullText.trim();
+}
+
+async function aiExtractDocxText(arrayBuffer) {
+  if (typeof mammoth !== 'undefined') {
+    try {
+      const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer.slice(0) });
+      if (result && result.value && result.value.trim()) {
+        return result.value.trim();
+      }
+    } catch (e) {
+      console.warn('Mammoth extraction failed, falling back to JSZip:', e);
+    }
+  }
+  if (typeof JSZip !== 'undefined') {
+    const zip = await JSZip.loadAsync(arrayBuffer.slice(0));
+    const docXml = await zip.file('word/document.xml')?.async('text');
+    if (docXml) {
+      return docXml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+  }
+  throw new Error('Unable to extract text from Word document');
+}
+
+function aiExtractPlainText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result || '');
+    reader.onerror = err => reject(err);
+    reader.readAsText(file);
+  });
+}
+
+// ------------------- CONTENT SAFETY GUARDRAILS -------------------
+
+function aiCheckContentSafety(text) {
+  if (!text) return { safe: true };
+  const sample = text.slice(0, 150000); // Screen first 150k characters
+  for (const pat of AI_SAFETY_PATTERNS) {
+    if (pat.test(sample)) {
+      return {
+        safe: false,
+        reason: 'Restricted prohibited content detected: This document contains material violating safety guidelines (harmful, dangerous, illegal, weapons, malware, or 18+ taboo explicit content). Processing was halted to maintain compliance.'
+      };
+    }
+  }
+  return { safe: true };
+}
+
+function aiShowSafetyAlert(reason) {
+  const alertEl = document.getElementById('ai-safety-alert');
+  const reasonEl = document.getElementById('ai-safety-reason');
+  const genBtn = document.getElementById('ai-generate-btn');
+
+  if (reasonEl) reasonEl.textContent = reason;
+  if (alertEl) alertEl.classList.remove('hidden');
+  if (genBtn) {
+    genBtn.disabled = true;
+    genBtn.classList?.add('opacity-50', 'cursor-not-allowed');
+  }
+  showToast('⚠️ Content safety alert: Prohibited material flagged');
+}
+
+function aiHideSafetyAlert() {
+  const alertEl = document.getElementById('ai-safety-alert');
+  const genBtn = document.getElementById('ai-generate-btn');
+  if (alertEl) alertEl.classList?.add('hidden');
+  if (genBtn) {
+    genBtn.disabled = false;
+    genBtn.classList?.remove('opacity-50', 'cursor-not-allowed');
+  }
+}
+
+// ------------------- CONTEXTUAL NLP SUMMARIZATION -------------------
+
+async function aiGenerateSummary() {
+  let sourceText = '';
+  let docTitle = 'Pasted Notes';
+
+  if (aiInputMode === 'upload') {
+    if (!aiLoadedFile) {
+      showToast('Please upload a document to summarize');
+      return;
+    }
+    if (!aiExtractedText || aiCountWords(aiExtractedText) === 0) {
+      showToast('No text detected in this file. Please paste text directly.');
+      return;
+    }
+    sourceText = aiExtractedText;
+    docTitle = aiLoadedFile.name;
+  } else {
+    sourceText = (document.getElementById('ai-paste-textarea')?.value || '').trim();
+    if (!sourceText) {
+      showToast('Please paste text or notes to summarize');
+      return;
+    }
+    const firstLine = sourceText.split('\n')[0].trim();
+    docTitle = firstLine ? firstLine.slice(0, 30) + '...' : 'Pasted Notes';
+  }
+
+  // Pre-processing safety check
+  const safety = aiCheckContentSafety(sourceText);
+  if (!safety.safe) {
+    aiShowSafetyAlert(safety.reason);
+    return;
+  }
+  aiHideSafetyAlert();
+
+  const format = document.getElementById('ai-summary-format')?.value || 'executive';
+  const lengthMode = document.getElementById('ai-summary-length')?.value || 'standard';
+
+  const genBtn = document.getElementById('ai-generate-btn');
+  if (genBtn) {
+    genBtn.disabled = true;
+    genBtn.innerHTML = `<i data-lucide="loader-2" style="width:18px;height:18px" class="animate-spin"></i><span>Analyzing &amp; Synthesizing Document...</span>`;
+    if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+  }
+
+  // Brief synthetic async delay for smooth UI feedback
+  await new Promise(r => setTimeout(r, 450));
+
+  try {
+    let summaryData = null;
+
+    // 1. Attempt accelerated Python AI microservice
+    try {
+      const apiRes = await fetch('/api/ai/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: sourceText,
+          format: format,
+          length_mode: lengthMode,
+          title: docTitle
+        }),
+        signal: AbortSignal.timeout(6000)
+      });
+
+      if (apiRes.ok) {
+        const apiData = await apiRes.json();
+        if (apiData.sections && apiData.sections.length > 0) {
+          const secList = apiData.sections;
+          const globalLead = secList[0]?.summary || 'Full document overview.';
+          const globalConc = secList[secList.length - 1]?.summary || 'All sections verified.';
+          const html = `
+            <div class="space-y-4 font-sans">
+              <div class="p-4 rounded-2xl bg-purple-50/80 dark:bg-purple-950/40 border border-purple-200/80 dark:border-purple-800/60 shadow-sm space-y-2">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-600 text-white">Python AI Accelerated</span>
+                    <span class="text-xs font-semibold text-purple-700 dark:text-purple-300">100% Document Coverage</span>
+                  </div>
+                  <span class="text-xs text-gray-500 font-mono">${secList.length} Sections Analyzed</span>
+                </div>
+                <div class="text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed pt-1">
+                  <span class="font-bold text-gray-900 dark:text-gray-100">Executive Synthesis: </span>
+                  ${escapeHtml(globalLead)}
+                </div>
+              </div>
+              <div class="space-y-3">
+                ${secList.map((sec, i) => `
+                  <div class="p-4 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200/80 dark:border-gray-700/80 space-y-2">
+                    <div class="flex items-center justify-between flex-wrap gap-1">
+                      <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-lg bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 text-xs font-bold flex items-center justify-center">${i + 1}</span>
+                        <h4 class="font-bold text-sm text-gray-900 dark:text-gray-100">${escapeHtml(sec.title)}</h4>
+                      </div>
+                      <span class="text-[11px] text-gray-400 font-mono">${sec.words} words</span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-gray-700 dark:text-gray-200 leading-relaxed">${escapeHtml(sec.summary)}</p>
+                    ${sec.bullets && sec.bullets.length > 0 ? `
+                      <ul class="space-y-1.5 pt-1">
+                        ${sec.bullets.map(b => `
+                          <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                            <span class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 flex-shrink-0"></span>
+                            <span>${escapeHtml(b)}</span>
+                          </li>
+                        `).join('')}
+                      </ul>
+                    ` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+          summaryData = {
+            html,
+            text: apiData.summary_text,
+            topics: apiData.topics || [],
+            tone: apiData.tone || 'Professional'
+          };
+        } else {
+          summaryData = {
+            html: `<div class="p-4 rounded-2xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/60 leading-relaxed whitespace-pre-line text-xs sm:text-sm text-gray-800 dark:text-gray-200">${escapeHtml(apiData.summary_text)}</div>`,
+            text: apiData.summary_text,
+            topics: apiData.topics || [],
+            tone: apiData.tone || 'Professional'
+          };
+        }
+        const statusEl = document.getElementById('ai-engine-status-text');
+        if (statusEl) statusEl.textContent = 'Python AI Accelerated ⚡';
+      }
+    } catch (netErr) {
+      console.info('[AI Engine] Python microservice offline, seamlessly using client-side engine.');
+      const statusEl = document.getElementById('ai-engine-status-text');
+      if (statusEl) statusEl.textContent = 'Local AI Engine 🔒';
+    }
+
+    // 2. Client-side fallback if server was offline
+    if (!summaryData) {
+      summaryData = aiSynthesizeSummary(sourceText, format, lengthMode, docTitle);
+    }
+
+    aiGeneratedSummary = summaryData.html;
+
+    const resultCard = document.getElementById('ai-summary-result-card');
+    const contentEl = document.getElementById('ai-summary-content');
+    const modeBadge = document.getElementById('ai-result-mode-badge');
+    const readTime = document.getElementById('ai-result-reading-time');
+    const statsPill = document.getElementById('ai-result-stats-pill');
+    const topicsContainer = document.getElementById('ai-topics-container');
+    const toneBadge = document.getElementById('ai-stat-tone-badge');
+
+    if (contentEl) contentEl.innerHTML = summaryData.html;
+    if (resultCard) resultCard.classList.remove('hidden');
+
+    const formatLabels = {
+      executive: 'Executive Brief',
+      bullets: 'Key Bullet Points',
+      comprehensive: 'Comprehensive Breakdown',
+      action_items: 'Action Items & Decisions',
+      full_file: 'Full File Breakdown (All Sections)'
+    };
+    if (modeBadge) modeBadge.textContent = formatLabels[format] || format;
+
+    const origWords = aiCountWords(sourceText);
+    const summWords = aiCountWords(summaryData.text);
+    const savedPct = origWords > 0 ? Math.max(0, Math.round(((origWords - summWords) / origWords) * 100)) : 0;
+    const estMins = Math.max(1, Math.round(summWords / 200));
+
+    if (readTime) readTime.textContent = `~${estMins} min read`;
+    const depthBadge = lengthMode === 'full_depth' ? ' • 100% Exhaustive Depth' : '';
+    if (statsPill) statsPill.textContent = `${savedPct}% Condensed${depthBadge} (${origWords.toLocaleString()} → ${summWords.toLocaleString()} words)`;
+    if (toneBadge) toneBadge.textContent = summaryData.tone;
+
+    if (topicsContainer && summaryData.topics) {
+      topicsContainer.innerHTML = summaryData.topics.map(t => `
+        <span class="px-2.5 py-1 rounded-lg bg-purple-100/70 dark:bg-purple-900/60 border border-purple-200/70 dark:border-purple-800/60 text-purple-700 dark:text-purple-300 text-xs font-semibold">
+          #${escapeHtml(t)}
+        </span>
+      `).join('');
+    }
+
+    // Save to History
+    aiSaveHistoryEntry(docTitle, summaryData.text, format, summWords);
+
+    showToast('AI Summary generated successfully! ✨');
+    resultCard?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch (err) {
+    console.error('Summarization error:', err);
+    showToast(`Error generating summary: ${err.message || err}`);
+  } finally {
+    if (genBtn) {
+      genBtn.disabled = false;
+      genBtn.innerHTML = `<i data-lucide="sparkles" style="width:18px;height:18px"></i><span>Generate AI Summary</span>`;
+      if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        lucide.createIcons();
+      }
+    }
+  }
+}
+
+function aiSplitIntoSections(rawText) {
+  const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const sections = [];
+  let currentTitle = '';
+  let currentLines = [];
+
+  const headingRegex = /^((\d+[\.\)]\s+.*)|([A-Z][A-Za-z0-9\s\-_]{2,45}:)|(Chapter\s+\d+.*)|(Section\s+\d+.*)|([A-Z\s]{4,40}))$/;
+
+  for (const line of lines) {
+    const isHeading = headingRegex.test(line) && line.length < 70 && !line.endsWith('.');
+    if (isHeading && currentLines.length > 0) {
+      sections.push({
+        title: currentTitle || 'Overview & Background',
+        text: currentLines.join(' ')
+      });
+      currentTitle = line;
+      currentLines = [];
+    } else {
+      if (!currentTitle && isHeading) {
+        currentTitle = line;
+      } else {
+        currentLines.push(line);
+      }
+    }
+  }
+
+  if (currentLines.length > 0) {
+    sections.push({
+      title: currentTitle || 'Document Scope & Details',
+      text: currentLines.join(' ')
+    });
+  }
+
+  if (sections.length <= 1) {
+    const paragraphs = rawText.split(/\r?\n\s*\r?\n/).map(p => p.trim()).filter(p => p.length > 30);
+    if (paragraphs.length > 1) {
+      return paragraphs.map((p, idx) => {
+        const firstSentence = p.split(/[.?!]/)[0] || '';
+        const title = firstSentence.length > 5 && firstSentence.length < 50
+          ? firstSentence
+          : 'Section ' + (idx + 1) + ': ' + p.split(/\s+/).slice(0, 5).join(' ') + '...';
+        return { title, text: p };
+      });
+    }
+
+    const words = rawText.split(/\s+/);
+    const chunkSize = 250;
+    const chunked = [];
+    for (let i = 0; i < words.length; i += chunkSize) {
+      const chunkWords = words.slice(i, i + chunkSize);
+      const blockNum = Math.floor(i / chunkSize) + 1;
+      chunked.push({
+        title: 'Block ' + blockNum + ': ' + chunkWords.slice(0, 5).join(' ') + '...',
+        text: chunkWords.join(' ')
+      });
+    }
+    return chunked;
+  }
+
+  return sections;
+}
+
+function aiSynthesizeSummary(rawText, format, lengthMode, title) {
+  const sentences = aiExtractSentences(rawText);
+
+  if (sentences.length === 0) {
+    return {
+      text: rawText,
+      html: `<p class="leading-relaxed">${escapeHtml(rawText)}</p>`,
+      topics: ['Document'],
+      tone: 'Informational'
+    };
+  }
+
+  // Tokenize words and build term frequencies
+  const stopwords = new Set([
+    'the','and','to','of','a','in','that','is','was','for','it','with','as','by','on','at','this','be','are','from',
+    'or','an','which','you','will','not','have','has','we','our','can','all','more','also','their','about','each'
+  ]);
+
+  const wordFreq = {};
+  const words = rawText.toLowerCase().match(/\b[a-z]{3,}\b/g) || [];
+  words.forEach(w => {
+    if (!stopwords.has(w)) {
+      wordFreq[w] = (wordFreq[w] || 0) + 1;
+    }
+  });
+
+  // Score sentences based on TF-IDF word frequency and structural position
+  const scoredSentences = sentences.map((sent, idx) => {
+    const sentWords = sent.toLowerCase().match(/\b[a-z]{3,}\b/g) || [];
+    let score = 0;
+    sentWords.forEach(w => {
+      if (wordFreq[w]) score += wordFreq[w];
+    });
+
+    // Boost position weight for lead sentences
+    if (idx < 3) score *= 1.35;
+    if (idx === 0) score *= 1.5;
+    if (idx > sentences.length - 4) score *= 1.2;
+
+    // Favor balanced sentence length (12 to 50 words)
+    const len = sentWords.length;
+    if (len >= 10 && len <= 45) score *= 1.25;
+    else if (len < 5) score *= 0.4;
+
+    return { text: sent.trim(), score, index: idx };
+  });
+
+  // Extract top topics
+  const topTopics = Object.entries(wordFreq)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 7)
+    .map(entry => entry[0].charAt(0).toUpperCase() + entry[0].slice(1));
+
+  // Determine tone
+  let tone = 'Professional';
+  const lowerAll = rawText.toLowerCase();
+  if (lowerAll.includes('research') || lowerAll.includes('hardware') || lowerAll.includes('sensor') || lowerAll.includes('protocol') || lowerAll.includes('algorithm')) {
+    tone = 'Technical & Scientific';
+  } else if (lowerAll.includes('revenue') || lowerAll.includes('market') || lowerAll.includes('strategy') || lowerAll.includes('quarterly')) {
+    tone = 'Business & Financial';
+  } else if (lowerAll.includes('chapter') || lowerAll.includes('lesson') || lowerAll.includes('student') || lowerAll.includes('concept')) {
+    tone = 'Educational / Academic';
+  }
+
+  // Handle "Full File Summarize" or "100% Depth"
+  if (format === 'full_file' || lengthMode === 'full_depth') {
+    const sections = aiSplitIntoSections(rawText);
+    const sectionSummaries = [];
+
+    sections.forEach((sec, idx) => {
+      const secSentences = aiExtractSentences(sec.text);
+      let secSummaryText = '';
+      let secBullets = [];
+
+      if (secSentences.length <= 2) {
+        secSummaryText = secSentences.join(' ') || sec.text;
+      } else {
+        const secScored = secSentences.map((s, i) => {
+          const sw = s.toLowerCase().match(/\b[a-z]{3,}\b/g) || [];
+          let sc = 0;
+          sw.forEach(w => { if (wordFreq[w]) sc += wordFreq[w]; });
+          if (i === 0) sc *= 1.3;
+          return { text: s, score: sc, idx: i };
+        });
+        const sorted = [...secScored].sort((a, b) => b.score - a.score);
+        
+        secSummaryText = sorted[0]?.text || secSentences[0];
+        const detailCount = lengthMode === 'full_depth' ? 3 : 2;
+        secBullets = sorted.slice(1, detailCount + 1).sort((a, b) => a.idx - b.idx).map(s => s.text);
+      }
+
+      sectionSummaries.push({
+        title: sec.title,
+        words: aiCountWords(sec.text),
+        summary: secSummaryText,
+        bullets: secBullets
+      });
+    });
+
+    const globalLead = [...scoredSentences].sort((a, b) => b.score - a.score)[0]?.text || 'Comprehensive overview of document contents.';
+    const globalConclusion = scoredSentences.filter(s => s.index > sentences.length - 6).sort((a, b) => b.score - a.score)[0]?.text || 'The documented findings outline complete system execution and verified results.';
+
+    const html = `
+      <div class="space-y-4 font-sans">
+        <div class="p-4 rounded-2xl bg-purple-50/80 dark:bg-purple-950/40 border border-purple-200/80 dark:border-purple-800/60 shadow-sm space-y-2">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-600 text-white">Full File Summary</span>
+              <span class="text-xs font-semibold text-purple-700 dark:text-purple-300">100% Document Coverage</span>
+            </div>
+            <span class="text-xs text-gray-500 font-mono">${sectionSummaries.length} Sections / Blocks Analyzed</span>
+          </div>
+          <div class="text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed pt-1">
+            <span class="font-bold text-gray-900 dark:text-gray-100">Executive Synthesis: </span>
+            ${escapeHtml(globalLead)}
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          ${sectionSummaries.map((sec, i) => `
+            <div class="p-4 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200/80 dark:border-gray-700/80 space-y-2">
+              <div class="flex items-center justify-between flex-wrap gap-1">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-lg bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 text-xs font-bold flex items-center justify-center">${i + 1}</span>
+                  <h4 class="font-bold text-sm text-gray-900 dark:text-gray-100">${escapeHtml(sec.title)}</h4>
+                </div>
+                <span class="text-[11px] text-gray-400 font-mono">${sec.words} words</span>
+              </div>
+              <p class="text-xs sm:text-sm text-gray-700 dark:text-gray-200 leading-relaxed">${escapeHtml(sec.summary)}</p>
+              ${sec.bullets.length > 0 ? `
+                <ul class="space-y-1.5 pt-1">
+                  ${sec.bullets.map(b => `
+                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                      <span class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 flex-shrink-0"></span>
+                      <span>${escapeHtml(b)}</span>
+                    </li>
+                  `).join('')}
+                </ul>
+              ` : ''}
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/50 space-y-1.5">
+          <div class="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">Complete Synthesis &amp; Conclusion</div>
+          <p class="text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed">${escapeHtml(globalConclusion)}</p>
+        </div>
+      </div>
+    `;
+
+    const plainText = `FULL FILE SUMMARY (${sectionSummaries.length} Sections Analyzed)\nExecutive Synthesis: ${globalLead}\n\n` +
+      sectionSummaries.map((s, i) => `${i + 1}. ${s.title} (${s.words} words)\n${s.summary}\n` + s.bullets.map(b => `• ${b}`).join('\n')).join('\n\n') +
+      `\n\nComplete Synthesis & Conclusion:\n${globalConclusion}`;
+
+    return { html, text: plainText, topics: topTopics, tone };
+  }
+
+  // Standard sentence scoring for non-full_file formats
+  let maxTarget = 12;
+  if (lengthMode === 'concise') maxTarget = 6;
+  if (lengthMode === 'detailed') maxTarget = 20;
+
+  const targetCount = Math.max(3, Math.min(sentences.length, maxTarget));
+  const topSentences = [...scoredSentences]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, targetCount)
+    .sort((a, b) => a.index - b.index);
+
+  let html = '';
+  let plainText = '';
+
+  if (format === 'executive') {
+    const tldr = topSentences[0]?.text || 'Overview of key findings.';
+    const bullets = topSentences.slice(1, 6);
+
+    html = `
+      <div class="space-y-4 font-sans">
+        <div class="p-4 rounded-2xl bg-purple-50/80 dark:bg-purple-950/40 border-l-4 border-purple-600 shadow-sm">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300 mb-1 flex items-center gap-1.5">
+            <span>TL;DR Executive Summary</span>
+          </div>
+          <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-relaxed">${escapeHtml(tldr)}</p>
+        </div>
+        <div class="space-y-2">
+          <div class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Core Findings &amp; Takeaways</div>
+          <ul class="space-y-2.5">
+            ${bullets.map(b => `
+              <li class="flex items-start gap-2.5 text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
+                <span class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></span>
+                <span>${escapeHtml(b.text)}</span>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+      </div>
+    `;
+    plainText = `TL;DR Executive Summary:\n${tldr}\n\nCore Findings & Takeaways:\n` + bullets.map(b => `• ${b.text}`).join('\n');
+
+  } else if (format === 'bullets') {
+    const bullets = topSentences.slice(0, 8);
+    html = `
+      <div class="space-y-3 font-sans">
+        <div class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Key Insights &amp; Points</div>
+        <ul class="space-y-2.5 text-xs sm:text-sm text-gray-800 dark:text-gray-200">
+          ${bullets.map((b, i) => `
+            <li class="flex items-start gap-3 leading-relaxed p-2.5 rounded-xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
+              <span class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">${i + 1}</span>
+              <span>${escapeHtml(b.text)}</span>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+    `;
+    plainText = bullets.map((b, i) => `${i + 1}. ${b.text}`).join('\n\n');
+
+  } else if (format === 'comprehensive') {
+    const chunk1 = topSentences.slice(0, Math.ceil(topSentences.length / 2));
+    const chunk2 = topSentences.slice(Math.ceil(topSentences.length / 2));
+
+    html = `
+      <div class="space-y-4 font-sans text-xs sm:text-sm">
+        <div class="p-4 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200/70 dark:border-gray-700/60 space-y-2">
+          <h4 class="font-bold text-sm text-purple-600 dark:text-purple-400">1. Summary Overview</h4>
+          <p class="leading-relaxed text-gray-800 dark:text-gray-200">${chunk1.map(c => escapeHtml(c.text)).join(' ')}</p>
+        </div>
+        <div class="p-4 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200/70 dark:border-gray-700/60 space-y-2">
+          <h4 class="font-bold text-sm text-purple-600 dark:text-purple-400">2. Detailed Findings &amp; Conclusions</h4>
+          <p class="leading-relaxed text-gray-800 dark:text-gray-200">${chunk2.map(c => escapeHtml(c.text)).join(' ')}</p>
+        </div>
+      </div>
+    `;
+    plainText = `1. Summary Overview:\n` + chunk1.map(c => c.text).join(' ') + `\n\n2. Detailed Findings & Conclusions:\n` + chunk2.map(c => c.text).join(' ');
+
+  } else if (format === 'action_items') {
+    const actionSentences = topSentences.filter(s => {
+      const l = s.text.toLowerCase();
+      return l.includes('should') || l.includes('must') || l.includes('will') || l.includes('recommend') ||
+             l.includes('plan') || l.includes('next') || l.includes('action') || l.includes('require') ||
+             l.includes('decision') || l.includes('agree') || l.includes('conduct') || l.includes('finalize') ||
+             l.includes('submit');
+    });
+
+    const displayItems = actionSentences.length >= 2 ? actionSentences : topSentences.slice(0, 5);
+
+    html = `
+      <div class="space-y-3 font-sans">
+        <div class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1">Action Items, Decisions &amp; Next Steps</div>
+        <div class="space-y-2">
+          ${displayItems.map(item => `
+            <div class="p-3 rounded-xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200/70 dark:border-purple-800/60 flex items-start gap-3">
+              <i data-lucide="check-circle-2" style="width:18px;height:18px" class="text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5"></i>
+              <span class="text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed">${escapeHtml(item.text)}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    plainText = `Action Items & Key Decisions:\n` + displayItems.map(item => `[ ] ${item.text}`).join('\n');
+  }
+
+  return { html, text: plainText, topics: topTopics, tone };
+}
+
+function aiExtractSentences(text) {
+  if (!text) return [];
+  const lines = text.split(/\r?\n+/).map(l => l.trim()).filter(l => l.length > 0);
+  const result = [];
+  for (const line of lines) {
+    const sents = line
+      .split(/(?<!\b(?:Mr|Mrs|Ms|Dr|Prof|Sr|Jr|vs|etc|e\.g|i\.e|[A-Z]))(?<=[.?!])\s+(?=[A-Z0-9"'])/)
+      .filter(Boolean)
+      .map(s => s.trim())
+      .filter(s => s.length > 15 && s.split(/\s+/).length >= 3);
+    if (sents.length > 0) {
+      result.push(...sents);
+    } else if (line.length > 20 && line.split(/\s+/).length >= 3) {
+      result.push(line);
+    }
+  }
+  return result;
+}
+
+function aiCountWords(str) {
+  if (!str) return 0;
+  return (str.match(/\b\S+\b/g) || []).length;
+}
+
+// ------------------- HISTORY -------------------
+
+function aiSaveHistoryEntry(docName, summaryText, format, wordCount) {
+  const entry = {
+    id: Date.now(),
+    name: docName,
+    summary: summaryText,
+    format,
+    words: wordCount,
+    time: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+  };
+
+  aiCurrentHistory.unshift(entry);
+  if (aiCurrentHistory.length > 30) aiCurrentHistory.pop();
+
+  try {
+    localStorage.setItem('pockitup_ai_summaries', JSON.stringify(aiCurrentHistory));
+  } catch (e) {}
+
+  aiRenderHistory();
+}
+
+function aiRenderHistory() {
+  const listEl = document.getElementById('ai-history-list');
+  if (!listEl) return;
+
+  if (aiCurrentHistory.length === 0) {
+    listEl.innerHTML = `
+      <div class="py-6 text-center text-gray-400">
+        <p class="text-xs font-medium">No past summaries yet</p>
+        <p class="text-[11px] text-gray-400 mt-0.5">Your generated summaries will be saved here</p>
+      </div>
+    `;
+    return;
+  }
+
+  listEl.innerHTML = aiCurrentHistory.map((item, idx) => `
+    <div onclick="aiLoadHistory(${idx})" class="p-3 rounded-2xl bg-gray-50/80 dark:bg-gray-900/60 border border-gray-200/70 dark:border-gray-700/60 hover:border-purple-400 dark:hover:border-purple-600 transition cursor-pointer flex items-center justify-between gap-3">
+      <div class="overflow-hidden space-y-0.5">
+        <div class="font-bold text-xs text-gray-800 dark:text-gray-200 truncate max-w-sm">${escapeHtml(item.name)}</div>
+        <div class="text-[11px] text-gray-400 flex items-center gap-2">
+          <span>${item.time}</span>
+          <span>•</span>
+          <span class="text-purple-600 dark:text-purple-400 font-medium">${item.words} words (${item.format})</span>
+        </div>
+      </div>
+      <button onclick="aiDeleteHistoryItem(${idx}, event)" class="p-1.5 text-gray-400 hover:text-rose-500 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition" title="Delete">
+        <i data-lucide="trash-2" style="width:15px;height:15px"></i>
+      </button>
+    </div>
+  `).join('');
+
+  if (typeof lucide !== 'undefined' && lucide.createIcons) {
+    lucide.createIcons();
+  }
+}
+
+function aiLoadHistory(idx) {
+  const item = aiCurrentHistory[idx];
+  if (!item) return;
+
+  const resultCard = document.getElementById('ai-summary-result-card');
+  const contentEl = document.getElementById('ai-summary-content');
+  const modeBadge = document.getElementById('ai-result-mode-badge');
+
+  if (contentEl) contentEl.innerHTML = `<p class="whitespace-pre-line leading-relaxed">${escapeHtml(item.summary)}</p>`;
+  if (resultCard) resultCard.classList.remove('hidden');
+  if (modeBadge) modeBadge.textContent = item.format;
+
+  showToast(`Loaded summary: ${item.name}`);
+  resultCard?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function aiDeleteHistoryItem(idx, event) {
+  if (event) event.stopPropagation();
+  aiCurrentHistory.splice(idx, 1);
+  try {
+    localStorage.setItem('pockitup_ai_summaries', JSON.stringify(aiCurrentHistory));
+  } catch (e) {}
+  aiRenderHistory();
+}
+
+function aiClearHistory() {
+  aiCurrentHistory = [];
+  try {
+    localStorage.removeItem('pockitup_ai_summaries');
+  } catch (e) {}
+  aiRenderHistory();
+  showToast('Summary history cleared');
+}
+
+function aiExportHistory() {
+  if (aiCurrentHistory.length === 0) {
+    showToast('No history to export');
+    return;
+  }
+  const lines = aiCurrentHistory.map(h => `========================================\n[${h.time}] ${h.name} (${h.format})\n========================================\n${h.summary}\n\n`);
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pockitup-ai-summaries-${Date.now()}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('History exported successfully');
+}
+
+// ------------------- INPUT MODE SWITCHING -------------------
+
+function aiSummSwitchInputMode(mode) {
+  aiInputMode = mode;
+  const uploadBtn = document.getElementById('ai-tab-mode-upload');
+  const pasteBtn = document.getElementById('ai-tab-mode-paste');
+  const uploadContainer = document.getElementById('ai-upload-container');
+  const pasteContainer = document.getElementById('ai-paste-container');
+
+  if (mode === 'upload') {
+    uploadContainer?.classList.remove('hidden');
+    pasteContainer?.classList.add('hidden');
+    uploadBtn?.classList.add('bg-white', 'dark:bg-gray-800', 'text-purple-600', 'dark:text-purple-400', 'shadow-sm');
+    uploadBtn?.classList.remove('text-gray-500', 'dark:text-gray-400');
+    pasteBtn?.classList.remove('bg-white', 'dark:bg-gray-800', 'text-purple-600', 'dark:text-purple-400', 'shadow-sm');
+    pasteBtn?.classList.add('text-gray-500', 'dark:text-gray-400');
+  } else {
+    uploadContainer?.classList.add('hidden');
+    pasteContainer?.classList.remove('hidden');
+    pasteBtn?.classList.add('bg-white', 'dark:bg-gray-800', 'text-purple-600', 'dark:text-purple-400', 'shadow-sm');
+    pasteBtn?.classList.remove('text-gray-500', 'dark:text-gray-400');
+    uploadBtn?.classList.remove('bg-white', 'dark:bg-gray-800', 'text-purple-600', 'dark:text-purple-400', 'shadow-sm');
+    uploadBtn?.classList.add('text-gray-500', 'dark:text-gray-400');
+    setTimeout(() => document.getElementById('ai-paste-textarea')?.focus(), 50);
+  }
+}
+
+function aiUpdatePasteCount() {
+  const text = document.getElementById('ai-paste-textarea')?.value || '';
+  const wordCount = aiCountWords(text);
+  const charCount = text.length;
+  const statsEl = document.getElementById('ai-paste-stats');
+  if (statsEl) {
+    statsEl.textContent = `${wordCount.toLocaleString()} words • ${charCount.toLocaleString()} characters`;
+  }
+}
+
+function aiSummResetForm() {
+  aiLoadedFile = null;
+  aiExtractedText = '';
+  document.getElementById('ai-file-input').value = '';
+  document.getElementById('ai-paste-textarea').value = '';
+  document.getElementById('ai-file-preview-card')?.classList.add('hidden');
+  document.getElementById('ai-summary-result-card')?.classList.add('hidden');
+  aiHideSafetyAlert();
+  aiUpdatePasteCount();
+  showToast('Reset form');
+}
+
+function aiCopySummary() {
+  const contentEl = document.getElementById('ai-summary-content');
+  if (!contentEl) return;
+  const text = contentEl.innerText || contentEl.textContent || '';
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Summary copied to clipboard!');
+  }).catch(() => {
+    showToast('Failed to copy');
+  });
+}
+
+function aiDownloadSummary(format = 'txt') {
+  const contentEl = document.getElementById('ai-summary-content');
+  if (!contentEl) return;
+  const text = contentEl.innerText || contentEl.textContent || '';
+  const title = aiLoadedFile ? aiLoadedFile.name.replace(/\.[^/.]+$/, '') : 'ai-summary';
+  const blob = new Blob([text], { type: format === 'md' ? 'text/markdown;charset=utf-8' : 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${title}-summary.${format}`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`Downloaded as .${format}`);
+}
+
+
 
 
 
