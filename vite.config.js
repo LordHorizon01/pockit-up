@@ -45,7 +45,6 @@ function rateLimitMiddleware(req, res, next) {
 export default defineConfig({
   server: {
     port: 5173,
-<<<<<<< HEAD
     open: '/',
     headers: {
       'X-Content-Type-Options': 'nosniff',
@@ -80,8 +79,4 @@ export default defineConfig({
       }
     }
   ]
-=======
-    open: '/'
-  }
->>>>>>> origin/main
 });
