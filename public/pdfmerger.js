@@ -10,8 +10,7 @@ function escapeHtml(value) {
     "'": '&#39;'
   }[char]));
 }
-
-// ===================== APP NAVIGATION =====================
+// App navigation
 function openTool(tool) {
   document.body.classList.add('in-tool-view');
   document.getElementById('home-view').classList.add('hidden');
@@ -100,16 +99,13 @@ function goHome() {
 
 let isScrollingFromNav = false;
 let scrollspyTimeout = null;
-
-// ===================== INSTAGRAM DOWNLOADER =====================
+// Instagram downloader
 function instaFetch() {
   const rawUrl = (document.getElementById('insta-url-input').value || '').trim();
   const errorEl = document.getElementById('insta-error');
   const errorMsg = document.getElementById('insta-error-msg');
   const previewSection = document.getElementById('insta-preview-section');
   const infoBox = document.getElementById('insta-info-box');
-
-  // Hide all feedback
   errorEl.classList.add('hidden');
   previewSection.classList.add('hidden');
   infoBox.classList.add('hidden');
@@ -119,8 +115,6 @@ function instaFetch() {
     errorEl.classList.remove('hidden');
     return;
   }
-
-  // Validate Instagram URL
   const instaRegex = /instagram\.com\/(p|reel|tv)\/([A-Za-z0-9_\-]+)/;
   const match = rawUrl.match(instaRegex);
   if (!match) {
@@ -131,17 +125,11 @@ function instaFetch() {
 
   const type = match[1] === 'reel' ? 'Reel' : match[1] === 'tv' ? 'IGTV' : 'Post';
   const shortcode = match[2];
-
-  // Build the clean embed URL
   const embedUrl = `https://www.instagram.com/${match[1]}/${shortcode}/embed/`;
   const cleanUrl = `https://www.instagram.com/${match[1]}/${shortcode}/`;
-
-  // Update post type label and open link
   document.getElementById('insta-post-type').textContent = type;
   document.getElementById('insta-open-link').href = cleanUrl;
   document.getElementById('insta-download-btn').href = cleanUrl;
-
-  // Show loading state inside frame
   const frame = document.getElementById('insta-embed-frame');
   const loading = document.getElementById('insta-embed-loading');
   frame.classList.add('hidden');
@@ -149,8 +137,6 @@ function instaFetch() {
 
   // Set iframe src
   frame.src = embedUrl;
-
-  // Show preview section and info notice
   previewSection.classList.remove('hidden');
   infoBox.classList.remove('hidden');
 
@@ -180,8 +166,7 @@ function instaReset() {
   const loading = document.getElementById('insta-embed-loading');
   if (loading) loading.classList.remove('hidden');
 }
-
-// ===================== PDF UNMERGER =====================
+// PDF splitter
 let unmergerFile = null;
 let unmergerPdfDoc = null;
 let unmergerArrayBuffer = null;
@@ -624,7 +609,6 @@ async function unmergerProcessDownload() {
   }
 }
 
-
 function scrollToSection(sectionId, btn) {
   isScrollingFromNav = true;
   clearTimeout(scrollspyTimeout);
@@ -656,8 +640,6 @@ function showComingSoon(btn, label) {
       document.getElementById('tab-pdf').classList.add('active');
     }, 800);
   }
-
-  // Show toast
   const toast = document.getElementById('coming-toast');
   const text = document.getElementById('coming-toast-text');
   if (toast && text) {
@@ -688,8 +670,7 @@ function showToast(msg) {
     console.log('[Toast]', msg);
   }
 }
-
-// ===================== THEME TOGGLE =====================
+// Theme toggle
 function initTheme() {
   const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   if (currentTheme === 'dark') {
@@ -717,14 +698,11 @@ function toggleTheme() {
     sunIcon.classList.add('hidden');
     moonIcon.classList.remove('hidden');
   }
-  
-  // Update canvas preview dark themes if required
   if (previewDoc) {
     renderPreview();
   }
 }
-
-// ===================== PDF MERGER =====================
+// PDF merger
 let pdfFiles = [];
 let mergedBytes = null;
 let dragIdx = null;
@@ -880,10 +858,7 @@ function downloadMerged() {
     progressText.textContent = '100%';
     
     setTimeout(() => {
-      // Create blob from merged PDF bytes
       const blob = new Blob([new Uint8Array(mergedBytes)], { type: 'application/pdf' });
-      
-      // Create download link with proper attributes
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -905,8 +880,7 @@ function downloadMerged() {
     }, 500);
   }, 1500);
 }
-
-// ===================== LIGHTBOX VIEW =====================
+// Lightbox view
 function openLightbox(pageNum) {
   currentLightboxPage = pageNum;
   currentZoom = 1.0; // Reset zoom when opening lightbox
@@ -941,8 +915,6 @@ async function renderLightboxPage() {
   
   document.getElementById('lightbox-prev').disabled = currentLightboxPage === 1;
   document.getElementById('lightbox-next').disabled = currentLightboxPage === totalPDFPages;
-  
-  // Update zoom button states
   document.getElementById('zoom-out-btn').disabled = currentZoom <= 0.5;
   document.getElementById('zoom-in-btn').disabled = currentZoom >= 3.0;
 }
@@ -974,8 +946,7 @@ function nextLightboxPage() {
     renderLightboxPage();
   }
 }
-
-// ===================== PDF COMPRESSOR =====================
+// PDF compressor
 let compressorFile = null;
 let compressedBytes = null;
 
@@ -1075,7 +1046,6 @@ async function compressPDF() {
     
     compressedBytes = compressedResult;
     modal.classList.add('hidden');
-    // Reset modal state for next use
     updateCompressProgress(0, 0, 0, 'Initializing...');
     displayCompressionResults(originalSize, compressedBytes.length);
   } catch (err) {
@@ -1091,11 +1061,9 @@ async function compressPDF() {
     }
   }
 }
-
-// ===================== COMPRESSION ENGINE =====================
+// Compression engine
 // Quality presets: name → { jpegQuality, scale }
-// IMPORTANT: scale must always be <= 1.0 — we compress, we never upscale.
-// Upscaling (scale > 1) adds pixels before JPEG encoding and BLOATS the file.
+// Never upscale rasterized pages; it increases the output file size.
 const COMPRESS_PRESETS = {
   screen:   { jpegQuality: 0.40, scale: 0.70 },  // Smallest — low res + low quality
   ebook:    { jpegQuality: 0.60, scale: 0.85 },  // Balanced — slightly lower res, good quality
@@ -1129,8 +1097,6 @@ async function compressWithMaxQuality(originalBytes) {
   updateCompressProgress(0, 0, 2, 'Loading PDF…');
   const pdfJsDoc = await pdfjsLib.getDocument({ data: new Uint8Array(originalBytes) }).promise;
   const numPages = pdfJsDoc.numPages;
-
-  // Create a new pdf-lib document to hold the compressed pages
   const newDoc = await PDFLib.PDFDocument.create();
   const offscreenCanvas = document.createElement('canvas');
   const ctx = offscreenCanvas.getContext('2d');
@@ -1190,8 +1156,6 @@ async function compressWithMaxQuality(originalBytes) {
 
   return result;
 }
-
-
 
 function displayCompressionResults(originalSize, compressedSize) {
   const resultSection = document.getElementById('compress-result-section');
@@ -1272,10 +1236,7 @@ function downloadCompressed() {
     progressText.textContent = '100%';
     
     setTimeout(() => {
-      // Create blob from compressed PDF bytes
       const blob = new Blob([new Uint8Array(compressedBytes)], { type: 'application/pdf' });
-      
-      // Create download link with proper attributes
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -1325,8 +1286,7 @@ function closeAlreadyCompressedModal() {
   const modal = document.getElementById('already-compressed-modal');
   if (modal) modal.classList.add('hidden');
 }
-
-// ===================== IMAGE TOOLS =====================
+// Image tools
 const imgTools = {
   'png-to-jpg':  { from:'PNG', to:'JPG', mime:'image/jpeg', ext:'jpg', accept:'.png,image/png' },
   'jpg-to-png':  { from:'JPG', to:'PNG', mime:'image/png',  ext:'png', accept:'.jpg,.jpeg,image/jpeg' },
@@ -1354,7 +1314,6 @@ function openImageTool(toolId) {
   document.body.classList.add('in-tool-view');
   document.getElementById('home-view').classList.add('hidden');
   document.getElementById('image-tool-view').classList.remove('hidden');
-  // Update header and title
   const label = imgCurrentTool.from + ' → ' + imgCurrentTool.to;
   document.getElementById('img-tool-breadcrumb').textContent = label;
   document.getElementById('img-tool-title').textContent = label + ' Converter';
@@ -1483,8 +1442,7 @@ function openImgPreview(blob, title) {
 function closeImgPreview() {
   document.getElementById('img-preview-modal').classList.add('hidden');
 }
-
-// ===================== STOPWATCH =====================
+// Stopwatch
 let swInterval = null;
 let swElapsedMs = 0;          // total elapsed milliseconds
 let swLapStartMs = 0;         // ms at last lap start
@@ -1505,8 +1463,6 @@ function swFmtTime(ms) {
 function swFmtMs(ms) {
   return '.' + String(Math.floor((ms % 1000) / 10)).padStart(2, '0');
 }
-
-// Update DOM displays
 function swUpdateDisplay() {
   const disp = document.getElementById('sw-display');
   const msDisp = document.getElementById('sw-ms-display');
@@ -1538,8 +1494,6 @@ function swRenderLaps() {
   // Always show the newest lap at the top
   list.scrollTop = 0;
 }
-
-// Start stopwatch
 function swStart() {
   if (swIsRunning) return;
   swIsRunning = true;
@@ -1558,15 +1512,11 @@ function swStart() {
   document.getElementById('sw-lap-btn').removeAttribute('disabled');
   lucide.createIcons();
 }
-
-// Pause stopwatch
 function swPause() {
   if (!swIsRunning) return;
   swIsRunning = false;
   clearInterval(swInterval);
   swInterval = null;
-
-  // Show Resume instead of Start
   const startBtn = document.getElementById('sw-start-btn');
   if (startBtn) {
     startBtn.textContent = 'Resume';
@@ -1583,8 +1533,6 @@ function swStop() {
     swInterval = null;
   }
 }
-
-// Reset stopwatch
 function swReset() {
   swStop();
   swElapsedMs = 0;
@@ -1618,8 +1566,7 @@ function swLap() {
   });
   swRenderLaps();
 }
-
-// ===================== COUNTDOWN TIMER =====================
+// Countdown timer
 let timerInterval = null;
 let timerTotalSeconds = 60; // default 1 minute (00:01:00)
 let timerRemainingSeconds = 60;
@@ -1636,8 +1583,6 @@ function formatTimerTime(secs) {
     String(s).padStart(2, '0')
   ].join(':');
 }
-
-// Update the visual display and progress ring
 function updateTimerDisplay() {
   const display = document.getElementById('timer-time-display');
   if (display) {
@@ -1761,8 +1706,6 @@ function stopTimerAlarm() {
     timerAlarmInterval = null;
   }
 }
-
-// Start countdown
 function startTimer() {
   if (timerInterval) clearInterval(timerInterval);
   stopTimerAlarm();
@@ -1775,8 +1718,6 @@ function startTimer() {
     playBtnIcon.setAttribute('data-lucide', 'square');
     playBtnIcon.style.marginLeft = '0px'; // center the square icon
   }
-  
-  // Show reset button inside circle
   const resetBtn = document.getElementById('timer-reset-btn');
   if (resetBtn) {
     resetBtn.classList.remove('opacity-0', 'pointer-events-none');
@@ -1790,15 +1731,11 @@ function startTimer() {
       timerInterval = null;
       timerIsRunning = false;
       playTimerAlarm();
-      
-      // Reset play button
       const pIcon = document.getElementById('timer-btn-icon');
       if (pIcon) {
         pIcon.setAttribute('data-lucide', 'play');
         pIcon.style.marginLeft = '4px';
       }
-      
-      // Hide reset button
       const rBtn = document.getElementById('timer-reset-btn');
       if (rBtn) {
         rBtn.classList.add('opacity-0', 'pointer-events-none');
@@ -1840,22 +1777,17 @@ function toggleTimer() {
     startTimer();
   }
 }
-
-// Reset timer to original duration
 function resetTimer() {
   pauseTimer();
   stopTimerAlarm();
   timerRemainingSeconds = timerTotalSeconds;
   updateTimerDisplay();
-  
-  // Hide reset button
   const resetBtn = document.getElementById('timer-reset-btn');
   if (resetBtn) {
     resetBtn.classList.add('opacity-0', 'pointer-events-none');
   }
 }
-
-// ===================== NUMBER TO WORD CONVERTER =====================
+// Number-to-word converter
 function numwordOnModeChange() {
   const mode = document.getElementById('numword-mode').value;
   const inputLabel = document.getElementById('numword-input-label');
@@ -2136,8 +2068,7 @@ function numwordConvert() {
     outputField.value = wordsToNumber(input);
   }
 }
-
-// ===================== SCOREBOARD =====================
+// Scoreboard
 let sbScore1 = 0;
 let sbScore2 = 0;
 
@@ -2200,8 +2131,7 @@ function sbResetAll() {
 
   sbToggleCustom();
 }
-
-// ===================== ROMAN NUMERALS CONVERTER =====================
+// Roman numeral converter
 function romanOnModeChange() {
   const mode = document.getElementById('roman-mode').value;
   const inputLabel = document.getElementById('roman-input-label');
@@ -2305,8 +2235,7 @@ function romanConvert() {
     outputField.value = romanToArabic(input);
   }
 }
-
-// ===================== IMAGES TO PDF =====================
+// Images to PDF
 let img2pdfFiles = [];
 let img2pdfBytes = null;
 let img2pdfPreviewDoc = null;
@@ -2364,8 +2293,6 @@ function img2pdfRenderList() {
     div.className = 'file-item flex items-center gap-3 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm';
     div.draggable = true;
     div.dataset.idx = i;
-
-    // Create thumbnail
     const thumb = document.createElement('img');
     thumb.className = 'w-10 h-10 object-cover rounded border border-gray-200 dark:border-gray-700 flex-shrink-0';
     thumb.alt = f.name;
@@ -2477,8 +2404,6 @@ function img2pdfToJpgBytes(img) {
 
 async function img2pdfCreate() {
   if (img2pdfFiles.length === 0) return;
-
-  // Show processing overlay
   const overlay = document.createElement('div');
   overlay.id = 'img2pdf-processing-overlay';
   overlay.className = 'fixed inset-0 bg-black/60 flex items-center justify-center z-50';
@@ -2669,8 +2594,7 @@ function img2pdfDownload() {
     }, 500);
   }, 1500);
 }
-
-// ===================== NAVIGATION DRAWER =====================
+// Navigation drawer
 function openSidebar() {
   const overlay = document.getElementById('sidebar-overlay');
   const drawer = document.getElementById('sidebar-drawer');
@@ -2755,8 +2679,7 @@ function scrollToSectionFromSidebar(sectionId) {
     scrollToSection(sectionId, tabBtn);
   }
 }
-
-// ===================== DOM EVENT SETUP =====================
+// Event setup
 document.addEventListener('DOMContentLoaded', () => {
   const instaFrame = document.getElementById('insta-embed-frame');
   if (instaFrame) instaFrame.addEventListener('load', instaEmbedLoaded);
@@ -2873,8 +2796,7 @@ function formatBytes(bytes) {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
-
-// ===================== PROTECT PDF =====================
+// Protect PDF
 let protectFile = null;
 let protectArrayBuffer = null;
 let protectEncryptedBytes = null;
@@ -2957,8 +2879,6 @@ async function protectHandleFile(file) {
     document.getElementById('protect-drop-zone').classList.add('hidden');
     document.getElementById('protect-config-section').classList.remove('hidden');
     document.getElementById('protect-result-section').classList.add('hidden');
-
-    // Reset password & inputs
     document.getElementById('protect-user-pass').value = '';
     document.getElementById('protect-user-confirm').value = '';
     document.getElementById('protect-owner-pass').value = '';
@@ -3112,8 +3032,6 @@ function protectGeneratePassword() {
 
   // Copy to clipboard
   navigator.clipboard?.writeText(gen).catch(() => {});
-
-  // Show Toast
   const toast = document.getElementById('coming-toast');
   const text = document.getElementById('coming-toast-text');
   if (toast && text) {
@@ -3142,8 +3060,6 @@ function protectToggleOwnerSection() {
 
 function protectSetPreset(preset) {
   protectCurrentPreset = preset;
-
-  // Update button active states
   ['max', 'read-print', 'forms', 'custom'].forEach(p => {
     const btn = document.getElementById(`preset-${p}`);
     if (btn) {
@@ -3219,8 +3135,6 @@ async function protectProcess() {
     document.getElementById('protect-user-confirm').focus();
     return;
   }
-
-  // Show progress modal
   const modal = document.getElementById('protect-progress-modal');
   const bar = document.getElementById('protect-progress-bar');
   const txt = document.getElementById('protect-progress-text');
@@ -3285,8 +3199,6 @@ async function protectProcess() {
     bar.style.width = '100%';
     txt.textContent = '100%';
     await new Promise(r => setTimeout(r, 200));
-
-    // Hide progress modal
     modal.classList.add('hidden');
 
     // Populate result view
@@ -3369,8 +3281,7 @@ function protectReset() {
   if (ob) ob.classList.add('hidden');
   protectCheckStrength();
 }
-
-// ===================== UNLOCK PDF =====================
+// Unlock PDF
 let unlockFile = null;
 let unlockArrayBuffer = null;
 let unlockDecryptedBytes = null;
@@ -3448,7 +3359,6 @@ async function unlockHandleFile(file) {
     unlockIsEncrypted = isEncrypted;
 
     if (isEncrypted) {
-      // Show Password-Locked Section
       document.getElementById('unlock-locked-filename').textContent = file.name;
       document.getElementById('unlock-locked-filesize').textContent = formatBytes(file.size);
 
@@ -3519,8 +3429,6 @@ async function unlockProcess() {
   }
 
   if (errorMsg) errorMsg.classList.add('hidden');
-
-  // Show progress modal
   const modal = document.getElementById('unlock-progress-modal');
   const bar = document.getElementById('unlock-progress-bar');
   const txt = document.getElementById('unlock-progress-text');
@@ -3619,8 +3527,7 @@ function unlockResetFile() {
 function unlockReset() {
   unlockResetFile();
 }
-
-// ===================== ROTATE PDF =====================
+// Rotate PDF
 let rotateFile = null;
 let rotateArrayBuffer = null;
 let rotateRotatedBytes = null;
@@ -3789,14 +3696,10 @@ function rotatePage(index, delta) {
   let newAngle = (state.currentDelta + delta) % 360;
   if (newAngle < 0) newAngle += 360;
   state.currentDelta = newAngle;
-
-  // Update canvas transform
   const canvas = document.getElementById(`rotate-canvas-${index}`);
   if (canvas) {
     canvas.style.transform = `rotate(${state.currentDelta}deg)`;
   }
-
-  // Update badge
   const badge = document.getElementById(`rotate-badge-${index}`);
   if (badge) {
     badge.textContent = `${state.currentDelta}°`;
@@ -3905,8 +3808,6 @@ async function rotateProcess() {
     alert('Please upload a PDF file first.');
     return;
   }
-
-  // Show progress modal
   const modal = document.getElementById('rotate-progress-modal');
   const bar = document.getElementById('rotate-progress-bar');
   const txt = document.getElementById('rotate-progress-text');
@@ -4004,8 +3905,7 @@ function rotateResetFile() {
 function rotateReset() {
   rotateResetFile();
 }
-
-// ===================== ADD / EDIT / REMOVE PAGE NUMBERS =====================
+// Page number tools
 let pageNumFile = null;
 let pageNumArrayBuffer = null;
 let pageNumNumberedBytes = null;
@@ -4080,8 +3980,6 @@ function pagenumberSetMode(mode) {
   const typoCard = document.getElementById('pagenumber-typography-card');
   const applyBtn = document.getElementById('pagenumber-apply-btn');
   const applyBtnText = document.getElementById('pagenumber-apply-btn-text');
-
-  // Reset tab button states
   [btnAdd, btnReplace, btnRemove].forEach(btn => {
     if (btn) btn.className = 'flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 border border-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50';
   });
@@ -4583,8 +4481,6 @@ async function pagenumberProcess() {
     alert('Please upload a PDF file first.');
     return;
   }
-
-  // Show progress modal
   const modal = document.getElementById('pagenumber-progress-modal');
   const bar = document.getElementById('pagenumber-progress-bar');
   const txt = document.getElementById('pagenumber-progress-text');
@@ -4912,9 +4808,7 @@ function pagenumberResetFile() {
 function pagenumberReset() {
   pagenumberResetFile();
 }
-
-
-// ===================== PDF TO WORD (.DOCX) =====================
+// PDF to Word conversion
 let pdfToWordFile = null;
 let pdfToWordArrayBuffer = null;
 let pdfToWordDocxBlob = null;
@@ -5212,8 +5106,6 @@ async function pdftowordRenderDocMockup(pageNum) {
   const pageData = await pdftowordExtractPage(pageNum);
   const mockup = document.getElementById('pdftoword-doc-mockup');
   if (!mockup || !pageData) return;
-
-  // Update Stats Pills
   document.getElementById('pdftoword-stat-words').textContent = pageData.wordCount.toLocaleString();
   document.getElementById('pdftoword-stat-chars').textContent = pageData.charCount.toLocaleString();
   document.getElementById('pdftoword-stat-paras').textContent = pageData.paragraphs.length.toLocaleString();
@@ -5315,8 +5207,6 @@ async function pdftowordProcess() {
     alert('Please upload a PDF file first.');
     return;
   }
-
-  // Show progress modal
   const modal = document.getElementById('pdftoword-progress-modal');
   const bar = document.getElementById('pdftoword-progress-bar');
   const txt = document.getElementById('pdftoword-progress-text');
@@ -5592,8 +5482,7 @@ function pdftowordResetFile() {
 function pdftowordReset() {
   pdftowordResetFile();
 }
-
-// ===================== PDF TO EXCEL (.XLSX) CONVERTER =====================
+// PDF to Excel conversion
 let pdfToExcelFile = null;
 let pdfToExcelArrayBuffer = null;
 let pdfToExcelPdfJsDoc = null;
@@ -5940,8 +5829,6 @@ function pdftoexcelRenderSpreadsheetMockup(sheetIndex = 0) {
     totalCols = sh.colCount;
     totalCells = sh.cellCount;
   }
-
-  // Update stat badges
   const statRows = document.getElementById('pdftoexcel-stat-rows');
   const statCols = document.getElementById('pdftoexcel-stat-cols');
   const statCells = document.getElementById('pdftoexcel-stat-cells');
@@ -6264,8 +6151,7 @@ function pdftoexcelResetFile() {
 function pdftoexcelReset() {
   pdftoexcelResetFile();
 }
-
-// ===================== WORD TO PDF CONVERTER =====================
+// Word to PDF conversion
 let wordToPdfFile = null;
 let wordToPdfArrayBuffer = null;
 let wordToPdfPageCount = 0;
@@ -6444,8 +6330,6 @@ async function wordtopdfRenderPreview() {
     // Count pages in container
     const sections = container.querySelectorAll('section.docx') || container.querySelectorAll('.docx');
     wordToPdfPageCount = sections.length > 0 ? sections.length : 1;
-
-    // Update Stats Badges
     const pagesBadge = document.getElementById('wordtopdf-stat-pages');
     const wordsBadge = document.getElementById('wordtopdf-stat-words');
     const charsBadge = document.getElementById('wordtopdf-stat-chars');
@@ -6766,8 +6650,7 @@ function wordtopdfResetFile() {
 function wordtopdfReset() {
   wordtopdfResetFile();
 }
-
-// ===================== SECURE PASSWORD GENERATOR =====================
+// Password generator
 let passwordgenCurrentMode = 'char'; // 'char' | 'phrase' | 'pin' | 'bulk'
 let passwordgenCurrentPassword = '';
 let passwordgenIsMasked = false;
@@ -6820,8 +6703,6 @@ function passwordgenSecureRandomInt(min, max) {
 
 function passwordgenSetMode(mode) {
   passwordgenCurrentMode = mode;
-
-  // Update tabs UI
   ['char', 'phrase', 'pin', 'bulk'].forEach(m => {
     const tabBtn = document.getElementById(`passwordgen-tab-${m}`);
     const panel = document.getElementById(`passwordgen-panel-${m}`);
@@ -7141,8 +7022,6 @@ function passwordgenUpdateStrengthUI(entropy, crackTime, level, pwd) {
   }
   if (entropyEl) entropyEl.textContent = `${entropy} bits entropy`;
   if (crackTimeEl) crackTimeEl.textContent = `Crack Time: ${crackTime}`;
-
-  // Update 5 segments
   const barColors = [
     'bg-red-500',
     'bg-orange-500',
@@ -7161,8 +7040,6 @@ function passwordgenUpdateStrengthUI(entropy, crackTime, level, pwd) {
       }
     }
   }
-
-  // Update Checklist Pills
   const chkLen = document.getElementById('passwordgen-chk-len');
   const chkUpper = document.getElementById('passwordgen-chk-upper');
   const chkLower = document.getElementById('passwordgen-chk-lower');
@@ -7406,8 +7283,7 @@ function passwordgenReset() {
   passwordgenCurrentMode = 'char';
   passwordgenSetMode('char');
 }
-
-// ===================== COLOR PICKER & PALETTE STUDIO =====================
+// Color picker and palette studio
 let colorpickerCurrentTab = 'picker';
 let colorpickerCurrentHue = 217;
 let colorpickerCurrentSat = 0.76;
@@ -7426,8 +7302,7 @@ let colorpickerExtractedColors = [];
 let colorpickerIsDraggingSpectrum = false;
 
 let colorpickerVisibleCounts = { web: 14, android: 12, ios: 12, aesthetic: 14 };
-
-// Curated UI Palettes Dataset (Expansive base catalog + procedural generation)
+// Palette catalog
 const COLORPICKER_PALETTES = {
   web: [
     {
@@ -7736,8 +7611,7 @@ const COLORPICKER_PALETTES = {
     }
   ]
 };
-
-// Procedural AI Palette Generator for Infinite Discovery
+// Procedural palette generation
 function colorpickerGenerateProceduralPalette(cat) {
   const baseHues = [210, 160, 280, 15, 45, 340, 190, 260, 120];
   const randHue = (baseHues[Math.floor(Math.random() * baseHues.length)] + Math.floor(Math.random() * 40 - 20) + 360) % 360;
@@ -8025,8 +7899,7 @@ function colorpickerExportPalette(idx, format) {
   });
 }
 
-
-// Curated Gradient Presets
+// Gradient presets
 const COLORPICKER_GRADIENT_PRESETS = [
   { name: 'Instagram Vibe', css: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)', stops: [{ color: '#833ab4', pos: 0 }, { color: '#fd1d1d', pos: 50 }, { color: '#fcb045', pos: 100 }] },
   { name: 'Sunset Bloom', css: 'linear-gradient(135deg, #ff0844 0%, #ffb199 100%)', stops: [{ color: '#ff0844', pos: 0 }, { color: '#ffb199', pos: 100 }] },
@@ -8072,8 +7945,7 @@ function colorpickerSetTab(tab) {
     setTimeout(colorpickerDrawSpectrum, 50);
   }
 }
-
-// ===================== SPECTRUM 2D CANVAS =====================
+// Two-dimensional color spectrum
 function setupSpectrumEvents() {
   const box = document.getElementById('colorpicker-spectrum-box');
   const canvas = document.getElementById('colorpicker-spectrum-canvas');
@@ -8151,8 +8023,6 @@ function colorpickerDrawSpectrum() {
   gradV.addColorStop(1, '#000000');
   ctx.fillStyle = gradV;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Update handle position
   const handle = document.getElementById('colorpicker-spectrum-handle');
   if (handle) {
     handle.style.left = `${colorpickerCurrentSat * 100}%`;
@@ -8203,8 +8073,7 @@ async function colorpickerUseEyeDropper() {
     alert('The EyeDropper API is available in Chromium-based browsers (Chrome, Edge, Opera). You can also paste any HEX/RGB color or pick from the spectrum.');
   }
 }
-
-// ===================== COLOR MATH & DISPATCHER =====================
+// Color conversions
 function colorpickerSetColorFromHsv(h, s, v, a) {
   const rgb = hsvToRgb(h, s, v);
   const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
@@ -8237,8 +8106,6 @@ function colorpickerSetColorFromHsv(h, s, v, a) {
   // Handle color in spectrum
   const handle = document.getElementById('colorpicker-spectrum-handle');
   if (handle) handle.style.backgroundColor = hex;
-
-  // Update Formats Values
   setTextContent('colorpicker-val-hex', hex);
   setTextContent('colorpicker-val-rgb', `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`);
   setTextContent('colorpicker-val-rgba', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${a.toFixed(2).replace(/\.?0+$/, '')})`);
@@ -8258,8 +8125,6 @@ function colorpickerSetColorFromHsv(h, s, v, a) {
 
   setTextContent('colorpicker-contrast-black-score', `${contrastBlack.toFixed(2)}:1`);
   setBadge('colorpicker-contrast-black-badge', contrastBlack);
-
-  // Update Harmonies & Tints
   colorpickerRenderHarmonies(h, s, v);
   colorpickerRenderTintsAndShades(rgb.r, rgb.g, rgb.b);
 }
@@ -8296,8 +8161,7 @@ function colorpickerToggleSwatchMode(mode) {
     box.style.border = '4px solid #ffffff';
   }
 }
-
-// ===================== HARMONIES & TINTS =====================
+// Color harmonies and tints
 function colorpickerRenderHarmonies(h, s, v) {
   const container = document.getElementById('colorpicker-harmonies-container');
   if (!container) return;
@@ -8385,8 +8249,7 @@ function colorpickerRenderTintsAndShades(r, g, b) {
 
   container.innerHTML = html;
 }
-
-// ===================== UI PALETTES STUDIO =====================
+// UI palette studio
 function colorpickerSetPaletteCategory(cat) {
   colorpickerPaletteCategory = cat;
   ['web', 'android', 'ios', 'aesthetic'].forEach(c => {
@@ -8532,8 +8395,7 @@ function colorpickerExportPalette(idx, format) {
     alert(`Copied ${pal.name} as ${format.toUpperCase()}!`);
   });
 }
-
-// ===================== GRADIENT STUDIO =====================
+// Gradient studio
 function colorpickerSetGradientType(type) {
   colorpickerGradientType = type;
   const btnLin = document.getElementById('colorpicker-grad-type-linear');
@@ -8710,8 +8572,7 @@ function colorpickerDownloadGradientPng() {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
 }
-
-// ===================== IMAGE COLOR EXTRACTOR =====================
+// Image color extractor
 function colorpickerHandleImageUpload(e) {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
@@ -8778,8 +8639,7 @@ function colorpickerExportExtractedPalette() {
     alert(`Copied palette: ${colorpickerExtractedColors.join(', ')}`);
   });
 }
-
-// ===================== UTILITY & CONVERSION HELPERS =====================
+// Utility and conversion helpers
 function colorpickerCopyText(elementId, btn) {
   const el = document.getElementById(elementId);
   if (!el) return;
@@ -8939,18 +8799,14 @@ function getContrastRatio(l1, l2) {
   const darker = Math.min(l1, l2);
   return (brighter + 0.05) / (darker + 0.05);
 }
-
-
-// =========================================================================
-// ==================== ZIP ARCHIVER & EXTRACTOR STUDIO ====================
-// =========================================================================
-
+// ZIP archiver and extractor
 let ziparchiverCurrentTab = 'create';
 let ziparchiverQueue = []; // [{ id, file, name, virtualPath, size, type, lastModified, category, ext }]
 let ziparchiverEditingQueueId = null;
 let ziparchiverCreatedBlob = null;
 let ziparchiverCreatedFilename = 'archive.zip';
-let ziparchiverExtractedEntries = []; // [{ id, path, name, dir, size, compressedSize, date, comment, isSelected, category, ext, encrypted, zipEntryObj }]
+// Normalized entries used by the archive inspector.
+let ziparchiverExtractedEntries = [];
 let ziparchiverCurrentFilter = 'all';
 let ziparchiverSearchQuery = '';
 let ziparchiverCurrentPreviewEntry = null;
@@ -9090,9 +8946,7 @@ function ziparchiverToggleModalPasswordVisibility() {
   }
   lucide.createIcons();
 }
-
-// ===================== CREATE ARCHIVE LOGIC =====================
-
+// Archive creation
 function ziparchiverOnDragOver(e) {
   e.preventDefault();
   e.stopPropagation();
@@ -9502,10 +9356,7 @@ function ziparchiverResetCreate() {
   ziparchiverRenderQueue();
   document.getElementById('ziparchiver-create-result')?.classList.add('hidden');
 }
-
-
-// ===================== INSPECT & EXTRACT ZIP LOGIC =====================
-
+// Archive inspection and extraction
 function ziparchiverOnExtractDragOver(e) {
   e.preventDefault();
   e.stopPropagation();
@@ -10193,12 +10044,7 @@ function ziparchiverReset() {
   ziparchiverClosePasswordModal();
   ziparchiverSetTab('create');
 }
-
-
-// =========================================================================
-// ======================== STANDARD CALCULATOR STUDIO =====================
-// =========================================================================
-
+// Standard calculator
 let calcCurrentInput = '0';
 let calcPreviousValue = null;
 let calcCurrentOperator = null;
@@ -10337,8 +10183,6 @@ function setupCalculator() {
     calcKeyboardListenerAttached = true;
   }
 }
-
-// Show Toast Message
 function calcShowToast(msg) {
   const toast = document.getElementById('coming-toast');
   const text = document.getElementById('coming-toast-text');
@@ -11154,11 +10998,7 @@ function calcSwitchSideTab(tab) {
 function calcToggleSideTab(tab) {
   calcSwitchSideTab(tab);
 }
-
-// =========================================================================
-// =============== SMARTPHONE DUAL UNIT CONVERTER SYSTEM ===================
-// =========================================================================
-
+// Dual unit converter
 function calcInitDualConverter() {
   calcSelectConvCat(calcConverterCategory || 'length');
 }
@@ -11289,8 +11129,6 @@ function calcPerformDualConversion() {
   const valBotEl = document.getElementById('calc-conv-val-bottom');
   if (valTopEl) valTopEl.textContent = calcFormatDisplay(calcConvValTop);
   if (valBotEl) valBotEl.textContent = calcFormatDisplay(calcConvValBottom);
-
-  // Update formula in sidecar
   const formulaText = document.getElementById('calc-conv-formula-text');
   if (formulaText && uTop && uBottom) {
     const oneConv = calcCleanFloat(calcComputeUnitConvert(1, calcConvUnitTop, calcConvUnitBottom, cat));
@@ -11466,11 +11304,7 @@ function calcReset() {
   calcCloseSettingsModal();
   calcSwitchSideTab('history');
 }
-
-// =========================================================================
-// ==================== SCIENTIFIC CALCULATOR TOOL =========================
-// =========================================================================
-
+// Scientific calculator
 let sciCurrentInput = '0';
 let sciEquationTokens = [];
 let sciLastResult = null;
@@ -12795,11 +12629,7 @@ function sciHandleKeyDown(e) {
     sciInsertConstant('e');
   }
 }
-
-// =========================================================================
-// ==================== CURRENCY CONVERTER TOOL ============================
-// =========================================================================
-
+// Currency converter
 let currAmountFrom = '1';
 let currAmountTo = '0.86';
 let currCodeFrom = 'USD';
@@ -13774,11 +13604,7 @@ function currHandleKeyDown(e) {
     currSwapCurrencies();
   }
 }
-
-// =========================================================================
-// ====================== VOLUME CONVERTER TOOL ============================
-// =========================================================================
-
+// Volume converter
 let volAmountFrom = '0';
 let volAmountTo = '0';
 let volUnitFrom = 'tsp_us';
@@ -14529,11 +14355,7 @@ function volHandleKeyDown(e) {
     volSwapUnits();
   }
 }
-
-// =========================================================================
-// ==================== AI FILE SUMMARIZER TOOL ============================
-// =========================================================================
-
+// AI file summarizer
 let aiLoadedFile = null;
 let aiExtractedText = '';
 let aiInputMode = 'upload'; // 'upload' or 'paste'
@@ -15527,13 +15349,3 @@ function aiDownloadSummary(format = 'txt') {
   URL.revokeObjectURL(url);
   showToast(`Downloaded as .${format}`);
 }
-
-
-
-
-
-
-
-
-
-

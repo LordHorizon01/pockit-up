@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 
-// In-Memory Sliding Window Rate Limiter for API protection
+// In-memory sliding-window rate limiter for API requests.
 const rateLimitMap = new Map();
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 50;
@@ -58,7 +58,7 @@ export default defineConfig({
         secure: false,
         configure: (proxy, options) => {
           proxy.on('error', (err, req, res) => {
-            // Silently handle proxy error when Python microservice is not running
+            // Return a local fallback when the Python service is unavailable.
             if (!res.headersSent) {
               res.writeHead(503, { 'Content-Type': 'application/json' });
               res.end(JSON.stringify({

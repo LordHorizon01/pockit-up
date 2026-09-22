@@ -17,7 +17,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS for local development origins
+# Allow the local Vite development servers.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -31,7 +31,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Safety Guardrails Patterns
+# Content safety patterns
 SAFETY_PATTERNS = [
     re.compile(r"\b(how to (make|build|assemble|synthesize) (a )?(bomb|explosive|dirty bomb|pipe bomb|c4|ied|grenade|detonator))\b", re.I),
     re.compile(r"\b(assassinate|mass shooting plan|terrorist attack instructions|how to commit suicide|ways to kill myself|self harm instructions)\b", re.I),
@@ -123,7 +123,7 @@ def split_into_sections(text: str) -> List[Dict[str, Any]]:
 
     return sections
 
-# Request Models
+# Request models
 class SummarizeRequest(BaseModel):
     text: str = Field(..., min_length=10, description="Raw document or notes text")
     format: str = Field(default="executive", description="Summary format")
@@ -160,7 +160,7 @@ def summarize_document(req: SummarizeRequest):
             "summary_words": len(req.text.split())
         }
 
-    # Word Frequency calculation
+    # Rank recurring terms for topic suggestions.
     raw_words = re.findall(r"\b[a-zA-Z]{3,}\b", req.text.lower())
     freq = {}
     for w in raw_words:
@@ -169,7 +169,7 @@ def summarize_document(req: SummarizeRequest):
 
     top_topics = [w.capitalize() for w, _ in sorted(freq.items(), key=lambda item: item[1], reverse=True)[:7]]
 
-    # Tone detection
+    # Choose a broad tone label from domain terms.
     lower_all = req.text.lower()
     if any(k in lower_all for k in ['research', 'hardware', 'sensor', 'protocol', 'algorithm', 'controller']):
         tone = "Technical & Scientific"
@@ -178,7 +178,7 @@ def summarize_document(req: SummarizeRequest):
     else:
         tone = "Professional"
 
-    # Full File / 100% Depth Mode
+    # Preserve section-level output for full-document requests.
     if req.format == "full_file" or req.length_mode == "full_depth":
         sections = split_into_sections(req.text)
         summaries = []
@@ -221,7 +221,7 @@ def summarize_document(req: SummarizeRequest):
             "summary_words": len(plain.split())
         }
 
-    # Standard formats
+    # Produce the requested summary format.
     scored_all = []
     for idx, sent in enumerate(sentences):
         sc = sum(freq.get(w, 0) for w in re.findall(r"\b[a-zA-Z]{3,}\b", sent.lower()))

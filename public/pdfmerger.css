@@ -1,25 +1,91 @@
-body { font-family: 'DM Sans', sans-serif; }
-.drop-active { border-color: #6366f1 !important; background: #eef2ff !important; }
-.dark .drop-active { background: #1e1b4b !important; }
-.file-item { cursor: grab; transition: all 0.2s ease; }
-.file-item:active { cursor: grabbing; }
-.file-item:hover { border-color: #818cf8; background-color: #f8fafc; transform: translateY(-1px); }
-.dark .file-item:hover { border-color: #6366f1; background-color: #1e293b; }
-.dragging { opacity: 0.4; background-color: #e2e8f0; }
-.dark .dragging { background-color: #334155; }
-body, header, button, div, p, h1, h2, canvas, span {
+body {
+  font-family: 'DM Sans', sans-serif;
+}
+
+.drop-active {
+  border-color: #6366f1 !important;
+  background: #eef2ff !important;
+}
+
+.dark .drop-active {
+  background: #1e1b4b !important;
+}
+
+.file-item {
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.file-item:active {
+  cursor: grabbing;
+}
+
+.file-item:hover {
+  border-color: #818cf8;
+  background-color: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.dark .file-item:hover {
+  border-color: #6366f1;
+  background-color: #1e293b;
+}
+
+.dragging {
+  opacity: 0.4;
+  background-color: #e2e8f0;
+}
+
+.dark .dragging {
+  background-color: #334155;
+}
+
+body,
+header,
+button,
+div,
+p,
+h1,
+h2,
+canvas,
+span {
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
 }
 
 /* Logo switching */
-.logo-light { display: block; }
-.logo-dark  { display: none; }
-html.dark .logo-light { display: none; }
-html.dark .logo-dark  { display: block; }
-.site-logo { height: 130px; max-width: 520px; width: auto; object-fit: contain; transition: opacity 0.3s ease; }
-.site-logo-sm { height: 44px; max-width: 220px; width: auto; object-fit: contain; transition: opacity 0.3s ease; }
+.logo-light {
+  display: block;
+}
 
-/* Hero header gradient */
+.logo-dark {
+  display: none;
+}
+
+html.dark .logo-light {
+  display: none;
+}
+
+html.dark .logo-dark {
+  display: block;
+}
+
+.site-logo {
+  height: 130px;
+  max-width: 520px;
+  width: auto;
+  object-fit: contain;
+  transition: opacity 0.3s ease;
+}
+
+.site-logo-sm {
+  height: 44px;
+  max-width: 220px;
+  width: auto;
+  object-fit: contain;
+  transition: opacity 0.3s ease;
+}
+
+/* Hero header */
 .hero-header {
   background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f4ff 100%);
   border-bottom: 1px solid #e0e7ff;
@@ -153,7 +219,7 @@ html.dark .section-heading h2 { color: #f1f5f9; }
   margin-top: 1px;
 }
 
-/* Animations and Spinners */
+/* Animations and spinners */
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -183,7 +249,7 @@ html.dark .section-heading h2 { color: #f1f5f9; }
   scroll-margin-top: 80px;
 }
 
-/* Theme toggle and Hamburger menu alignment with sticky navigation bar */
+/* Keep navigation controls aligned with the sticky bar. */
 #theme-toggle, #menu-toggle {
   transition: top 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.2s ease !important;
 }
@@ -196,23 +262,21 @@ html.dark .section-heading h2 { color: #f1f5f9; }
   right: 24px !important;
 }
 
-/* Home page only: align with sticky navigation bar when scrolled */
+/* Keep home controls aligned after scrolling. */
 body:not(.in-tool-view):not(:has(#home-view.hidden)).scrolled #theme-toggle,
 body:not(.in-tool-view):not(:has(#home-view.hidden)).scrolled #menu-toggle {
   top: 6px !important;
   padding: 6px !important;
 }
 
-/* Inside ALL tool views & upcoming tools:
-   Buttons stay strictly in the tool navbar (where "logo / tool name" is) and scroll away naturally with the page.
-   They never float over the tool view when scrolled (prevents covering calculator/tool controls). */
+/* Keep tool controls in the header so they do not cover tool content. */
 body:has(#home-view.hidden) #menu-toggle,
 body:has(#home-view.hidden) #theme-toggle,
 body.in-tool-view #menu-toggle,
 body.in-tool-view #theme-toggle {
   position: absolute !important;
   top: 17px !important;
-  padding: 0.625rem !important; /* 10px = p-2.5 */
+  padding: 0.625rem !important;
   z-index: 40 !important;
 }
 
@@ -225,7 +289,7 @@ body.in-tool-view.scrolled #theme-toggle {
   padding: 0.625rem !important;
 }
 
-/* ===================== STANDARD CALCULATOR MODERN STYLING ===================== */
+/* Standard calculator */
 .calc-btn {
   display: flex;
   align-items: center;
@@ -245,7 +309,7 @@ body.in-tool-view.scrolled #theme-toggle {
   filter: brightness(0.93);
 }
 
-/* Number Keys */
+/* Number keys */
 .calc-btn-num {
   background-color: #ffffff;
   color: #1e293b;
@@ -269,7 +333,7 @@ body.in-tool-view.scrolled #theme-toggle {
   transform: translateY(-1px);
 }
 
-/* Function Edit Keys (C, CE, %, ⌫) */
+/* Function keys */
 .calc-btn-func {
   background-color: #f1f5f9;
   color: #475569;
@@ -289,7 +353,7 @@ body.in-tool-view.scrolled #theme-toggle {
   color: #f8fafc;
 }
 
-/* Math Keys (1/x, x², √x) */
+/* Math keys */
 .calc-btn-math {
   background-color: #f8fafc;
   color: #64748b;
@@ -309,7 +373,7 @@ body.in-tool-view.scrolled #theme-toggle {
   color: #ffffff;
 }
 
-/* Arithmetic Operator Keys (÷, ×, −, +) */
+/* Operator keys */
 .calc-btn-op {
   background-color: #fff7ed;
   color: #ea580c;
@@ -332,5 +396,4 @@ body.in-tool-view.scrolled #theme-toggle {
   background-color: #3d2419;
   border-color: #8c3b1b;
 }
-
 
